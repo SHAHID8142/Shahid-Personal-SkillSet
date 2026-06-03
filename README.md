@@ -1,65 +1,154 @@
-# Shahid-Personal-SkillSet
+# Shahid Personal SkillSet (`/sps`)
 
-A universal **build orchestrator** for AI coding agents, packaged as a Claude Code marketplace.
-Install it once on any machine. Then, whenever you say *"build / design / animate / debug X for me,"*
-it figures out which specialized skill the task needs, **installs that skill automatically** if it's
-missing, and uses it — across any project, any stack.
+A universal build orchestrator for AI coding agents. One command installs it globally across
+**Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity**, and 10+ more.
 
-It doesn't copy other people's skills into this repo. It holds the orchestrator + a **vetted catalog**
-and installs each skill from its **official source** on demand, so everything stays current and
-properly licensed. See `CATALOG.md` for the full "what skill for what" list.
+When you type `/sps [your request]`, it reads your prompt, detects which skills are needed,
+auto-installs anything missing with a one-line notice, and builds — with three rules that can
+never be turned off:
 
-## How it works
+| Rule | What it does |
+|------|-------------|
+| **Hallmark anti-slop** | Every UI runs a slop checklist before handover. Generic hero stacks, default gradients, Inter-on-Inter → redesigned. |
+| **Graphify** | Every project gets a knowledge graph (`graphify .`) automatically. Saves tokens on every subsequent query. |
+| **Responsive** | Before every handover: 320px / 768px / 1280px / 1440px verified. Not stated — actually checked. |
 
-1. You install this marketplace once and install the orchestrator skill.
-2. You optionally install the whole catalog upfront (`scripts/install-catalog.sh`).
-3. When you ask Claude Code to build something, the orchestrator matches the request to the catalog,
-   auto-installs any missing skill, runs `/reload-plugins`, and builds using it.
+---
 
-The catalog covers: design (hallmark, ui-ux-pro-max, frontend-design), animation (GSAP, Framer
-Motion, Lenis, Anime.js, three.js), backend & deploy (Stripe, Cloudflare, Netlify), debug & security
-(Sentry, Trail of Bits), SEO & content (SEO/Ads + marketing skills), and research (graphify, Context7).
+## Install — Mac / Linux
 
-## Install (Claude Code)
+**Requirements:** Node.js, Claude Code CLI
 
 ```bash
-# 1. add this repo as a marketplace
-claude plugin marketplace add <your-username>/Shahid-Personal-SkillSet
-
-# 2. install the orchestrator
-claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope user
-
-# 3. install the whole catalog upfront (best-effort; Claude Code can verify/fix per-repo)
-bash scripts/install-catalog.sh
-
-# 4. inside Claude Code:
-/reload-plugins
+git clone https://github.com/SHAHID8142/Shahid-Personal-SkillSet
+cd Shahid-Personal-SkillSet
+bash install.sh
 ```
 
-Then just talk to Claude Code normally: *"build me an animated SaaS landing page"* → it pulls the
-design + animation skills and builds. The skills auto-activate from their descriptions.
+Or, just the `/sps` orchestrator without the full catalog:
 
-## Use across machines
+```bash
+npx skills add -g SHAHID8142/Shahid-Personal-SkillSet
+```
 
-This git repo is the sync mechanism. On a new machine: clone it, `claude plugin marketplace add ./`,
-install the orchestrator, run the catalog script. To update: `git pull`.
+---
 
-## Structure
+## Install — Windows
+
+**Requirements:** Node.js, Claude Code CLI, PowerShell 5+
+
+```powershell
+git clone https://github.com/SHAHID8142/Shahid-Personal-SkillSet
+cd Shahid-Personal-SkillSet
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+If you've already set your ExecutionPolicy to allow local scripts:
+
+```powershell
+.\install.ps1
+```
+
+> **Note on ExecutionPolicy:** Windows blocks unsigned scripts by default. The `-ExecutionPolicy Bypass`
+> flag runs this script once without permanently changing your system policy. To set it permanently:
+> `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+
+Windows prerequisites if not installed:
+```powershell
+# Node.js
+winget install OpenJS.NodeJS.LTS
+
+# Claude Code CLI
+winget install Anthropic.ClaudeCode
+
+# uv (for graphify — optional but recommended)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+---
+
+## How to use
+
+In any supported agent, type:
+
+```
+/sps [your request]
+```
+
+Examples:
+- `/sps build me an animated SaaS landing page` → hallmark + GSAP + frontend-design
+- `/sps create a Stripe checkout with a dashboard` → Stripe + engineering-skills + ui-ux-pro-max
+- `/sps add Lottie animations to my hero section` → lottie-animations + awwwards-animations
+- `/sps build a React Native mobile app with Expo` → Expo + engineering-skills + hallmark
+- `/sps set up Supabase auth and Postgres` → Supabase + engineering-skills
+- `/sps audit this UI for slop` → hallmark audit mode
+
+The orchestrator detects the domains from your words, installs what's missing, and uses the right
+skills. Hallmark, graphify, and responsive checks run automatically on everything.
+
+---
+
+## Update
+
+```bash
+# Mac / Linux
+cd Shahid-Personal-SkillSet && git pull && bash install.sh
+
+# Windows
+cd Shahid-Personal-SkillSet; git pull; powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+---
+
+## Skill catalog (what gets installed)
+
+`CATALOG.md` has the full list. Summary:
+
+| Category | Skills |
+|----------|--------|
+| Design & UI | hallmark, ui-ux-pro-max, frontend-design, modern-web-design |
+| Animation | GSAP (8 skills), Framer Motion, Lenis, Anime.js, Awwwards, Lottie, Rive, React Spring |
+| 3D & WebGL | Three.js, React Three Fiber, Babylon.js, A-Frame, Spline, PixiJS, PlayCanvas |
+| Auth | Clerk (via Vercel), Auth0, Better Auth |
+| Database | Neon/Postgres, Supabase, MongoDB, Firebase, Redis |
+| Payments | Stripe, Coinbase |
+| Email | Resend, Courier |
+| CMS | Sanity, WordPress |
+| Backend | Node.js/REST/GraphQL, Apollo, Firecrawl, Remotion, Replicate |
+| Mobile | Expo / React Native |
+| AI / LLM | Vercel AI SDK, AI Gateway, Claude API, Chat SDK |
+| Deploy | Vercel, Cloudflare, Netlify, Docker, Kubernetes, Terraform |
+| Performance | Web Quality (Addy Osmani), Sentry, Datadog, a11y-audit |
+| Security | Trail of Bits, Cloudflare WAF |
+| SEO & Marketing | SEO/meta/schema, marketing-skills, product-skills |
+| Research | graphify, Context7 MCP |
+| Design handoff | Figma |
+
+---
+
+## Repo structure
 
 ```
 Shahid-Personal-SkillSet/
-├── .claude-plugin/marketplace.json      # makes this repo a Claude Code marketplace
-├── plugins/universal-build-orchestrator/
-│   ├── .claude-plugin/plugin.json
-│   └── skills/universal-build-orchestrator/SKILL.md   # the router + catalog + auto-install logic
-├── CATALOG.md                           # what skill for what (human reference)
-├── scripts/install-catalog.sh           # install the whole catalog upfront
+├── skills/
+│   └── sps/
+│       └── SKILL.md              ← /sps orchestrator (npx skills compatible)
+├── plugins/
+│   └── universal-build-orchestrator/
+│       ├── .claude-plugin/plugin.json
+│       └── skills/.../SKILL.md   ← Claude plugin system entry point
+├── .claude-plugin/
+│   └── marketplace.json          ← Claude marketplace config
+├── install.sh                    ← Mac/Linux installer
+├── install.ps1                   ← Windows installer (PowerShell)
+├── CATALOG.md                    ← Full skill catalog with keywords & sources
 └── README.md
 ```
 
-## Safety note
+---
+
+## Safety
 
 Every catalogued skill is third-party code that runs on your machine. They're pre-selected from
-reputable sources, but the orchestrator only ever installs from this catalog — never from arbitrary
-web results. Review a source if it looks changed or abandoned. This is the standard caution for any
-plugin marketplace.
+reputable official sources. The orchestrator only ever installs from this catalog — never from
+arbitrary web search results. Review any source that looks changed or abandoned before trusting it.
