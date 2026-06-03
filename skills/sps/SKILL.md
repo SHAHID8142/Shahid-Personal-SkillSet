@@ -1055,11 +1055,33 @@ Do not select skills by keywords alone. Use this reasoning process:
 | feature flags, A/B testing, experiments | **feature-flags-architect** (claude-code-skills) |
 
 #### Authentication
+
+**Decision guide — which auth to use:**
+- Already using Supabase for DB → **Supabase Auth** (built-in, zero extra service)
+- Need enterprise SSO, organizations, RBAC → **Clerk**
+- Need OAuth only, no user management → **Auth0** or **Better Auth**
+- Open-source, self-hostable → **Better Auth** or **NextAuth**
+- Profile says preferred auth → use that without asking
+
 | Keywords | Skill | Install |
 |----------|-------|---------|
-| Clerk, auth, sign-in, sign-up, user management, session | **vercel:auth** | built into Claude Code |
-| Auth0, OAuth, JWT, enterprise auth | Auth0 skill | `npx skills add auth0/auth0-skill` |
-| Better Auth, NextAuth, open-source auth | Better Auth skill | `npx skills add better-auth/better-auth` |
+| Supabase auth, email+password, magic link, OAuth with Supabase, RLS, Row-Level Security | **Supabase Auth** | `npx skills add supabase/supabase` — auth is included; also install `@supabase/ssr` for Next.js |
+| Clerk, auth, sign-in, sign-up, user management, organizations, RBAC, session | **vercel:auth** | built into Claude Code |
+| Auth0, OAuth, JWT, SAML, enterprise SSO | Auth0 skill | `npx skills add auth0/auth0-skill` |
+| Better Auth, NextAuth, open-source auth, self-hosted auth | Better Auth skill | `npx skills add better-auth/better-auth` |
+
+**Supabase Auth implementation checklist** (use whenever Supabase Auth is chosen):
+- [ ] Install: `@supabase/supabase-js` + `@supabase/ssr`
+- [ ] Create server client (`lib/supabase/server.ts`) using `createServerClient` from `@supabase/ssr`
+- [ ] Create browser client (`lib/supabase/client.ts`) using `createBrowserClient`
+- [ ] Create middleware (`middleware.ts`) to refresh sessions on every request
+- [ ] Auth pages: `/auth/sign-in`, `/auth/sign-up`, `/auth/callback`, `/auth/error`
+- [ ] Email confirmation callback route handler at `/auth/callback/route.ts`
+- [ ] Protected routes: check session in layout or middleware, redirect to `/auth/sign-in` if unauthenticated
+- [ ] Row-Level Security (RLS): enable on every table, write policies for SELECT/INSERT/UPDATE/DELETE
+- [ ] Never expose service role key on the client — only anon key in `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- [ ] Sign-out clears session both client and server side
+- [ ] `.env.example` includes: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 #### Database & Storage
 | Keywords | Skill | Install |
