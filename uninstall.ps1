@@ -1,5 +1,5 @@
-# Shahid Personal SkillSet — Uninstaller (Windows PowerShell)
-# ─────────────────────────────────────────────────────────────
+# Shahid Personal SkillSet - Uninstaller (Windows PowerShell)
+# -------------------------------------------------------------
 # Removes all /sps skills and catalog skills from all agents.
 # Does NOT delete your personal data: ~/.sps/profile.md, mistakes.md, learned/
 #
@@ -16,9 +16,9 @@ function removed($msg) { Write-Host "   [-] $msg" -ForegroundColor Red }
 function section($msg) { Write-Host ""; Write-Host "-- $msg --" -ForegroundColor Cyan }
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
-Write-Host "║         Shahid Personal SkillSet — Uninstaller (Windows)         ║" -ForegroundColor Magenta
-Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
+Write-Host "+==================================================================+" -ForegroundColor Magenta
+Write-Host "|         Shahid Personal SkillSet - Uninstaller (Windows)         |" -ForegroundColor Magenta
+Write-Host "+==================================================================+" -ForegroundColor Magenta
 Write-Host ""
 
 if ($All) {
@@ -27,7 +27,7 @@ if ($All) {
     if ($confirm -ne "yes") { Write-Host "Aborted."; exit 0 }
 }
 
-# ── Remove agent-installed skills ─────────────────────────────────────────────
+# -- Remove agent-installed skills ---------------------------------------------
 section "Removing globally installed skills"
 
 function Remove-AgentSkill($name) {
@@ -62,7 +62,7 @@ foreach ($s in $r3fSkills) { Remove-AgentSkill $s }
 $otherSkills = @("tailwind-design-system","threejs-fundamentals","nextjs-app-router-patterns","vercel-composition-patterns","vercel-react-best-practices","supabase","supabase-postgres-best-practices")
 foreach ($s in $otherSkills) { Remove-AgentSkill $s }
 
-# ── Remove Claude plugins ─────────────────────────────────────────────────────
+# -- Remove Claude plugins -----------------------------------------------------
 section "Removing Claude plugins"
 
 if (Get-Command claude -ErrorAction SilentlyContinue) {
@@ -106,10 +106,10 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
     claude mcp remove context7 --scope user 2>$null
     if ($LASTEXITCODE -eq 0) { removed "Context7 MCP" }
 } else {
-    info "claude CLI not found — skipping Claude plugin removal"
+    info "claude CLI not found - skipping Claude plugin removal"
 }
 
-# ── Remove graphify ───────────────────────────────────────────────────────────
+# -- Remove graphify -----------------------------------------------------------
 section "Removing graphify"
 if (Get-Command uv -ErrorAction SilentlyContinue) {
     uv tool uninstall graphifyy 2>$null
@@ -121,7 +121,7 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
 $graphifySkill = "$env:USERPROFILE\.claude\skills\graphify"
 if (Test-Path $graphifySkill) { Remove-Item -Recurse -Force $graphifySkill; removed "graphify skill" }
 
-# ── Remove personal data (only with -All) ────────────────────────────────────
+# -- Remove personal data (only with -All) ------------------------------------
 if ($All) {
     section "Removing personal data (~/.sps/)"
     $spsDir = "$env:USERPROFILE\.sps"
@@ -132,11 +132,11 @@ if ($All) {
     info "To also remove personal data: .\uninstall.ps1 -All"
 }
 
-# ── Done ──────────────────────────────────────────────────────────────────────
+# -- Done ----------------------------------------------------------------------
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║                    Uninstall complete                             ║" -ForegroundColor Green
-Write-Host "║                                                                  ║" -ForegroundColor Green
-Write-Host "║  To reinstall: powershell -ExecutionPolicy Bypass -File install.ps1  ║" -ForegroundColor Green
-Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host "+==================================================================+" -ForegroundColor Green
+Write-Host "|                    Uninstall complete                             |" -ForegroundColor Green
+Write-Host "|                                                                  |" -ForegroundColor Green
+Write-Host "|  To reinstall: powershell -ExecutionPolicy Bypass -File install.ps1  |" -ForegroundColor Green
+Write-Host "+==================================================================+" -ForegroundColor Green
 Write-Host ""
