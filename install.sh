@@ -1,229 +1,154 @@
 #!/usr/bin/env bash
-# Shahid Personal SkillSet — global install script
+# Shahid Personal SkillSet — global install (Mac / Linux)
 # ─────────────────────────────────────────────────────────────────────────────
 # Usage: git clone https://github.com/SHAHID8142/Shahid-Personal-SkillSet
-#        cd Shahid-Personal-SkillSet
-#        bash install.sh
+#        cd Shahid-Personal-SkillSet && bash install.sh
 #
-# Installs /sps and the FULL skill catalog globally across ALL detected agents:
-# Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity, and more.
+# Installs /sps + a reliable core of skills globally across all detected agents
+# (Claude Code, Antigravity, Cursor, Codex, Gemini CLI, Windsurf, and more).
 #
-# Re-runnable — already-installed skills are skipped automatically.
-# Lines marked ✗ after running = that skill needs manual install (see its repo README).
+# Design: NOTHING hangs. Every network call has a hard timeout, git/npm can't
+# prompt for credentials, and a live [n/N] progress counter shows it's working.
+# Skills not installed here are installed on-demand at runtime by /sps itself.
+# Re-runnable and safe to Ctrl-C at any point.
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -uo pipefail
 
-GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; NC='\033[0m'
+# ── Hang-prevention: never let git/ssh/npm block on a prompt ─────────────────
+export GIT_TERMINAL_PROMPT=0                              # git fails instead of asking for login
+export GIT_SSH_COMMAND="ssh -oBatchMode=yes -oStrictHostKeyChecking=no"
+export GIT_CLONE_PROTECTION_ACTIVE=false
+export npm_config_yes=true                                # npx never prompts to install
+export CI=1                                               # many tools go non-interactive under CI
+NETWORK_TIMEOUT=90                                        # seconds before we give up on any one item
 
-# Counters + failure log for the end-of-run summary
-INSTALLED=0; FAILED=0; FAILED_LIST=()
+GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
+
+# Counters + failure log
+INSTALLED=0; FAILED=0; STEP=0
 LOG="$HOME/.sps/install.log"
-mkdir -p "$HOME/.sps"
-: > "$LOG"   # truncate at start of each run
+mkdir -p "$HOME/.sps"; : > "$LOG"
 
-ok()      { echo -e "${GREEN}✓${NC} $*"; INSTALLED=$((INSTALLED+1)); }
-info()    { echo -e "${YELLOW}→${NC} $*"; }
-fail()    { echo -e "${RED}✗${NC} $*"; FAILED=$((FAILED+1)); FAILED_LIST+=("$*"); echo "FAILED: $*" >> "$LOG"; }
+# Total number of install steps (keep in sync with the calls below) — for the [n/N] counter
+TOTAL=23
+
+ok()      { echo -e "${GREEN}✓${NC} $* ${DIM}(${SECONDS_THIS}s)${NC}"; INSTALLED=$((INSTALLED+1)); }
+softfail(){ echo -e "${YELLOW}–${NC} $* ${DIM}(skipped — /sps will install on demand)${NC}"; FAILED=$((FAILED+1)); echo "SKIPPED: $*" >> "$LOG"; }
 section() { echo ""; echo -e "${BOLD}── $* ──${NC}"; }
+note()    { echo -e "${DIM}  $*${NC}"; }
 
-npx_add() {
+# Portable timeout (macOS has no `timeout`). Kills the command if it runs too long.
+run_timeout() {
+  local secs="$1"; shift
+  "$@" >/dev/null 2>&1 &
+  local cmd_pid=$!
+  ( sleep "$secs"; kill -TERM "$cmd_pid" 2>/dev/null; sleep 2; kill -KILL "$cmd_pid" 2>/dev/null ) >/dev/null 2>&1 &
+  local watch_pid=$!
+  wait "$cmd_pid" 2>/dev/null; local rc=$?
+  kill -TERM "$watch_pid" 2>/dev/null; wait "$watch_pid" 2>/dev/null
+  return $rc
+}
+
+# Run one install step with a live progress line + elapsed time.
+step() {
   local label="$1"; shift
-  info "Installing $label..."
-  if npx skills add -g "$@" >/dev/null 2>&1; then ok "$label"
-  else fail "$label ($*)"; fi
-}
-
-claude_install() {
-  local label="$1" plugin="$2"
-  info "Installing $label..."
-  if command -v claude >/dev/null 2>&1; then
-    if claude plugin install "$plugin" --scope user >/dev/null 2>&1; then ok "$label"
-    else fail "$label"; fi
+  STEP=$((STEP+1))
+  local start=$SECONDS
+  printf "${YELLOW}→${NC} [%2d/%d] %s ... " "$STEP" "$TOTAL" "$label"
+  if run_timeout "$NETWORK_TIMEOUT" "$@"; then
+    SECONDS_THIS=$((SECONDS-start)); echo -e "${GREEN}done${NC} ${DIM}(${SECONDS_THIS}s)${NC}"; INSTALLED=$((INSTALLED+1))
   else
-    fail "$label (claude CLI not found)"
+    SECONDS_THIS=$((SECONDS-start)); echo -e "${YELLOW}skipped${NC} ${DIM}(${SECONDS_THIS}s — /sps installs on demand)${NC}"; FAILED=$((FAILED+1)); echo "SKIPPED: $label" >> "$LOG"
   fi
 }
 
-claude_marketplace() {
-  local label="$1" source="$2"
-  if command -v claude >/dev/null 2>&1; then
-    claude plugin marketplace add "$source" >/dev/null 2>&1 && ok "Marketplace: $label" || true
-  fi
-}
+have(){ command -v "$1" >/dev/null 2>&1; }
 
 echo ""
-echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║         Shahid Personal SkillSet — Global Catalog Install        ║"
-echo "║   /sps + full website & app stack → all detected agents          ║"
-echo "╚══════════════════════════════════════════════════════════════════╝"
-echo ""
+echo "+==================================================================+"
+echo "|        Shahid Personal SkillSet — install (Mac / Linux)          |"
+echo "|   /sps + core skills -> all detected agents. Nothing hangs.      |"
+echo "+==================================================================+"
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 section "Prerequisites"
-command -v node >/dev/null 2>&1  && ok "Node.js $(node -v)" || { echo "Node.js required — https://nodejs.org"; exit 1; }
-command -v npx  >/dev/null 2>&1  && ok "npx available"      || { echo "npx required (comes with Node.js)"; exit 1; }
-command -v claude >/dev/null 2>&1 && ok "claude CLI found"  || info "claude CLI not found — Claude-only skills will be skipped"
-command -v uv >/dev/null 2>&1    && ok "uv found"           || info "uv not found — will fall back to pip for graphify"
+have node  && note "Node.js $(node -v)"      || { echo "Node.js required: https://nodejs.org"; exit 1; }
+have npx   && note "npx available"           || { echo "npx required (ships with Node.js)"; exit 1; }
+have claude && note "claude CLI found"       || note "claude CLI not found — Claude plugins will be skipped"
+have uv    && note "uv found"                || note "uv not found — graphify will use pip"
 
-# ── STEP 1: /sps Orchestrator (this skill) ───────────────────────────────────
-section "/sps Orchestrator"
-npx_add "/sps (Shahid Personal SkillSet)" "SHAHID8142/Shahid-Personal-SkillSet"
-claude_marketplace "shahid-personal-skillset" "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-claude_install "universal-build-orchestrator" "universal-build-orchestrator@shahid-personal-skillset"
-
-# ── STEP 2: Anti-slop & Design ───────────────────────────────────────────────
-section "Design & Anti-slop"
-npx_add "hallmark (anti-AI-slop)"              "nutlope/hallmark"
-claude_marketplace "ui-ux-pro-max"             "nextlevelbuilder/ui-ux-pro-max-skill"
-claude_install     "ui-ux-pro-max"             "ui-ux-pro-max@ui-ux-pro-max-skill"
-claude_marketplace "claude-design-skillstack"  "freshtechbro/claudedesignskills"
-claude_install     "modern-web-design"         "modern-web-design@claude-design-skillstack"
-claude_install     "animated-component-libs"   "animated-component-libraries@claude-design-skillstack"
-claude_install     "apple-hig-expert"          "apple-hig-expert@claude-code-skills"
-
-# ── STEP 3: Animation & Motion ───────────────────────────────────────────────
-section "Animation & Motion"
-npx_add "GSAP official (all 8 skills)"         "https://github.com/greensock/gsap-skills"
-claude_install "motion-framer"                 "motion-framer@claude-design-skillstack"
-claude_install "locomotive-scroll (Lenis)"     "locomotive-scroll@claude-design-skillstack"
-claude_install "animejs"                       "animejs@claude-design-skillstack"
-npx_add "awwwards-animations"                  "devmartinese/awwwards-animations"
-claude_install "react-spring-physics"          "react-spring-physics@claude-design-skillstack"
-claude_install "lottie-animations"             "lottie-animations@claude-design-skillstack"
-claude_install "rive-interactive"              "rive-interactive@claude-design-skillstack"
-claude_install "scroll-reveal (AOS)"           "scroll-reveal-libraries@claude-design-skillstack"
-claude_install "barba-js (page transitions)"   "barba-js@claude-design-skillstack"
-
-# ── STEP 4: 3D & WebGL ───────────────────────────────────────────────────────
-section "3D & WebGL"
-claude_install "three.js / WebGL"              "threejs-webgl@claude-design-skillstack"
-claude_install "react-three-fiber (R3F)"       "react-three-fiber@claude-design-skillstack"
-claude_install "babylon.js"                    "babylonjs-engine@claude-design-skillstack"
-claude_install "a-frame / webxr"               "aframe-webxr@claude-design-skillstack"
-claude_install "spline-interactive"            "spline-interactive@claude-design-skillstack"
-claude_install "pixijs-2d"                     "pixijs-2d@claude-design-skillstack"
-claude_install "lightweight-3d-effects"        "lightweight-3d-effects@claude-design-skillstack"
-claude_install "playcanvas-engine"             "playcanvas-engine@claude-design-skillstack"
-claude_install "web3d-integration-patterns"    "web3d-integration-patterns@claude-design-skillstack"
-claude_install "blender-web-pipeline"          "blender-web-pipeline@claude-design-skillstack"
-
-# ── STEP 5: Frontend & Framework ─────────────────────────────────────────────
-section "Frontend Framework & Tooling"
-claude_marketplace "claude-code-skills"        "alirezarezvani/claude-skills"
-claude_install "feature-flags-architect"       "feature-flags-architect@claude-code-skills"
-claude_install "code-tour"                     "code-tour@claude-code-skills"
-# Next.js / Vercel skills are built into Claude Code — no install needed
-
-# ── STEP 6: Authentication ───────────────────────────────────────────────────
-section "Authentication"
-npx_add "Auth0"                                "auth0/auth0-skill"
-npx_add "Better Auth"                          "better-auth/better-auth"
-# Clerk is covered by vercel:auth (built into Claude Code)
-
-# ── STEP 7: Database & Storage ───────────────────────────────────────────────
-section "Database & Storage"
-npx_add "Neon (Postgres)"                      "neon/neon"
-npx_add "Supabase"                             "supabase/supabase"
-npx_add "MongoDB"                              "mongodb/mongodb"
-npx_add "Firebase"                             "firebase/firebase-basics"
-npx_add "Redis"                                "redis/redis"
-# Vercel KV/Blob/Postgres — built into Claude Code (vercel:vercel-storage)
-
-# ── STEP 8: Payments & Commerce ──────────────────────────────────────────────
-section "Payments & Commerce"
-npx_add "Stripe"                               "stripe/stripe-best-practices"
-npx_add "Coinbase"                             "coinbase/coinbase"
-
-# ── STEP 9: Email & Notifications ────────────────────────────────────────────
-section "Email & Notifications"
-npx_add "Resend (transactional email)"         "resend/resend"
-npx_add "Courier (multi-channel)"              "trycourier/courier-skills"
-
-# ── STEP 10: CMS & Content ───────────────────────────────────────────────────
-section "CMS & Content"
-npx_add "Sanity (headless CMS)"                "sanity/sanity"
-npx_add "WordPress"                            "wordpress/wordpress"
-claude_install "markdown-html"                 "markdown-html@claude-code-skills"
-
-# ── STEP 11: Backend, APIs & Data ────────────────────────────────────────────
-section "Backend, APIs & Data"
-claude_install "engineering-skills"            "engineering-skills@claude-code-skills"
-claude_install "engineering-advanced-skills"   "engineering-advanced-skills@claude-code-skills"
-npx_add "Apollo GraphQL"                       "apollo-graphql/apollo-graphql"
-npx_add "Firecrawl (web scraping)"             "firecrawl/firecrawl"
-npx_add "Remotion (video rendering)"           "remotion/remotion"
-npx_add "Replicate (AI image APIs)"            "replicate/replicate"
-
-# ── STEP 12: Mobile ──────────────────────────────────────────────────────────
-section "Mobile (React Native / Expo)"
-npx_add "Expo / React Native"                  "expo/expo-api-docs"
-
-# ── STEP 13: Deploy & Infrastructure ─────────────────────────────────────────
-section "Deploy & Infrastructure"
-npx_add "Cloudflare"                           "cloudflare/cloudflare"
-npx_add "Netlify functions"                    "netlify/netlify-functions"
-claude_install "docker-development"            "docker-development@claude-code-skills"
-claude_install "kubernetes-operator"           "kubernetes-operator@claude-code-skills"
-claude_install "terraform-patterns"            "terraform-patterns@claude-code-skills"
-claude_install "helm-chart-builder"            "helm-chart-builder@claude-code-skills"
-
-# ── STEP 14: Performance, Debug & Security ───────────────────────────────────
-section "Performance, Debug & Security"
-npx_add "Web Quality (Addy Osmani)"            "addy-osmani/web-quality"
-npx_add "Sentry (error monitoring)"            "getsentry/sentry-sdk-setup"
-npx_add "Trail of Bits (security)"             "trailofbits/audit-context-building"
-npx_add "Datadog (monitoring)"                 "datadog/datadog"
-npx_add "Browserbase (Playwright)"             "browserbase/browserbase"
-claude_install "a11y-audit"                    "a11y-audit@claude-code-skills"
-claude_install "chaos-engineering"             "chaos-engineering@claude-code-skills"
-claude_install "slo-architect"                 "slo-architect@claude-code-skills"
-
-# ── STEP 15: SEO, Marketing & Product ────────────────────────────────────────
-section "SEO, Marketing & Product"
-claude_install "marketing-skills"              "marketing-skills@claude-code-skills"
-claude_install "research-ops-skills (SEO)"     "research-ops-skills@claude-code-skills"
-claude_install "product-skills"                "product-skills@claude-code-skills"
-claude_install "pm-skills"                     "pm-skills@claude-code-skills"
-claude_install "business-growth-skills"        "business-growth-skills@claude-code-skills"
-claude_install "demo-video"                    "demo-video@claude-code-skills"
-claude_install "c-level-skills"                "c-level-skills@claude-code-skills"
-
-# ── STEP 16: Figma & Design Handoff ──────────────────────────────────────────
-section "Figma & Design Handoff"
-npx_add "Figma"                                "figma/figma"
-
-# ── STEP 17: Research, Docs & Memory ─────────────────────────────────────────
-section "Research, Docs & Memory"
-if command -v uv >/dev/null 2>&1; then
-  info "Installing graphify..."
-  uv tool install graphifyy >/dev/null 2>&1 && graphify install >/dev/null 2>&1 && ok "graphify" || fail "graphify"
+# ── Core: /sps everywhere ─────────────────────────────────────────────────────
+section "Core orchestrator"
+step "/sps for all agents"            npx skills add -g SHAHID8142/Shahid-Personal-SkillSet
+if have claude; then
+  REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  step "/sps Claude marketplace"      claude plugin marketplace add "$REPO"
+  step "/sps Claude plugin"           claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope user
 else
-  info "Installing graphify via pip..."
-  pip install graphifyy >/dev/null 2>&1 && graphify install >/dev/null 2>&1 && ok "graphify" || fail "graphify"
+  STEP=$((STEP+2)); note "claude not found — skipped 2 Claude steps"
 fi
 
-if command -v claude >/dev/null 2>&1; then
-  info "Installing Context7 MCP..."
-  claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp >/dev/null 2>&1 && ok "Context7 MCP" || fail "Context7 MCP"
+# ── Reliable npx skills (verified small repos, all timeout-guarded) ───────────
+section "Design & animation skills"
+step "hallmark (anti-slop)"           npx skills add -g nutlope/hallmark
+step "GSAP (official suite)"          npx skills add -g https://github.com/greensock/gsap-skills
+step "awwwards-animations"            npx skills add -g devmartinese/awwwards-animations
+
+# ── Claude plugin skills (fast — marketplaces are small) ─────────────────────
+if have claude; then
+  section "Claude design plugins"
+  step "ui-ux-pro-max marketplace"    claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
+  step "ui-ux-pro-max"                claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope user
+  step "design-skillstack marketplace" claude plugin marketplace add freshtechbro/claudedesignskills
+  step "motion-framer"                claude plugin install motion-framer@claude-design-skillstack --scope user
+  step "locomotive-scroll"            claude plugin install locomotive-scroll@claude-design-skillstack --scope user
+  step "animejs"                      claude plugin install animejs@claude-design-skillstack --scope user
+  step "three.js / R3F / babylon"     claude plugin install react-three-fiber@claude-design-skillstack --scope user
+
+  section "Engineering, marketing & SEO plugins"
+  step "claude-code-skills marketplace" claude plugin marketplace add alirezarezvani/claude-skills
+  step "engineering-skills (epic-design, senior-*, code-reviewer)" claude plugin install engineering-skills@claude-code-skills --scope user
+  step "engineering-advanced-skills"  claude plugin install engineering-advanced-skills@claude-code-skills --scope user
+  step "marketing-skills (SEO, copy, CRO)" claude plugin install marketing-skills@claude-code-skills --scope user
+  step "a11y-audit"                   claude plugin install a11y-audit@claude-code-skills --scope user
+else
+  STEP=$((STEP+12)); note "claude not found — skipped 12 Claude plugin steps"
 fi
 
-claude_install "research-summarizer"           "research-summarizer@claude-code-skills"
-claude_install "statistical-analyst"           "statistical-analyst@claude-code-skills"
+# ── Research / memory ─────────────────────────────────────────────────────────
+section "Research & docs"
+if have uv; then
+  step "graphify (knowledge graphs)"  bash -c 'uv tool install graphifyy && graphify install'
+elif have pip; then
+  step "graphify (via pip)"           bash -c 'pip install graphifyy && graphify install'
+else
+  STEP=$((STEP+1)); note "no uv/pip — graphify skipped"
+fi
+if have claude; then
+  step "Context7 MCP (live docs)"     claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp
+else
+  STEP=$((STEP+1))
+fi
 
-# ── STEP 18: User Profile & Persistent Memory ────────────────────────────────
-section "User Profile & Persistent Memory"
+# ── Antigravity CLI sync (reads a different dir than npx writes) ──────────────
+section "Antigravity CLI (agy)"
+REPO_SPS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/skills/sps/SKILL.md"
+AGY_DIR="$HOME/.gemini/antigravity/skills/sps"
+if [ -f "$REPO_SPS" ]; then
+  mkdir -p "$AGY_DIR" && cp "$REPO_SPS" "$AGY_DIR/SKILL.md" && note "✓ /sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)"
+  have agy && note "agy detected — /sps auto-activates via progressive disclosure" || note "agy not found — copied anyway; works once Antigravity is installed"
+else
+  note "skills/sps/SKILL.md not found — run from repo root"
+fi
 
-# Create ~/.sps/ directory structure
-mkdir -p ~/.sps/learned
-
-# Seed profile if it doesn't exist
-if [ ! -f ~/.sps/profile.md ]; then
-  cat > ~/.sps/profile.md << 'PROFILE'
+# ── Profile + memory seed (never overwrites existing) ────────────────────────
+section "Profile & memory"
+mkdir -p "$HOME/.sps/learned"
+if [ ! -f "$HOME/.sps/profile.md" ]; then
+  cat > "$HOME/.sps/profile.md" <<'P'
 # SPS User Profile
 Last updated:
-
----
 
 ## Identity
 - Role / experience level:
@@ -248,103 +173,48 @@ Last updated:
 
 ## Mode preference
 - Color scheme default:
-- Notes:
 
 ## Communication style
 - Verbosity:
 - Prefers:
 - Dislikes:
 
-## Explicit approvals (things praised or confirmed as correct)
+## Explicit approvals
 -
 
-## Explicit rejections (things criticized or asked to change)
+## Explicit rejections
 -
 
 ## Working patterns observed
 -
-PROFILE
-  ok "Profile template created (~/.sps/profile.md)"
-  info "On your first /sps task, the agent will ask 5 quick questions to fill this in."
+P
+  note "profile.md created — /sps fills it in on first task"
 else
-  ok "Profile already exists (~/.sps/profile.md) — skipping"
+  note "profile.md kept (already exists)"
 fi
+[ -f "$HOME/.sps/mistakes.md" ] || printf '# SPS Mistake Log\nRead before every task. Never repeat these.\n\n---\n' > "$HOME/.sps/mistakes.md"
+[ -f "$HOME/.sps/learned/INDEX.md" ] || printf '# SPS Learned Topics\nResearched tools saved here. Check before researching.\n\n---\n' > "$HOME/.sps/learned/INDEX.md"
+note "mistakes.md + learned/INDEX.md ready"
 
-# Seed mistake log if it doesn't exist
-if [ ! -f ~/.sps/mistakes.md ]; then
-  cat > ~/.sps/mistakes.md << 'MISTAKES'
-# SPS Mistake Log
-Mistakes made by agents using /sps. Read this before every task. Never repeat these.
-
----
-MISTAKES
-  ok "Mistake log created (~/.sps/mistakes.md)"
-else
-  ok "Mistake log exists — skipping"
-fi
-
-# Seed learned topics index if it doesn't exist
-if [ ! -f ~/.sps/learned/INDEX.md ]; then
-  cat > ~/.sps/learned/INDEX.md << 'INDEX'
-# SPS Learned Topics
-
-Topics researched by /sps when not found in the built-in catalog.
-Read before every task to check if required knowledge is already here.
-
----
-INDEX
-  ok "Learned topics index created (~/.sps/learned/INDEX.md)"
-else
-  ok "Learned topics index exists — skipping"
-fi
-
-# ── STEP 19: Antigravity CLI sync (agy reads a different directory) ──────────
-section "Antigravity CLI (agy)"
-# Antigravity reads global skills from ~/.gemini/antigravity/skills/<name>/SKILL.md — NOT from
-# ~/.agents or ~/.claude. npx skills does not reliably update it, so we copy explicitly here.
-REPO_SPS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/skills/sps/SKILL.md"
-AGY_DIR="$HOME/.gemini/antigravity/skills/sps"
-if [ -f "$REPO_SPS" ]; then
-  mkdir -p "$AGY_DIR"
-  cp "$REPO_SPS" "$AGY_DIR/SKILL.md" && ok "/sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)" || fail "Antigravity sync"
-  # Workspace-scope copy too, for projects opened here
-  if command -v agy >/dev/null 2>&1; then
-    ok "agy CLI detected — /sps will auto-activate via progressive disclosure"
-  else
-    info "agy CLI not found — skill copied anyway; will work once Antigravity is installed"
-  fi
-else
-  fail "Antigravity sync (skills/sps/SKILL.md not found — run from repo root)"
-fi
-
-# ── Verification ──────────────────────────────────────────────────────────────
+# ── Verify + summary ──────────────────────────────────────────────────────────
 section "Verification"
-if command -v claude >/dev/null 2>&1; then
-  PLUGIN_COUNT=$(claude plugin list 2>/dev/null | grep -c "enabled" || echo "0")
-  ok "Claude plugins enabled: $PLUGIN_COUNT"
-fi
-[ -f "$HOME/.agents/skills/sps/SKILL.md" ] && ok "/sps present for universal agents (~/.agents/skills/)" || info "/sps not found in ~/.agents/skills/"
-[ -f "$HOME/.gemini/antigravity/skills/sps/SKILL.md" ] && ok "/sps present for Antigravity" || info "/sps not synced to Antigravity"
+[ -f "$HOME/.agents/skills/sps/SKILL.md" ]            && note "✓ /sps present for universal agents" || note "– /sps missing for universal agents"
+[ -f "$HOME/.gemini/antigravity/skills/sps/SKILL.md" ] && note "✓ /sps present for Antigravity"       || note "– /sps missing for Antigravity"
+if have claude; then note "✓ Claude plugins enabled: $(claude plugin list 2>/dev/null | grep -c enabled)"; fi
 
-# ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
-echo "╔══════════════════════════════════════════════════════════════════╗"
-echo -e "║  ${BOLD}Installation complete${NC}                                           ║"
-echo "╠══════════════════════════════════════════════════════════════════╣"
-printf  "║  Installed/synced: %-3s   Failed: %-3s                            ║\n" "$INSTALLED" "$FAILED"
-echo "╠══════════════════════════════════════════════════════════════════╣"
-echo "║  Use it everywhere — just describe what to build, or type /sps:   ║"
-echo "║    Claude Code   →  /sps [request]                               ║"
-echo "║    Antigravity   →  auto-activates (progressive disclosure)      ║"
-echo "║    Cursor/Codex  →  auto-loaded from skill dir                   ║"
-echo "║                                                                  ║"
-echo "║  Six rules always on: anti-slop · graphify · responsive ·        ║"
-echo "║  a11y · design-tokens · conventional-commits                     ║"
-echo "╚══════════════════════════════════════════════════════════════════╝"
+echo "+==================================================================+"
+echo "|  Install complete                                                |"
+echo "+------------------------------------------------------------------+"
+printf "|  Installed: %-3s   Skipped (optional): %-3s                       |\n" "$INSTALLED" "$FAILED"
+echo "+------------------------------------------------------------------+"
+echo "|  Use it:  Claude Code -> /sps [request]                          |"
+echo "|           Antigravity -> just describe what to build             |"
+echo "|  Six rules always on: anti-slop, graphify, responsive,           |"
+echo "|  a11y, design-tokens, conventional-commits.                      |"
+echo "+==================================================================+"
 if [ "$FAILED" -gt 0 ]; then
-  echo ""
-  echo -e "${YELLOW}$FAILED item(s) failed — these are optional/best-effort and don't block /sps.${NC}"
-  echo -e "Full list saved to: ${BOLD}$LOG${NC}"
-  echo "Unknown libraries are handled at runtime by /sps's learn-protocol anyway."
+  note "Skipped items are optional — /sps installs any tool on demand at runtime."
+  note "Details: $LOG"
 fi
 echo ""
