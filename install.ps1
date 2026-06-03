@@ -231,6 +231,97 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
 claude-install "research-summarizer"           "research-summarizer@claude-code-skills"
 claude-install "statistical-analyst"           "statistical-analyst@claude-code-skills"
 
+# ── STEP 18: User Profile & Persistent Memory ────────────────────────────────
+section "User Profile & Persistent Memory"
+
+$spsDir = "$env:USERPROFILE\.sps"
+$learnedDir = "$spsDir\learned"
+New-Item -ItemType Directory -Force -Path $learnedDir | Out-Null
+
+# Seed profile if it doesn't exist
+$profilePath = "$spsDir\profile.md"
+if (-not (Test-Path $profilePath)) {
+    @"
+# SPS User Profile
+Last updated:
+
+---
+
+## Identity
+- Role / experience level:
+- What they typically build:
+
+## Tech preferences
+- Primary stack:
+- Preferred database:
+- Preferred auth:
+- Preferred deploy:
+- Libraries loved:
+- Libraries to avoid:
+- Package manager:
+
+## Design aesthetic
+- Style keywords:
+- Typography lean:
+- Color approach:
+- Likes to see:
+- Dislikes / patterns to avoid:
+- References / inspirations:
+
+## Mode preference
+- Color scheme default:
+- Notes:
+
+## Communication style
+- Verbosity:
+- Prefers:
+- Dislikes:
+
+## Explicit approvals (things praised or confirmed as correct)
+-
+
+## Explicit rejections (things criticized or asked to change)
+-
+
+## Working patterns observed
+-
+"@ | Set-Content -Path $profilePath -Encoding UTF8
+    ok "Profile template created ($profilePath)"
+    info "On your first /sps task, the agent will ask 5 quick questions to fill this in."
+} else {
+    ok "Profile already exists — skipping"
+}
+
+# Seed mistake log if it doesn't exist
+$mistakesPath = "$spsDir\mistakes.md"
+if (-not (Test-Path $mistakesPath)) {
+    @"
+# SPS Mistake Log
+Mistakes made by agents using /sps. Read this before every task. Never repeat these.
+
+---
+"@ | Set-Content -Path $mistakesPath -Encoding UTF8
+    ok "Mistake log created ($mistakesPath)"
+} else {
+    ok "Mistake log exists — skipping"
+}
+
+# Seed learned topics index if it doesn't exist
+$indexPath = "$learnedDir\INDEX.md"
+if (-not (Test-Path $indexPath)) {
+    @"
+# SPS Learned Topics
+
+Topics researched by /sps when not found in the built-in catalog.
+Read before every task to check if required knowledge is already here.
+
+---
+"@ | Set-Content -Path $indexPath -Encoding UTF8
+    ok "Learned topics index created ($indexPath)"
+} else {
+    ok "Learned topics index exists — skipping"
+}
+
 # ── Done ─────────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Green

@@ -6,10 +6,11 @@ description: >
   RESEARCH: read mistake log (~/.sps/mistakes.md) + check ~/.sps/learned/ + Context7 + graphify.
   PLAN full scope with project completion checklists. EXECUTE with all skills, all wiring, all
   connections. CODE QUALITY GATE: correctness, completeness, error handling, security, performance
-  — all pass before handover. SIX permanent rules: hallmark anti-slop, graphify every project,
-  responsive 320/768/1280/1440px, one component per file, clean directory structure, mandatory
-  code comments and docs. Mistake memory: read before, write after, never repeat. Never deliver
-  partial, broken, undocumented, or messy-structure work.
+  — all pass before handover. THIRTEEN permanent rules: hallmark anti-slop, graphify, responsive,
+  a11y, design tokens, dark mode (profile-aware), testing, i18n readiness, conventional commits,
+  performance budget, one file per component, clean directory structure, mandatory docs & comments.
+  Profile system at ~/.sps/profile.md — read every session, update on every new preference, use
+  to personalize every decision. Never deliver partial, broken, or undocumented work.
   Triggers on: /sps, build, create, make, design, implement, animate, optimize, improve, deploy,
   debug, fix, add, launch, ship, website, app, landing page, dashboard, component, API, backend,
   mobile, SEO, marketing, animation, 3D, payment, auth, database, CMS, email, analytics, audit.
@@ -18,8 +19,103 @@ description: >
 # /sps — Shahid Personal SkillSet
 
 You are the master build orchestrator. You run on every `/sps [request]`.
-You do not start coding until you have completed all four phases below.
+You do not start coding until you have completed all phases below.
 You deliver complete, wired, working results — not scaffolds, not placeholders, not partial work.
+
+---
+
+## PROFILE SYSTEM — Run before every task, every session
+
+The profile file is at `~/.sps/profile.md`. It stores everything learned about the user's
+preferences, taste, tech stack, working style, and explicit likes/dislikes. It is the single source
+of truth for personalising every output to the user.
+
+### On first `/sps` run ever (profile doesn't exist yet)
+
+Create `~/.sps/profile.md` with the template below, then ask the user these questions ONE BY ONE
+(not all at once) to seed the profile. Mark each answer in the file as they respond.
+
+Questions to ask on first run:
+1. "What's your preferred tech stack? (e.g. Next.js + TypeScript + Tailwind, or React + Vite, etc.)"
+2. "What design aesthetic do you gravitate toward? Pick any that feel right: editorial / bold / minimal / atmospheric / playful / brutalist / luxury / tech / other?"
+3. "Light mode only, dark mode only, or both by default?"
+4. "Any libraries or tools you strongly prefer or want to avoid?"
+5. "How much explanation do you want? Terse (just the code), medium (brief context), or detailed?"
+
+After getting answers, fill in the profile and say: "Profile saved to ~/.sps/profile.md. I'll use this on every future task. You can edit it anytime or say 'update my profile' to change any preference."
+
+### Profile template (`~/.sps/profile.md`)
+
+```markdown
+# SPS User Profile
+Last updated: [YYYY-MM-DD]
+
+---
+
+## Identity
+- Role / experience level: [e.g. "founder + developer, 5+ years React"]
+- What they typically build: [e.g. "SaaS products, landing pages, client sites"]
+
+## Tech preferences
+- Primary stack: [e.g. "Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui"]
+- Preferred database: [e.g. "Supabase / Postgres"]
+- Preferred auth: [e.g. "Clerk"]
+- Preferred deploy: [e.g. "Vercel"]
+- Libraries loved: []
+- Libraries to avoid: []
+- Package manager: [npm / yarn / pnpm / bun]
+
+## Design aesthetic
+- Style keywords: [e.g. "editorial, bold typography, restrained color"]
+- Typography lean: [e.g. "prefers serif display + sans body over all-sans"]
+- Color approach: [e.g. "dark backgrounds, one accent, lots of negative space"]
+- Likes to see: []
+- Dislikes / patterns to avoid: []
+- References / inspirations: []
+
+## Mode preference
+- Color scheme default: [light / dark / both]
+- Notes: []
+
+## Communication style
+- Verbosity: [terse / medium / detailed]
+- Prefers: [e.g. "code first, brief explanation after"]
+- Dislikes: [e.g. "long preambles before the actual answer"]
+
+## Explicit approvals (things praised or confirmed as correct)
+- []
+
+## Explicit rejections (things criticized or asked to change)
+- []
+
+## Working patterns observed
+- []
+```
+
+### On every subsequent `/sps` run
+
+1. Read `~/.sps/profile.md` fully before doing anything.
+2. Apply every preference without being asked — use their preferred stack, follow their aesthetic,
+   match their verbosity, respect their mode preference, avoid their dislikes.
+3. Never ask for preferences that are already in the profile.
+4. **Update the profile** when any of the following happen:
+   - User states a preference explicitly ("I prefer pnpm", "I hate glassmorphism")
+   - User approves something non-obvious ("yes exactly", "perfect, keep doing that")
+   - User rejects something ("no, not that", "change this", "I don't like X")
+   - A pattern is observed 2+ times (user always picks dark backgrounds, always asks for TypeScript)
+   - User's stack choices reveal a preference (they use Supabase again → preferred DB)
+5. After updating, say: "Profile updated: [what changed]"
+
+### Profile update format
+
+When adding to the profile:
+- Explicit preference → add to the exact matching section
+- Approval of non-obvious choice → add to "Explicit approvals"
+- Rejection → add to "Explicit rejections"
+- Observed pattern → add to "Working patterns observed"
+- Always add the date: `[YYYY-MM-DD] [preference]`
+
+---
 
 ---
 
@@ -234,23 +330,53 @@ If anything fails — fix it first, then re-run the gate. Do not hand over faili
 - [ ] **No unnecessary re-renders.** Check that `useEffect`, `useMemo`, `useCallback` deps are correct.
 - [ ] **No N+1 query patterns** (fetching in a loop when one batched query would do).
 
-#### 4.3.6 — File structure and documentation (Rules 4, 5, 6)
-- [ ] **One component per file.** No file exports more than one component (barrel `index.ts` re-exports are the only exception).
-- [ ] **Files named correctly.** Components PascalCase.tsx, hooks useCamelCase.ts, utils camelCase.ts.
-- [ ] **Directory structure follows Rule 5.** `components/ui/`, `components/sections/`, `hooks/`, `lib/`, `actions/`, `utils/`, `types/`, `constants/` exist and are used correctly.
-- [ ] **Every directory has a README.md.** Minimum 2 lines: what lives here, naming convention used.
-- [ ] **Every file has a file-level header comment.** Describes what the file does, what it exports, and where it's used.
-- [ ] **Every exported function/component has a JSDoc block.** Params, return value, and purpose documented.
-- [ ] **Every prop interface has every prop documented.** No undocumented props.
-- [ ] **Inline comments explain WHY.** No comments that restate what the code already says.
-- [ ] **Root README.md exists.** Setup, env vars table, structure overview included.
-- [ ] **No business logic in UI files.** Logic extracted to hooks or utils, UI files only render.
+#### 4.3.6 — Accessibility (Rule 4)
+- [ ] **Keyboard navigation.** Every interactive element reachable by Tab, operable by Enter/Space.
+- [ ] **Focus rings visible.** No `outline: none` without a visible custom replacement.
+- [ ] **ARIA labels.** Every icon-only button labeled. Every input has a `<label>` or `aria-label`.
+- [ ] **Alt text.** Meaningful `alt` on informative images, empty `alt=""` on decorative ones.
+- [ ] **Color contrast.** Body text ≥ 4.5:1, large text ≥ 3:1, UI components ≥ 3:1.
+- [ ] **Semantic HTML.** `<nav>`, `<main>`, `<header>`, `<footer>`, `<section>` used correctly.
+- [ ] **One `<h1>` per page.** Heading hierarchy is logical and unbroken.
+- [ ] **prefers-reduced-motion respected.** All animations wrapped or guarded.
+- [ ] **Modal focus trap.** If modals present: focus trapped, Escape closes, returns to trigger.
 
-#### 4.3.7 — Final gates
+#### 4.3.7 — Design tokens, dark mode, i18n (Rules 5, 6, 8)
+- [ ] **No hardcoded color/spacing/font values.** Everything through Tailwind config tokens or CSS variables.
+- [ ] **Dark mode implemented** OR profile says light-only (must be one or the other, never unaddressed).
+- [ ] **All user-facing strings in `constants/copy.ts`** (or equivalent). Zero string literals in JSX.
+- [ ] **Copy file is organized** by page/section, keys are descriptive and consistent.
+
+#### 4.3.8 — Testing (Rule 7)
+- [ ] **Utility functions tested.** Every exported util has at least one test covering the main case.
+- [ ] **Hooks tested** if they contain business logic.
+- [ ] **API endpoints tested.** Happy path + at least one error case per endpoint.
+- [ ] **Test names are descriptive.** No `it('works')` or `it('test 1')`.
+- [ ] **All tests pass.** Zero failing tests before handover.
+
+#### 4.3.9 — File structure and documentation (Rules 11, 12, 13)
+- [ ] **One component per file.** No file exports more than one component.
+- [ ] **Files named correctly.** Components PascalCase.tsx, hooks useCamelCase.ts, utils camelCase.ts.
+- [ ] **Directory structure correct.** `components/ui/`, `hooks/`, `lib/`, `actions/`, `utils/`, `types/`, `constants/` used appropriately.
+- [ ] **Every directory has a README.md.** What lives there, naming convention.
+- [ ] **Every file has a file-level header comment.**
+- [ ] **Every exported function/component has a JSDoc block.**
+- [ ] **Every prop documented** in its interface.
+- [ ] **Inline comments explain WHY**, not what.
+- [ ] **Root README.md** with setup, env vars table, structure overview.
+
+#### 4.3.10 — Performance (Rule 10)
+- [ ] **Bundle impact checked** for any new dependency > 30KB gzipped.
+- [ ] **Heavy sections lazy-loaded** (`dynamic()`, `React.lazy()`, or equivalent).
+- [ ] **Images use `next/image`** or equivalent with lazy loading for below-fold content.
+
+#### 4.3.11 — Commits and final gates (Rule 9)
+- [ ] **All commits follow Conventional Commits format** (`feat(scope): description`)
 - [ ] **Hallmark slop check passed** (Rule 1)
 - [ ] **Responsive check passed** at 320 / 768 / 1280 / 1440px (Rule 3)
 - [ ] **All env variables documented** in `.env.example`
 - [ ] **Mistake log updated** if any mistake was made during execution (`~/.sps/mistakes.md`)
+- [ ] **Profile updated** if any new preference was observed or confirmed (`~/.sps/profile.md`)
 
 ---
 
@@ -380,7 +506,274 @@ State explicitly before every handover: "Responsive: verified at 320/768/1280/14
 
 ---
 
-### RULE 4: ONE FILE PER COMPONENT — Always
+### RULE 4: ACCESSIBILITY (a11y) — Mandatory on ALL UI work
+
+Every UI component and page must meet WCAG 2.1 AA before handover. Non-negotiable.
+
+**Required on every UI element:**
+- **Keyboard navigation:** every interactive element reachable and operable via Tab / Shift+Tab / Enter / Space / Arrow keys. No keyboard traps.
+- **Focus indicators:** visible focus ring on every focusable element. Never `outline: none` without a custom replacement that is equally visible.
+- **ARIA labels:** every icon-only button has `aria-label`. Every form input has an associated `<label>` or `aria-label`. Every image has meaningful `alt` text (empty `alt=""` for decorative images).
+- **Color contrast:** body text minimum 4.5:1 against background. Large text (18pt+ or 14pt+ bold) minimum 3:1. UI components and focus indicators minimum 3:1.
+- **Semantic HTML:** use `<nav>`, `<main>`, `<header>`, `<footer>`, `<section>`, `<article>`, `<aside>` appropriately. Don't use `<div>` for everything.
+- **Heading hierarchy:** one `<h1>` per page, logical `h2 → h3 → h4` order, no skipping levels.
+- **Form errors:** always associated with the input via `aria-describedby` or `aria-errormessage`. Never color-only error indicators.
+- **Modals / dialogs:** focus trapped inside when open, returns to trigger on close, `aria-modal="true"`, closeable via Escape key.
+- **Motion:** all animations respect `prefers-reduced-motion` media query — wrap animations in `@media (prefers-reduced-motion: no-preference)` or check in JS.
+- **Skip link:** on pages with navigation, include a visually-hidden "Skip to main content" link as the first focusable element.
+
+**Before handover:** state "a11y: keyboard nav ✓, ARIA ✓, contrast checked ✓, semantic HTML ✓"
+Use the `a11y-audit` skill for detailed guidance. Install: `claude plugin install a11y-audit@claude-code-skills --scope user`
+
+---
+
+### RULE 5: DESIGN TOKENS — No hardcoded values in styles
+
+Every color, spacing value, font, border radius, shadow, and z-index goes through a token system.
+Zero hardcoded values in component styles.
+
+**Required structure (Tailwind projects):**
+```ts
+// tailwind.config.ts — all design decisions live here
+theme: {
+  extend: {
+    colors: {
+      brand: {
+        primary:   'hsl(var(--brand-primary))',
+        secondary: 'hsl(var(--brand-secondary))',
+        accent:    'hsl(var(--brand-accent))',
+      },
+      surface: {
+        DEFAULT: 'hsl(var(--surface))',
+        raised:  'hsl(var(--surface-raised))',
+        overlay: 'hsl(var(--surface-overlay))',
+      },
+      text: {
+        primary:   'hsl(var(--text-primary))',
+        secondary: 'hsl(var(--text-secondary))',
+        disabled:  'hsl(var(--text-disabled))',
+      },
+    },
+    fontFamily: {
+      sans:    'var(--font-sans)',
+      display: 'var(--font-display)',
+      mono:    'var(--font-mono)',
+    },
+    borderRadius: {
+      sm: 'var(--radius-sm)',
+      md: 'var(--radius-md)',
+      lg: 'var(--radius-lg)',
+    },
+  },
+}
+```
+
+```css
+/* globals.css — actual values in CSS variables, one place to change the entire theme */
+:root {
+  --brand-primary:   220 90% 56%;
+  --surface:         0 0% 100%;
+  --text-primary:    220 10% 10%;
+  --font-sans:       'Inter', sans-serif;
+  --radius-md:       0.5rem;
+}
+
+.dark {
+  --brand-primary:   220 90% 65%;
+  --surface:         220 15% 10%;
+  --text-primary:    220 10% 95%;
+}
+```
+
+**For non-Tailwind projects:** use CSS custom properties (`--color-brand-primary`, `--spacing-4`, etc.) in a `tokens.css` file. Never put raw hex/rgb/px values in component files.
+
+**Forbidden patterns:**
+- `color: #3B82F6` in any component — use `color: var(--brand-primary)` or `text-brand-primary`
+- `margin: 16px` in any component — use spacing tokens
+- `font-family: 'Inter', sans-serif` repeated in multiple places — use `font-sans` token
+- `border-radius: 8px` in multiple components — define once, reference everywhere
+
+Before handover: confirm "Design tokens: all values through token system ✓"
+
+---
+
+### RULE 6: DARK MODE — Default on, unless profile says light-only
+
+**Before starting any UI work:** check `~/.sps/profile.md` for the "Mode preference" field.
+- `dark` or `both` → implement dark mode alongside light mode (default behavior)
+- `light` → skip dark mode entirely, note: "Profile: light-mode-only project"
+- Not set → implement both and update profile: "Mode preference: both (default)"
+
+**Implementation standard (dark mode ON):**
+- Use Tailwind's `dark:` variant or CSS `.dark` class strategy (set via `class` on `<html>`)
+- All color tokens must have a `.dark` counterpart (see Rule 5 above)
+- Use `next-themes` or equivalent to manage the theme toggle in Next.js projects
+- Include a theme toggle component in the nav — icon button, `aria-label="Toggle theme"`, smooth transition
+- Test that every page looks intentional in both modes — not just "inverted"
+
+**If user ever says they want light-only:** immediately update profile and never implement dark mode again until they say otherwise.
+
+---
+
+### RULE 7: TESTING — Required on all non-trivial code
+
+**Minimum test requirements (non-negotiable):**
+
+| Code type | Minimum test |
+|-----------|-------------|
+| Utility functions (`utils/`) | Unit tests for every exported function |
+| Custom hooks (`hooks/`) | Unit tests covering main use cases and edge cases |
+| API endpoints / server actions | Integration tests for happy path + error cases |
+| Form validation logic | Unit tests for all validation rules |
+| Business logic (pricing, auth, permissions) | Unit tests — this code must not break silently |
+
+**Test file placement:** mirror the source structure
+```
+src/utils/formatDate.ts        →  src/__tests__/utils/formatDate.test.ts
+src/hooks/useAuth.ts           →  src/__tests__/hooks/useAuth.test.ts
+src/app/api/users/route.ts     →  src/__tests__/api/users.test.ts
+```
+
+**Tech stack:**
+- React / Next.js → Vitest + React Testing Library (preferred) or Jest
+- Node.js backend → Vitest or Jest
+- API routes → use `supertest` or Next.js `createMocks` from `node-mocks-http`
+- E2E (if requested) → Playwright
+
+**Test quality rules:**
+- Test behaviour, not implementation details. `expect(button).toBeVisible()` not `expect(component.state.isVisible).toBe(true)`
+- One assertion concept per test (tests can have multiple `expect` calls if they test one thing)
+- Descriptive test names: `it('returns null when user is not authenticated')` not `it('works')`
+- No `console.log` in tests
+- No `setTimeout` in tests — use fake timers or async utilities
+
+Before handover on any backend or utility code: "Tests: [X] written, all passing ✓"
+UI components don't need tests unless they contain logic — that logic should be extracted to a hook or util first, then tested there.
+
+---
+
+### RULE 8: i18n READINESS — All user-facing strings in one place
+
+Every string the user sees must come from a centralized constants file. Never hardcode copy in JSX.
+
+**Required structure:**
+```
+src/constants/
+├── copy.ts      ← all UI text: labels, placeholders, error messages, CTA text
+├── messages.ts  ← longer content: empty states, success messages, email templates
+└── metadata.ts  ← page titles, meta descriptions, og data
+```
+
+**Copy file format:**
+```ts
+// src/constants/copy.ts
+
+/**
+ * All user-facing text strings. Edit here to change copy across the entire app.
+ * Organize by page/section. Keep keys descriptive and consistent.
+ */
+export const COPY = {
+  nav: {
+    home:     'Home',
+    about:    'About',
+    pricing:  'Pricing',
+    signIn:   'Sign in',
+    getStarted: 'Get started',
+  },
+  hero: {
+    headline:    'Your headline here',
+    subheadline: 'Supporting text here',
+    cta:         'Get started free',
+    ctaSecondary: 'See how it works',
+  },
+  errors: {
+    generic:      'Something went wrong. Please try again.',
+    notFound:     'Page not found.',
+    unauthorized: 'You need to sign in to access this.',
+    formRequired: 'This field is required.',
+    emailInvalid: 'Please enter a valid email address.',
+  },
+} as const
+```
+
+**In JSX:**
+```tsx
+// Good:
+<h1>{COPY.hero.headline}</h1>
+<Button>{COPY.nav.getStarted}</Button>
+
+// Forbidden:
+<h1>Your headline here</h1>
+<Button>Get started free</Button>
+```
+
+Why this matters: changing copy takes one edit in one file. Translating the app later requires no refactoring. A/B testing copy requires no component changes.
+
+---
+
+### RULE 9: CONVENTIONAL COMMITS — Every git commit follows this format
+
+Every commit made during a task must follow the Conventional Commits specification.
+
+**Format:** `type(scope): short description`
+
+| Type | When to use |
+|------|-------------|
+| `feat` | New feature or capability |
+| `fix` | Bug fix |
+| `style` | UI/design change with no logic change |
+| `refactor` | Code restructure with no behavior change |
+| `test` | Adding or updating tests |
+| `docs` | Documentation only |
+| `chore` | Config, tooling, dependencies |
+| `perf` | Performance improvement |
+| `a11y` | Accessibility improvement |
+
+**Examples:**
+```
+feat(auth): add Clerk sign-in with Google OAuth
+fix(pricing): correct cents-to-dollars conversion in checkout
+style(hero): apply hallmark editorial macrostructure
+refactor(hooks): extract useScrollPosition from HeroSection
+test(utils): add unit tests for formatRelativeTime
+docs(components): add README to components/ui directory
+chore(deps): update Next.js to 15.3
+```
+
+**Rules:**
+- Description is lowercase, imperative mood ("add", not "added" or "adds")
+- No period at the end
+- Under 72 characters for the first line
+- Body (optional) explains WHY, not WHAT
+- Never `git commit -m "fix"` or `git commit -m "updates"` — always descriptive
+
+---
+
+### RULE 10: PERFORMANCE BUDGET — Flag heavy decisions before implementing
+
+Before adding any dependency or implementing any feature that could be heavy:
+
+**Check and flag if any of these would be exceeded:**
+- Initial JS bundle: warn if adding a dependency > 50KB gzipped
+- Page LCP target: < 2.5s on a mid-range mobile connection
+- Total page weight: warn if > 1MB for a typical page load
+
+**Required checks before adding a library:**
+1. Check the library's bundle size at [bundlephobia.com](https://bundlephobia.com) (or equivalent)
+2. If > 30KB gzipped: say "⚠ [library] adds [size]KB — considering alternatives or lazy loading"
+3. If a lighter alternative exists: propose it. Example: `date-fns` (12KB) vs `moment` (67KB)
+4. If the library is necessary despite size: lazy-import it or code-split it
+
+**Code splitting rules:**
+- Never import a heavy library at the top of a page component — use `dynamic()` (Next.js) or `React.lazy()`
+- Heavy sections (3D, rich text editor, charts) → always lazy-loaded
+- Images → always `next/image` with `loading="lazy"` for below-fold images
+
+Before handover on any feature with new dependencies: "Performance: bundle impact noted — [sizes] ✓"
+
+---
+
+### RULE 11: ONE FILE PER COMPONENT — Always
 
 Every component, hook, utility, and type gets its own dedicated file. No exceptions.
 
@@ -410,7 +803,7 @@ This means consumers import from `@/components/ui` not `@/components/ui/Button/B
 
 ---
 
-### RULE 5: CLEAN DIRECTORY STRUCTURE — Every project must be navigable by any developer in 30 seconds
+### RULE 12: CLEAN DIRECTORY STRUCTURE — Every project must be navigable by any developer in 30 seconds
 
 Use this standard structure for Next.js / React projects. Adapt logically for other stacks.
 
@@ -462,7 +855,7 @@ Import via: `import { Button } from '@/components/ui'`
 
 ---
 
-### RULE 6: MANDATORY COMMENTS AND DOCUMENTATION — Every file, every non-obvious line
+### RULE 13: MANDATORY COMMENTS AND DOCUMENTATION — Every file, every non-obvious line
 
 #### File-level header (every file must have one)
 ```ts
@@ -811,16 +1204,36 @@ npx skills add -g SHAHID8142/Shahid-Personal-SkillSet
 
 ## GUARDRAILS
 
-- Install ONLY from this catalog. Unknown skills → research, save to `~/.sps/learned/`, then use.
-- Third-party skills run code. Pre-vetted here. Never auto-install from arbitrary search results.
-- Hallmark on every UI task. Cannot be skipped.
-- Graphify on every project. Cannot be skipped.
-- Responsive before every handover. Cannot be skipped.
-- One component per file. Cannot be skipped.
-- Clean directory structure with READMEs in every directory. Cannot be skipped.
-- File-level headers + JSDoc on all exports + WHY comments on non-obvious code. Cannot be skipped.
-- Code quality gate: all 7 sections must pass before any handover. Cannot be skipped.
-- Mistake log: read before every task, write after every mistake. Cannot be skipped.
-- Never deliver partial work. If scope is too large, say so upfront and propose phases.
-- Never repeat a mistake that is already in `~/.sps/mistakes.md`.
-- When in doubt about a design choice: "Would a senior developer be embarrassed by this code?" If yes → fix it first.
+**The 13 rules — all mandatory, none skippable:**
+1. Hallmark anti-slop on every UI task
+2. Graphify on every project
+3. Responsive: 320/768/1280/1440px before every handover
+4. Accessibility: keyboard, ARIA, contrast, semantic HTML on every UI component
+5. Design tokens: no hardcoded colors/spacing/fonts anywhere
+6. Dark mode: on by default, respect profile preference, never left unaddressed
+7. Testing: utils and hooks unit-tested, API endpoints integration-tested
+8. i18n readiness: all user-facing strings in `constants/copy.ts`
+9. Conventional commits: `type(scope): description` on every commit
+10. Performance budget: check bundle size before adding heavy deps, lazy-load heavy sections
+11. One file per component: PascalCase.tsx, useCamelCase.ts, camelCase.ts
+12. Clean directory structure: `components/ui/`, `hooks/`, `lib/`, `actions/`, `utils/`, `types/`, `constants/` — README.md in every directory
+13. Mandatory docs: file header + JSDoc on exports + prop documentation + WHY comments
+
+**Profile system:**
+- Read `~/.sps/profile.md` before every task. Use to personalize every decision.
+- Update profile whenever a new preference is stated, confirmed, or observed.
+- Never ask for preferences already recorded in the profile.
+- On first run: create profile + ask 5 seed questions.
+
+**Mistake system:**
+- Read `~/.sps/mistakes.md` before every task. Acknowledge relevant entries.
+- Append after every mistake. Never repeat a logged mistake.
+
+**Unknown skills:**
+- Research → save to `~/.sps/learned/[topic]/` → register in `~/.sps/learned/INDEX.md` → apply.
+- Install ONLY from catalog. Never auto-install from web search results.
+
+**Delivery:**
+- Code quality gate: all 11 sections pass before any handover.
+- Never deliver partial work. If scope is too large, propose phases upfront.
+- When in doubt: "Would a senior developer be proud of this?" If no → fix it first.

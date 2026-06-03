@@ -204,6 +204,93 @@ fi
 claude_install "research-summarizer"           "research-summarizer@claude-code-skills"
 claude_install "statistical-analyst"           "statistical-analyst@claude-code-skills"
 
+# ── STEP 18: User Profile & Persistent Memory ────────────────────────────────
+section "User Profile & Persistent Memory"
+
+# Create ~/.sps/ directory structure
+mkdir -p ~/.sps/learned
+
+# Seed profile if it doesn't exist
+if [ ! -f ~/.sps/profile.md ]; then
+  cat > ~/.sps/profile.md << 'PROFILE'
+# SPS User Profile
+Last updated:
+
+---
+
+## Identity
+- Role / experience level:
+- What they typically build:
+
+## Tech preferences
+- Primary stack:
+- Preferred database:
+- Preferred auth:
+- Preferred deploy:
+- Libraries loved:
+- Libraries to avoid:
+- Package manager:
+
+## Design aesthetic
+- Style keywords:
+- Typography lean:
+- Color approach:
+- Likes to see:
+- Dislikes / patterns to avoid:
+- References / inspirations:
+
+## Mode preference
+- Color scheme default:
+- Notes:
+
+## Communication style
+- Verbosity:
+- Prefers:
+- Dislikes:
+
+## Explicit approvals (things praised or confirmed as correct)
+-
+
+## Explicit rejections (things criticized or asked to change)
+-
+
+## Working patterns observed
+-
+PROFILE
+  ok "Profile template created (~/.sps/profile.md)"
+  info "On your first /sps task, the agent will ask 5 quick questions to fill this in."
+else
+  ok "Profile already exists (~/.sps/profile.md) — skipping"
+fi
+
+# Seed mistake log if it doesn't exist
+if [ ! -f ~/.sps/mistakes.md ]; then
+  cat > ~/.sps/mistakes.md << 'MISTAKES'
+# SPS Mistake Log
+Mistakes made by agents using /sps. Read this before every task. Never repeat these.
+
+---
+MISTAKES
+  ok "Mistake log created (~/.sps/mistakes.md)"
+else
+  ok "Mistake log exists — skipping"
+fi
+
+# Seed learned topics index if it doesn't exist
+if [ ! -f ~/.sps/learned/INDEX.md ]; then
+  cat > ~/.sps/learned/INDEX.md << 'INDEX'
+# SPS Learned Topics
+
+Topics researched by /sps when not found in the built-in catalog.
+Read before every task to check if required knowledge is already here.
+
+---
+INDEX
+  ok "Learned topics index created (~/.sps/learned/INDEX.md)"
+else
+  ok "Learned topics index exists — skipping"
+fi
+
 # ── Done ─────────────────────────────────────────────────────────────────────
 echo ""
 echo "╔══════════════════════════════════════════════════════════════════╗"
