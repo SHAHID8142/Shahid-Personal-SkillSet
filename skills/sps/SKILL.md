@@ -6,9 +6,10 @@ description: >
   RESEARCH: read mistake log (~/.sps/mistakes.md) + check ~/.sps/learned/ + Context7 + graphify.
   PLAN full scope with project completion checklists. EXECUTE with all skills, all wiring, all
   connections. CODE QUALITY GATE: correctness, completeness, error handling, security, performance
-  — all pass before handover. Three permanent rules: hallmark anti-slop, graphify every project,
-  responsive 320/768/1280/1440px. Mistake memory: read before every task, write after every
-  mistake, never repeat a logged mistake. Never deliver partial, broken, or placeholder work.
+  — all pass before handover. SIX permanent rules: hallmark anti-slop, graphify every project,
+  responsive 320/768/1280/1440px, one component per file, clean directory structure, mandatory
+  code comments and docs. Mistake memory: read before, write after, never repeat. Never deliver
+  partial, broken, undocumented, or messy-structure work.
   Triggers on: /sps, build, create, make, design, implement, animate, optimize, improve, deploy,
   debug, fix, add, launch, ship, website, app, landing page, dashboard, component, API, backend,
   mobile, SEO, marketing, animation, 3D, payment, auth, database, CMS, email, analytics, audit.
@@ -227,7 +228,25 @@ If anything fails — fix it first, then re-run the gate. Do not hand over faili
 - [ ] **No unnecessary re-renders.** Check that `useEffect`, `useMemo`, `useCallback` deps are correct.
 - [ ] **No N+1 query patterns** (fetching in a loop when one batched query would do).
 
-#### 4.3.6 — Final gates
+#### 4.3.5 — Performance basics
+- [ ] **No synchronous operations on the main thread** that could block rendering (large loops, heavy computation without workers).
+- [ ] **Images have explicit width/height** to prevent layout shift (CLS).
+- [ ] **No unnecessary re-renders.** Check that `useEffect`, `useMemo`, `useCallback` deps are correct.
+- [ ] **No N+1 query patterns** (fetching in a loop when one batched query would do).
+
+#### 4.3.6 — File structure and documentation (Rules 4, 5, 6)
+- [ ] **One component per file.** No file exports more than one component (barrel `index.ts` re-exports are the only exception).
+- [ ] **Files named correctly.** Components PascalCase.tsx, hooks useCamelCase.ts, utils camelCase.ts.
+- [ ] **Directory structure follows Rule 5.** `components/ui/`, `components/sections/`, `hooks/`, `lib/`, `actions/`, `utils/`, `types/`, `constants/` exist and are used correctly.
+- [ ] **Every directory has a README.md.** Minimum 2 lines: what lives here, naming convention used.
+- [ ] **Every file has a file-level header comment.** Describes what the file does, what it exports, and where it's used.
+- [ ] **Every exported function/component has a JSDoc block.** Params, return value, and purpose documented.
+- [ ] **Every prop interface has every prop documented.** No undocumented props.
+- [ ] **Inline comments explain WHY.** No comments that restate what the code already says.
+- [ ] **Root README.md exists.** Setup, env vars table, structure overview included.
+- [ ] **No business logic in UI files.** Logic extracted to hooks or utils, UI files only render.
+
+#### 4.3.7 — Final gates
 - [ ] **Hallmark slop check passed** (Rule 1)
 - [ ] **Responsive check passed** at 320 / 768 / 1280 / 1440px (Rule 3)
 - [ ] **All env variables documented** in `.env.example`
@@ -358,6 +377,215 @@ Install: `uv tool install graphifyy && graphify install`
 | 1440px (desktop) | Content respects max-width, doesn't stretch |
 
 State explicitly before every handover: "Responsive: verified at 320/768/1280/1440 — [what was checked and how]"
+
+---
+
+### RULE 4: ONE FILE PER COMPONENT — Always
+
+Every component, hook, utility, and type gets its own dedicated file. No exceptions.
+
+**File naming:**
+- React components → `PascalCase.tsx` (e.g. `HeroSection.tsx`, `PricingCard.tsx`)
+- Hooks → `use` prefix, `camelCase.ts` (e.g. `useScrollPosition.ts`, `useAuth.ts`)
+- Utilities / helpers → `camelCase.ts` (e.g. `formatDate.ts`, `cn.ts`)
+- Types / interfaces → `camelCase.types.ts` or `types.ts` inside the feature folder
+- Constants → `SCREAMING_SNAKE_CASE` inside `constants.ts`
+- API/server actions → `camelCase.ts` inside `actions/` or `api/`
+
+**Forbidden patterns:**
+- Multiple exported components in one file (except intentional barrel `index.ts` re-exports)
+- Logic mixed with UI in the same file beyond what a single component needs
+- Types defined inline in the consuming file when they're reused elsewhere
+- Helper functions buried at the bottom of a component file — move to `utils/`
+
+**Barrel files (`index.ts`):**
+Use in each directory to re-export its contents. Keep them clean:
+```ts
+// components/ui/index.ts
+export { Button } from './Button'
+export { Card } from './Card'
+export { Modal } from './Modal'
+```
+This means consumers import from `@/components/ui` not `@/components/ui/Button/Button`.
+
+---
+
+### RULE 5: CLEAN DIRECTORY STRUCTURE — Every project must be navigable by any developer in 30 seconds
+
+Use this standard structure for Next.js / React projects. Adapt logically for other stacks.
+
+```
+src/
+├── app/                    # Next.js App Router pages and layouts
+│   ├── (auth)/             # Route group: auth pages (login, signup, etc.)
+│   ├── (dashboard)/        # Route group: protected app pages
+│   ├── api/                # API route handlers
+│   ├── layout.tsx          # Root layout
+│   ├── page.tsx            # Home page
+│   └── globals.css         # Global styles only
+│
+├── components/
+│   ├── ui/                 # Primitive UI components (Button, Input, Modal, Card...)
+│   ├── layout/             # Layout components (Navbar, Footer, Sidebar, PageWrapper)
+│   ├── sections/           # Page sections (HeroSection, FeaturesSection, PricingSection)
+│   ├── forms/              # Form components (ContactForm, LoginForm, CheckoutForm)
+│   └── [feature]/          # Feature-specific components grouped by domain
+│
+├── hooks/                  # Custom React hooks (useAuth, useScrollPosition, useDebounce)
+├── lib/                    # Third-party library configs (db.ts, auth.ts, stripe.ts, mail.ts)
+├── actions/                # Server actions (createUser.ts, sendEmail.ts, processPayment.ts)
+├── types/                  # Shared TypeScript types and interfaces
+├── utils/                  # Pure utility functions (formatDate.ts, cn.ts, validators.ts)
+├── constants/              # App-wide constants (routes.ts, config.ts, siteMetadata.ts)
+├── styles/                 # Component-specific CSS modules (if not using Tailwind only)
+└── __tests__/              # Test files, mirroring src/ structure
+```
+
+**For non-Next.js projects**, adapt the same principles:
+- Group by feature/domain, not by file type when the project is large
+- Group by file type (components/, hooks/, utils/) when the project is small/medium
+- Never mix server and client code in the same file
+- Never put config files inside `src/` — keep them at project root
+
+**Every directory must have a `README.md`** that states in 2–3 lines:
+- What lives here
+- What naming convention is used
+- Any rule specific to this directory
+
+Example `components/ui/README.md`:
+```markdown
+# UI Components
+Primitive, reusable UI components with no business logic.
+Each component in its own file, PascalCase named.
+Import via: `import { Button } from '@/components/ui'`
+```
+
+---
+
+### RULE 6: MANDATORY COMMENTS AND DOCUMENTATION — Every file, every non-obvious line
+
+#### File-level header (every file must have one)
+```ts
+/**
+ * HeroSection.tsx
+ * 
+ * Full-viewport hero for the landing page. Renders the headline, sub-copy,
+ * CTA buttons, and the background animation. Uses Framer Motion for the
+ * stagger-reveal entrance and GSAP ScrollTrigger for the parallax on scroll.
+ * 
+ * Props: see HeroSectionProps below
+ * Used by: app/page.tsx
+ */
+```
+
+#### Component / function documentation (JSDoc/TSDoc)
+Every exported function and component gets a JSDoc block:
+```ts
+/**
+ * Formats a Unix timestamp into a human-readable relative string.
+ * Uses Intl.RelativeTimeFormat for locale-aware output.
+ * 
+ * @param timestamp - Unix timestamp in milliseconds
+ * @param locale    - BCP 47 locale string (default: 'en')
+ * @returns Relative time string e.g. "3 days ago", "in 2 hours"
+ */
+export function formatRelativeTime(timestamp: number, locale = 'en'): string {
+```
+
+#### Prop types documentation (every prop explained)
+```ts
+interface PricingCardProps {
+  /** Plan name displayed as the card heading */
+  name: string
+  /** Monthly price in USD cents (not dollars) to avoid floating point issues */
+  priceInCents: number
+  /** List of feature strings to display with checkmarks */
+  features: string[]
+  /** Whether this plan is highlighted as the recommended option */
+  isPopular?: boolean
+  /** Called when the user clicks the CTA button */
+  onSelect: (planId: string) => void
+}
+```
+
+#### Inline comments — explain WHY, not WHAT
+```ts
+// WHAT (bad — obvious from the code, adds no value):
+// Increment the counter
+count++
+
+// WHY (good — explains the non-obvious reason):
+// Stripe requires amounts in the smallest currency unit (cents for USD)
+// Passing dollars causes silent truncation and incorrect charges
+const amountInCents = Math.round(priceUSD * 100)
+
+// WHY (good — explains a workaround or constraint):
+// useLayoutEffect is intentional here — we need to measure the DOM node
+// synchronously before the browser paints to avoid a flash of wrong size
+useLayoutEffect(() => {
+  setHeight(ref.current?.offsetHeight ?? 0)
+}, [])
+```
+
+#### Section comments for long files
+When a file has multiple logical sections, separate them:
+```ts
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+// ─── Helper functions ────────────────────────────────────────────────────────
+
+// ─── Main component ──────────────────────────────────────────────────────────
+```
+
+#### What NOT to comment
+```ts
+// Bad — explains what, which is obvious:
+// Import React
+import React from 'react'
+
+// Bad — restates the function name:
+// Get user by ID
+async function getUserById(id: string) {
+
+// Bad — commits history belongs in git, not comments:
+// Added 2024-01-15 by Shahid to fix the login bug
+```
+
+#### README.md for every directory (see Rule 5)
+Every `components/`, `hooks/`, `lib/`, `utils/`, `actions/` directory gets a short README.md.
+
+#### Root-level README.md (every project)
+Must include:
+```markdown
+# Project Name
+
+One sentence describing what this project is.
+
+## Prerequisites
+- Node.js 20+
+- [Any other required tools]
+
+## Setup
+\`\`\`bash
+cp .env.example .env.local   # fill in your values
+npm install
+npm run dev
+\`\`\`
+
+## Environment variables
+| Variable | Required | Description |
+|----------|----------|-------------|
+| DATABASE_URL | Yes | Postgres connection string |
+| NEXT_PUBLIC_APP_URL | Yes | Full public URL of the app |
+
+## Project structure
+[brief description of src/ layout]
+
+## Key decisions
+[1-3 sentences on any non-obvious architectural choices]
+```
 
 ---
 
@@ -539,18 +767,27 @@ Do not select skills by keywords alone. Use this reasoning process:
 ## COMPLETENESS STANDARDS — No exceptions
 
 **Never hand over:**
-- A page with `TODO` comments
-- Placeholder text (`Lorem ipsum`, `Your text here`, `Coming soon`)
-- Unimplemented functions (`return null`, empty function bodies)
+- A page with `TODO` / `FIXME` / `HACK` comments
+- Placeholder text (`Lorem ipsum`, `Your text here`, `Coming soon`, `Add content here`)
+- Unimplemented functions (`return null`, `return {}`, empty function bodies)
 - Broken or `href="#"` links that should go somewhere real
 - Forms that don't submit or validate
 - Missing error states (only happy path implemented)
 - Missing mobile breakpoints
 - Missing favicon, title, or meta description on any HTML page
+- Multiple components crammed into one file
+- A directory with no README.md
+- A function/component with no JSDoc block
+- A prop interface with undocumented props
+- Business logic inside a UI/render file
 
 **Always include:**
 - `.env.example` with all required variables documented (never actual secrets)
-- A brief usage note if the project needs a build step or env vars to run
+- `README.md` at the project root: setup, env vars, structure overview
+- `README.md` in every major directory: what lives there, naming convention
+- File-level header comment in every `.ts` / `.tsx` / `.js` / `.jsx` file
+- JSDoc on every exported function and component
+- Section separators (`// ─── Section name ───`) in files longer than ~100 lines
 
 ---
 
@@ -574,11 +811,16 @@ npx skills add -g SHAHID8142/Shahid-Personal-SkillSet
 
 ## GUARDRAILS
 
-- Install ONLY from this catalog. Unknown skills → tell user and ask before adding.
+- Install ONLY from this catalog. Unknown skills → research, save to `~/.sps/learned/`, then use.
 - Third-party skills run code. Pre-vetted here. Never auto-install from arbitrary search results.
 - Hallmark on every UI task. Cannot be skipped.
 - Graphify on every project. Cannot be skipped.
 - Responsive before every handover. Cannot be skipped.
+- One component per file. Cannot be skipped.
+- Clean directory structure with READMEs in every directory. Cannot be skipped.
+- File-level headers + JSDoc on all exports + WHY comments on non-obvious code. Cannot be skipped.
+- Code quality gate: all 7 sections must pass before any handover. Cannot be skipped.
 - Mistake log: read before every task, write after every mistake. Cannot be skipped.
-- Never deliver partial work. If the scope is too large, say so upfront and propose phases.
+- Never deliver partial work. If scope is too large, say so upfront and propose phases.
 - Never repeat a mistake that is already in `~/.sps/mistakes.md`.
+- When in doubt about a design choice: "Would a senior developer be embarrassed by this code?" If yes → fix it first.
