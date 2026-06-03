@@ -1,32 +1,192 @@
-# Catalog — what skill for what
+# Shahid Personal SkillSet — Catalog
 
-Every entry is a real, verified skill. The orchestrator installs from these on demand; the setup
-script installs them upfront. Sources stay upstream (not copied in), so they stay current.
+## How to use
 
-| Skill | What it's for | Source |
-|-------|---------------|--------|
-| **hallmark** | Anti-AI-slop visual design — typography, color, layout, motion, microinteractions + pre-ship quality audit. Makes UI look intentionally crafted. | `Nutlope/hallmark` |
-| **ui-ux-pro-max** | Design intelligence — UI styles, color palettes, font pairings, UX guidelines, chart types across many stacks. Design systems and layout decisions. | `nextlevelbuilder/ui-ux-pro-max-skill` |
-| **frontend-design** | Distinctive, production-grade frontend interfaces that avoid the generic AI look. | `anthropics/skills` |
-| **awwwards-animations** | One toolkit: GSAP + Framer Motion + Lenis + Anime.js with a decision matrix. Scroll-driven motion, parallax, stagger, 60fps timelines. | `devmartinese/awwwards-animations-skill` |
-| **gsap (official)** | GreenSock's official skills — timelines, ScrollTrigger, plugins, framework integration. Deep GSAP work. | `greensock/gsap-skills` |
-| **claudedesignskills** | 3D + advanced motion marketplace — three.js, react-three-fiber, gsap-scrolltrigger, motion-framer, animejs, lottie, locomotive-scroll. | `freshtechbro/claudedesignskills` |
-| **Stripe / Cloudflare / Netlify / Expo** | Official backend, payments, and deploy skills. | `VoltAgent/awesome-agent-skills` |
-| **backend & APIs** | General backend/API engineering skills. | `alirezarezvani/claude-skills` |
-| **Sentry** | Error monitoring / debugging. | `VoltAgent/awesome-agent-skills` |
-| **Trail of Bits** | Security review. | `VoltAgent/awesome-agent-skills` |
-| **mattpocock/skills** | Test-first / phase-gate workflow guardrails. | `mattpocock/skills` |
-| **SEO + Google Ads** | SEO audits, schema markup, meta tags, PageSpeed, Search Console. | `alirezarezvani/claude-skills` |
-| **marketing / content** | Growth, content-ops, copywriting, outbound. | `alirezarezvani/claude-skills` |
-| **graphify** | Turn a codebase / docs into a queryable knowledge graph. Research over large material; big token savings per query. | `safishamsi/graphify` |
-| **Context7** | Up-to-date, version-specific docs for any library, on demand. Stops outdated/hallucinated APIs. | `upstash/context7` (MCP) |
+```
+/sps [your request]
+```
 
-## How to add to the catalog
+The `/sps` orchestrator reads your prompt, matches keywords to the right skills, installs
+anything missing (one-line notice, then proceeds), and executes. Works identically on:
+Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity, and more.
 
-1. Find the skill (browse [claudemarketplaces.com](https://claudemarketplaces.com),
-   `VoltAgent/awesome-agent-skills`, or the [MCP registry](https://registry.modelcontextprotocol.io)).
-2. Review its `SKILL.md` and any scripts.
-3. Add a row here **and** a row in the orchestrator's Catalog section
-   (`plugins/universal-build-orchestrator/skills/universal-build-orchestrator/SKILL.md`) with its
-   install command, so the orchestrator can auto-install it.
-4. Commit and push so every machine gets it.
+**Install everything:** `bash install.sh` (from the cloned repo root)
+**Or just the orchestrator:** `npx skills add -g SHAHID8142/Shahid-Personal-SkillSet`
+
+---
+
+## THREE PERMANENT RULES (always active, cannot be skipped)
+
+| # | Rule | Enforced |
+|---|------|----------|
+| 1 | **Hallmark anti-slop** | Every UI output runs the slop checklist. Generic patterns → rejected and redesigned. |
+| 2 | **Graphify** | Every project gets a knowledge graph (`graphify .`) before deep work starts. |
+| 3 | **Responsive** | Before every handover: 320px / 768px / 1280px / 1440px verified. |
+
+---
+
+## Full Skill Catalog — Website & App Build Stack
+
+### Design & UI
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **hallmark** | design, UI, page, landing, hero, component, layout, dashboard | `Nutlope/hallmark` |
+| **ui-ux-pro-max** | design system, color palette, typography, font pairing, UX | `nextlevelbuilder/ui-ux-pro-max-skill` |
+| **frontend-design** | React component, Next.js, web app, frontend, production UI | `anthropics/skills` |
+| **modern-web-design** | modern trends, glassmorphism, micro-interactions, dark mode | `freshtechbro/claudedesignskills` |
+| **animated-component-libraries** | Magic UI, React Bits, pre-built animated components | `freshtechbro/claudedesignskills` |
+| **apple-hig-expert** | Apple HIG, iOS design, macOS guidelines | `alirezarezvani/claude-skills` |
+
+### Animation & Motion
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **gsap-scrolltrigger** | GSAP, ScrollTrigger, timeline, parallax, pin, scrub | `greensock/gsap-skills` |
+| **gsap-react / gsap-plugins** | GSAP React, useGSAP, SplitText, MorphSVG, DrawSVG | `greensock/gsap-skills` |
+| **motion-framer** | Framer Motion, variants, AnimatePresence, spring, layout | `freshtechbro/claudedesignskills` |
+| **locomotive-scroll** | smooth scroll, Lenis, locomotive scroll | `freshtechbro/claudedesignskills` |
+| **animejs** | Anime.js, SVG morphing, stagger, keyframe | `freshtechbro/claudedesignskills` |
+| **awwwards-animations** | award-level, magnetic cursor, 60fps, Awwwards, FWA | `devmartinese/awwwards-animations-skill` |
+| **react-spring-physics** | React Spring, physics, spring dynamics, inertia | `freshtechbro/claudedesignskills` |
+| **lottie-animations** | Lottie, After Effects, dotLottie, bodymovin | `freshtechbro/claudedesignskills` |
+| **rive-interactive** | Rive, state machine animation, interactive vector | `freshtechbro/claudedesignskills` |
+| **scroll-reveal-libraries** | AOS, scroll reveal, fade on scroll | `freshtechbro/claudedesignskills` |
+| **barba-js** | Barba.js, page transitions, SPA navigation | `freshtechbro/claudedesignskills` |
+
+### 3D & WebGL
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **threejs-webgl** | Three.js, WebGL, 3D scene, mesh, shader | `freshtechbro/claudedesignskills` |
+| **react-three-fiber** | R3F, drei, @react-three, 3D in React | `freshtechbro/claudedesignskills` |
+| **babylonjs** | Babylon.js, physics, XR, VR, AR | `freshtechbro/claudedesignskills` |
+| **aframe-webxr** | A-Frame, WebXR, VR, AR, 360 | `freshtechbro/claudedesignskills` |
+| **spline-interactive** | Spline, no-code 3D, visual editor | `freshtechbro/claudedesignskills` |
+| **pixijs-2d** | PixiJS, 2D WebGL, sprites, canvas | `freshtechbro/claudedesignskills` |
+| **lightweight-3d-effects** | Zdog, Vanta, vanilla-tilt, lightweight 3D | `freshtechbro/claudedesignskills` |
+| **playcanvas-engine** | PlayCanvas, browser game, entity-component | `freshtechbro/claudedesignskills` |
+| **web3d-integration-patterns** | multi-library 3D + animation integration | `freshtechbro/claudedesignskills` |
+| **blender-web-pipeline** | Blender, glTF export, 3D asset pipeline | `freshtechbro/claudedesignskills` |
+
+### Frontend Framework (built into Claude Code)
+| Skill | Keywords |
+|-------|----------|
+| **vercel:nextjs** | Next.js, App Router, RSC, SSR, SSG |
+| **vercel:react-best-practices** | React hooks, patterns, best practices |
+| **vercel:routing-middleware** | routing, middleware, redirects, rewrites |
+| **vercel:next-cache-components** | caching, ISR, static, streaming |
+| **vercel:turbopack** | Turbopack, fast builds |
+| **vercel:shadcn** | shadcn/ui, Radix, Tailwind components |
+| **feature-flags-architect** | feature flags, A/B testing, experiments |
+
+### Authentication
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **vercel:auth (Clerk)** | Clerk, auth, sign-in, sign-up | built into Claude Code |
+| **Auth0** | Auth0, OAuth, JWT | `VoltAgent/awesome-agent-skills` |
+| **Better Auth** | Better Auth, NextAuth | `VoltAgent/awesome-agent-skills` |
+
+### Database & Storage
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Neon** | Postgres, SQL, Neon, migrations | `VoltAgent/awesome-agent-skills` |
+| **Supabase** | Supabase, BaaS, Postgres, realtime | `VoltAgent/awesome-agent-skills` |
+| **MongoDB** | MongoDB, NoSQL, document database | `VoltAgent/awesome-agent-skills` |
+| **Firebase** | Firebase, Firestore, Realtime Database | `VoltAgent/awesome-agent-skills` |
+| **Redis** | Redis, caching, pub/sub, queues | `VoltAgent/awesome-agent-skills` |
+| **vercel:vercel-storage** | Vercel KV, Blob, Postgres | built into Claude Code |
+
+### Payments & Commerce
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Stripe** | payments, checkout, subscription, webhook | `VoltAgent/awesome-agent-skills` |
+| **Coinbase** | crypto payments, Web3 | `VoltAgent/awesome-agent-skills` |
+
+### Email & Notifications
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Resend** | transactional email, email API | `VoltAgent/awesome-agent-skills` |
+| **Courier** | multi-channel, push, SMS, email, chat | `trycourier/courier-skills` |
+
+### CMS & Content
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Sanity** | headless CMS, content studio, GROQ | `VoltAgent/awesome-agent-skills` |
+| **WordPress** | WordPress, WP, content management | `VoltAgent/awesome-agent-skills` |
+| **markdown-html** | markdown, MDX, blog, content | `alirezarezvani/claude-skills` |
+
+### Backend & APIs
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **engineering-skills** | API, backend, Node.js, REST, database | `alirezarezvani/claude-skills` |
+| **engineering-advanced-skills** | architecture, microservices, DDD | `alirezarezvani/claude-skills` |
+| **Apollo GraphQL** | GraphQL, Apollo, schema, resolvers | `VoltAgent/awesome-agent-skills` |
+| **Firecrawl** | web scraping, web data, crawl | `VoltAgent/awesome-agent-skills` |
+| **Remotion** | video rendering, programmatic video | `VoltAgent/awesome-agent-skills` |
+| **Replicate** | AI models, image generation API | `VoltAgent/awesome-agent-skills` |
+
+### Mobile
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Expo** | React Native, Expo, mobile, iOS, Android | `VoltAgent/awesome-agent-skills` |
+
+### AI & LLM (built into Claude Code)
+| Skill | Keywords |
+|-------|----------|
+| **vercel:ai-sdk** | Vercel AI SDK, streaming, LLM, AI chat |
+| **vercel:ai-gateway** | AI Gateway, model routing, providers |
+| **vercel:chat-sdk** | chat UI, AI chatbot, conversational |
+| **claude-api** | Claude API, Anthropic SDK, prompt caching |
+
+### Deploy & Infrastructure
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **vercel:deploy** | Vercel deploy, preview, production | built into Claude Code |
+| **vercel:vercel-functions** | serverless, edge functions | built into Claude Code |
+| **Cloudflare** | Workers, Edge, CDN, Durable Objects | `VoltAgent/awesome-agent-skills` |
+| **Netlify** | serverless functions, deploy, blobs | `VoltAgent/awesome-agent-skills` |
+| **docker-development** | Docker, containers, Dockerfile | `alirezarezvani/claude-skills` |
+| **kubernetes-operator** | Kubernetes, k8s, Helm | `alirezarezvani/claude-skills` |
+| **terraform-patterns** | Terraform, IaC | `alirezarezvani/claude-skills` |
+
+### Performance, Debug & Security
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Web Quality (Addy Osmani)** | Lighthouse, Web Vitals, PageSpeed, performance | `VoltAgent/awesome-agent-skills` |
+| **Sentry** | error monitoring, crash, stack trace | `VoltAgent/awesome-agent-skills` |
+| **Trail of Bits** | security audit, vulnerability, pentest | `VoltAgent/awesome-agent-skills` |
+| **Datadog** | monitoring, observability, metrics | `VoltAgent/awesome-agent-skills` |
+| **Browserbase** | browser automation, Playwright, testing | `VoltAgent/awesome-agent-skills` |
+| **a11y-audit** | accessibility, WCAG, a11y, screen reader | `alirezarezvani/claude-skills` |
+| **vercel:vercel-firewall** | Cloudflare WAF, DDoS, rate limit | built into Claude Code |
+
+### SEO, Marketing & Product
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **research-ops-skills** | SEO, meta tags, schema markup, PageSpeed | `alirezarezvani/claude-skills` |
+| **marketing-skills** | marketing, copy, content, growth, ads | `alirezarezvani/claude-skills` |
+| **product-skills** | product strategy, PRD, requirements | `alirezarezvani/claude-skills` |
+| **pm-skills** | project management, Agile, sprint | `alirezarezvani/claude-skills` |
+| **business-growth-skills** | go-to-market, GTM, growth | `alirezarezvani/claude-skills` |
+| **demo-video** | demo video, product walkthrough | `alirezarezvani/claude-skills` |
+
+### Design Handoff
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Figma** | Figma, design tokens, handoff, variables | `VoltAgent/awesome-agent-skills` |
+
+### Research, Docs & Memory
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **graphify** | explore codebase, research, knowledge graph | `safishamsi/graphify` |
+| **context7 MCP** | library docs, API reference, version-specific | `upstash/context7` |
+| **research-summarizer** | research, summarize, synthesize | `alirezarezvani/claude-skills` |
+| **statistical-analyst** | data analysis, statistics, charts | `alirezarezvani/claude-skills` |
+
+---
+
+## Adding a new skill
+
+1. Review its `SKILL.md` and any scripts it runs.
+2. Add a row to the relevant table above with keywords and source.
+3. Add the matching keyword row in `skills/sps/SKILL.md` with its install command.
+4. Add the install line in `install.sh` under the right section.
+5. Commit and push — every clone gets it on the next `bash install.sh`.
