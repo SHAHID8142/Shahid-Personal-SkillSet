@@ -37,6 +37,7 @@ function Remove-AgentSkill($name) {
         "$env:USERPROFILE\.cursor\rules\$name.mdc",
         "$env:USERPROFILE\.codex\skills\$name",
         "$env:USERPROFILE\.gemini\skills\$name",
+        "$env:USERPROFILE\.gemini\antigravity\skills\$name",
         "$env:USERPROFILE\.windsurf\skills\$name"
     )
     $found = $false

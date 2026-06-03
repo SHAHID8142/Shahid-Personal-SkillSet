@@ -15,9 +15,16 @@
 set -uo pipefail
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; NC='\033[0m'
-ok()      { echo -e "${GREEN}✓${NC} $*"; }
+
+# Counters + failure log for the end-of-run summary
+INSTALLED=0; FAILED=0; FAILED_LIST=()
+LOG="$HOME/.sps/install.log"
+mkdir -p "$HOME/.sps"
+: > "$LOG"   # truncate at start of each run
+
+ok()      { echo -e "${GREEN}✓${NC} $*"; INSTALLED=$((INSTALLED+1)); }
 info()    { echo -e "${YELLOW}→${NC} $*"; }
-fail()    { echo -e "${RED}✗${NC} $* — verify against the repo README and retry manually"; }
+fail()    { echo -e "${RED}✗${NC} $*"; FAILED=$((FAILED+1)); FAILED_LIST+=("$*"); echo "FAILED: $*" >> "$LOG"; }
 section() { echo ""; echo -e "${BOLD}── $* ──${NC}"; }
 
 npx_add() {
@@ -291,23 +298,53 @@ else
   ok "Learned topics index exists — skipping"
 fi
 
-# ── Done ─────────────────────────────────────────────────────────────────────
+# ── STEP 19: Antigravity CLI sync (agy reads a different directory) ──────────
+section "Antigravity CLI (agy)"
+# Antigravity reads global skills from ~/.gemini/antigravity/skills/<name>/SKILL.md — NOT from
+# ~/.agents or ~/.claude. npx skills does not reliably update it, so we copy explicitly here.
+REPO_SPS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/skills/sps/SKILL.md"
+AGY_DIR="$HOME/.gemini/antigravity/skills/sps"
+if [ -f "$REPO_SPS" ]; then
+  mkdir -p "$AGY_DIR"
+  cp "$REPO_SPS" "$AGY_DIR/SKILL.md" && ok "/sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)" || fail "Antigravity sync"
+  # Workspace-scope copy too, for projects opened here
+  if command -v agy >/dev/null 2>&1; then
+    ok "agy CLI detected — /sps will auto-activate via progressive disclosure"
+  else
+    info "agy CLI not found — skill copied anyway; will work once Antigravity is installed"
+  fi
+else
+  fail "Antigravity sync (skills/sps/SKILL.md not found — run from repo root)"
+fi
+
+# ── Verification ──────────────────────────────────────────────────────────────
+section "Verification"
+if command -v claude >/dev/null 2>&1; then
+  PLUGIN_COUNT=$(claude plugin list 2>/dev/null | grep -c "enabled" || echo "0")
+  ok "Claude plugins enabled: $PLUGIN_COUNT"
+fi
+[ -f "$HOME/.agents/skills/sps/SKILL.md" ] && ok "/sps present for universal agents (~/.agents/skills/)" || info "/sps not found in ~/.agents/skills/"
+[ -f "$HOME/.gemini/antigravity/skills/sps/SKILL.md" ] && ok "/sps present for Antigravity" || info "/sps not synced to Antigravity"
+
+# ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
 echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║                     Installation complete                         ║"
+echo -e "║  ${BOLD}Installation complete${NC}                                           ║"
+echo "╠══════════════════════════════════════════════════════════════════╣"
+printf  "║  Installed/synced: %-3s   Failed: %-3s                            ║\n" "$INSTALLED" "$FAILED"
+echo "╠══════════════════════════════════════════════════════════════════╣"
+echo "║  Use it everywhere — just describe what to build, or type /sps:   ║"
+echo "║    Claude Code   →  /sps [request]                               ║"
+echo "║    Antigravity   →  auto-activates (progressive disclosure)      ║"
+echo "║    Cursor/Codex  →  auto-loaded from skill dir                   ║"
 echo "║                                                                  ║"
-echo "║   Claude Code: type /sps [your request]                          ║"
-echo "║   Cursor:      sps skill is auto-loaded from .cursor/rules/      ║"
-echo "║   Codex:       skill in ~/.codex/skills/sps/                     ║"
-echo "║   Gemini CLI:  skill in ~/.gemini/skills/sps/                    ║"
-echo "║   Others:      skill in ~/.agents/skills/sps/                    ║"
-echo "║                                                                  ║"
-echo "║   THREE RULES always active (no override):                       ║"
-echo "║   1. Hallmark anti-slop — no AI-looking UI ever                  ║"
-echo "║   2. Graphify — every project gets a knowledge graph             ║"
-echo "║   3. Responsive — 320/768/1280/1440px before every handover      ║"
-echo "║                                                                  ║"
-echo "║   ✗ lines above = failed installs. Run claude plugin list        ║"
-echo "║   to confirm Claude installs, and check each repo's README.      ║"
+echo "║  Six rules always on: anti-slop · graphify · responsive ·        ║"
+echo "║  a11y · design-tokens · conventional-commits                     ║"
 echo "╚══════════════════════════════════════════════════════════════════╝"
+if [ "$FAILED" -gt 0 ]; then
+  echo ""
+  echo -e "${YELLOW}$FAILED item(s) failed — these are optional/best-effort and don't block /sps.${NC}"
+  echo -e "Full list saved to: ${BOLD}$LOG${NC}"
+  echo "Unknown libraries are handled at runtime by /sps's learn-protocol anyway."
+fi
 echo ""

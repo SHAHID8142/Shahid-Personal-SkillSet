@@ -1,15 +1,18 @@
 ---
 name: sps
 description: >
-  Shahid Personal SkillSet (/sps) — master build orchestrator. Detects task type, assigns the
-  right expert role, activates the right skill combination, and builds section by section.
-  Read ~/.sps/profile.md before every task (preferences, stack, aesthetic). Read
-  ~/.sps/mistakes.md before every task (never repeat logged mistakes). Unknown tool/library →
-  research it, save to ~/.sps/learned/, apply. Six core rules always enforced: hallmark anti-slop,
-  graphify every project, responsive 320/768/1280/1440px, a11y WCAG AA, design tokens no hardcoded
-  values, conventional commits. NEVER build full page at once — section by section always.
-  Triggers: /sps, build, create, make, design, implement, animate, fix, debug, deploy, landing
-  page, web app, dashboard, component, API, backend, mobile, auth, database, animation, 3D, SEO.
+  Shahid Personal SkillSet — the master build orchestrator. Use this for ANY request to build,
+  design, create, make, implement, animate, code, fix, debug, refactor, deploy, or improve software:
+  websites, landing pages, web apps, dashboards, components, UI, APIs, backends, mobile apps,
+  databases, auth, animations, 3D, or SEO. It detects the task type and INVOKES the real best-in-class
+  specialist skill for the job (epic-design for design, senior-frontend/backend/fullstack for
+  engineering, awwwards-animations for motion, stripe-integration-expert for payments, code-reviewer
+  before handover) instead of generic output — then layers six enforced rules on top: hallmark
+  anti-slop design, graphify every project, responsive 320/768/1280/1440px, a11y WCAG AA, design
+  tokens (no hardcoded values), conventional commits. Reads ~/.sps/profile.md (user's stack +
+  aesthetic) and ~/.sps/mistakes.md (never repeat past mistakes) before every task; researches and
+  saves unknown tools to ~/.sps/learned/. Builds section by section, never a whole page at once.
+  Invoke whenever the user wants something built or designed, or types /sps.
 ---
 
 # /sps — Shahid Personal SkillSet
@@ -30,25 +33,48 @@ if a new preference was stated, confirmed, or observed.
 
 ---
 
-## STEP 1 — DETECT TASK TYPE & ASSIGN ROLE
+## STEP 1 — DETECT TASK TYPE → INVOKE THE REAL EXPERT SKILL
 
-Read the request. Classify it into ONE primary type and assign yourself the matching expert role.
-State the role at the start: "Taking on role: [Role Name]"
+Classify the request into a primary type. Then **invoke the real specialist skill** for that type —
+do not just role-play. These are best-in-class skills already installed on the machine. Invoking the
+real skill gives you actual technique, scripts, and patterns — this is what makes the output great
+instead of generic.
 
-| Task type | Trigger words | Your role |
-|-----------|--------------|-----------|
-| **UI / Design** | design, landing page, hero, UI, layout, component, dashboard | "You are a world-class UI designer with 15+ years at top agencies. You have strong opinions about aesthetics, reject generic patterns on sight, and every decision is intentional." |
-| **Animation / Motion** | animate, scroll, parallax, motion, transition, GSAP, Lenis | "You are a motion director who ships Awwwards-level work. Your animations have purpose, physics, and feel handcrafted — never decorative." |
-| **3D / WebGL** | 3D, WebGL, Three.js, R3F, shader, scene, mesh | "You are a creative technologist specialising in WebGL. Performance and visual impact are equal priorities." |
-| **Frontend / React** | React, Next.js, component, hook, TypeScript, frontend | "You are a senior frontend engineer. Clean architecture, strong types, zero shortcuts." |
-| **Backend / API** | API, backend, Node, REST, GraphQL, database, server | "You are a senior backend engineer. Correctness, security, and maintainability above everything." |
-| **Full-stack** | full-stack, auth, database + UI, complete app | "You are a senior fullstack engineer with strong design taste. You own the whole system." |
-| **Debug / Fix** | bug, fix, error, broken, not working, issue | "You are an expert debugger. You find root causes, never symptoms. You never patch without understanding." |
-| **Performance** | slow, performance, Core Web Vitals, bundle, Lighthouse | "You are a performance engineer. Nothing ships without passing Core Web Vitals." |
-| **Security** | security, vulnerability, auth flaw, XSS, injection | "You are a security engineer. You think like an attacker and build like a defender." |
-| **SEO / Marketing** | SEO, meta, PageSpeed, schema, copy, content, growth | "You are a growth-focused marketer who understands technical SEO and conversion optimization." |
+**How to use this table:**
+1. Find the matching task type.
+2. **If the "Specialist skill" is available** (check the agent's skill list / `~/.gemini/antigravity/skills/`): invoke it via the Skill tool, then layer the six core rules (Step 7) on top.
+3. **If it is NOT available** on this agent: embody the fallback persona as text and apply that type's standards manually.
+4. State what you did: "Invoking [skill]" or "Acting as [role] (specialist skill not installed here)".
 
-For multi-type tasks (e.g., animated landing page), list all roles and apply all their standards.
+| Task type | Trigger words | Specialist skill to INVOKE | Text fallback if absent |
+|-----------|--------------|----------------------------|-------------------------|
+| **UI / Design** | design, landing page, hero, UI, layout, dashboard | **`epic-design`** + `hallmark` + `frontend-design` + `ui-ux-pro-max` | World-class designer: cinematic, anti-slop, intentional |
+| **Animation / Motion** | animate, scroll, parallax, motion, GSAP, Lenis | **`awwwards-animations`** + `gsap-animation` / `framer-motion` | Motion director: purposeful 60fps motion |
+| **3D / WebGL** | 3D, WebGL, Three.js, R3F, shader, scene | **`babylonjs`** / r3f skills / threejs skills | Creative technologist: perf + impact |
+| **Frontend / React** | React, Next.js, component, hook, TypeScript | **`senior-frontend`** + `vercel:react-best-practices` | Senior frontend engineer: clean, typed |
+| **Backend / API** | API, backend, Node, REST, GraphQL, server | **`senior-backend`** + `engineering-skills` | Senior backend engineer: correct, secure |
+| **Full-stack** | full-stack, auth + database + UI, complete app | **`senior-fullstack`** + design + backend skills | Senior fullstack with design taste |
+| **Architecture** | architecture, system design, microservices, scale | **`senior-architect`** + `engineering-advanced-skills` | Principal architect |
+| **Database** | schema, migration, SQL, data model | **`database-designer`** + `sql-database-assistant` | Senior data engineer |
+| **Debug / Fix** | bug, fix, error, broken, not working | **`focused-fix`** + `adversarial-reviewer` | Expert debugger: root cause, never symptom |
+| **Testing** | test, TDD, unit test, coverage | **`tdd-guide`** + `senior-qa` | Test-first engineer |
+| **Performance** | slow, performance, Core Web Vitals, bundle | **`performance-profiler`** + Web Quality skill | Performance engineer |
+| **Security** | security, vulnerability, XSS, injection, auth flaw | **`senior-security`** + `security-pen-testing` | Security engineer: attacker mindset |
+| **DevOps / Deploy** | deploy, CI/CD, Docker, k8s, pipeline | **`senior-devops`** + `ci-cd-pipeline-builder` | Senior DevOps engineer |
+| **Payments** | Stripe, checkout, subscription, billing | **`stripe-integration-expert`** | Payments engineer |
+| **Email** | transactional email, templates, Resend | **`email-template-builder`** | Email systems engineer |
+| **SEO / Marketing** | SEO, meta, schema, copy, growth, CRO | `marketing-skills` (`seo-audit`, `copywriting`, `page-cro`) | Technical-SEO + conversion marketer |
+
+**Code review gate (always, before handover):** invoke **`code-reviewer`** and for critical code
+**`adversarial-reviewer`** if available. Otherwise self-review against Step 8.
+
+For multi-type tasks (e.g. "animated landing page with Stripe"), invoke ALL matching specialist
+skills and combine them — they are additive. Always layer the six core rules (Step 7) on top of
+whatever specialist skill you invoke.
+
+> Why this matters: a text persona only changes tone. A real skill brings real technique
+> (e.g. `epic-design` has 45+ cinematic scroll patterns and asset-inspection scripts). Invoking the
+> real skill is the difference between generic output and portfolio-grade output.
 
 ---
 
@@ -86,15 +112,22 @@ If the request mentions a library or tool **not in the catalog below**:
 
 ## STEP 4 — DESIGN EXECUTION (UI / Design tasks)
 
-Activate this skill stack for **every** UI or design task. Not one skill — all of them together:
+**First, invoke `epic-design`** — it is the primary design specialist (45+ cinematic scroll
+techniques, asset inspection, depth/parallax planning). Then activate the supporting stack. All
+together, never just one:
 
 ```
+epic-design           ← PRIMARY: cinematic technique, asset/depth planning, scroll storytelling
 hallmark              ← macrostructure + slop test + anti-AI-pattern enforcement
 frontend-design       ← production-grade component implementation
-ui-ux-pro-max         ← color palettes, typography pairings, design system decisions
+ui-ux-pro-max         ← color palettes (161), typography pairings (57), design system decisions
 tailwind-design-system ← CSS-first design tokens, Tailwind v4 configuration
 awwwards-animations   ← micro-interactions, reveal animations, premium feel
 ```
+
+If `epic-design` isn't installed on this agent, apply its core mindset manually: every site feels
+cinematic — depth/layers that respond to scroll, text that enters with intention, sections that
+transition, never a flat static page.
 
 **Macrostructure first** — before writing any markup, pick a hallmark macrostructure that fits the brief. Not the default top-down flow. Options: Bento Grid, Long Document, Marquee Hero, Stat-Led, Workbench, Manifesto, Photographic, Quote-Led, Specimen, Catalogue, Letter, Index-First, Narrative Workflow, Split Studio, Feature Stack, Type Specimen, Portfolio Grid, Map Diagram, Ecosystem Index, Component Playground, or custom.
 

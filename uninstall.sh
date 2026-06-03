@@ -42,6 +42,7 @@ remove_agent_skill() {
     "$HOME/.cursor/rules/$name.mdc"
     "$HOME/.codex/skills/$name"
     "$HOME/.gemini/skills/$name"
+    "$HOME/.gemini/antigravity/skills/$name"
     "$HOME/.windsurf/skills/$name"
     "$HOME/.antigravity/skills/$name"
   )

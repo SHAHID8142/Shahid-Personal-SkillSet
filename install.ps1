@@ -15,10 +15,19 @@
 
 $ErrorActionPreference = "Continue"
 
+# Counters + failure log for the end-of-run summary
+$script:Installed = 0
+$script:Failed = 0
+$script:FailedList = @()
+$spsHome = "$env:USERPROFILE\.sps"
+New-Item -ItemType Directory -Force -Path $spsHome | Out-Null
+$script:Log = "$spsHome\install.log"
+"" | Set-Content -Path $script:Log
+
 # ── Colour helpers ────────────────────────────────────────────────────────────
-function ok($msg)   { Write-Host "  [OK] $msg" -ForegroundColor Green }
+function ok($msg)   { Write-Host "  [OK] $msg" -ForegroundColor Green; $script:Installed++ }
 function info($msg) { Write-Host "   --> $msg" -ForegroundColor Yellow }
-function fail($msg) { Write-Host "  [!] $msg — verify against the repo README and retry manually" -ForegroundColor Red }
+function fail($msg) { Write-Host "  [!] $msg" -ForegroundColor Red; $script:Failed++; $script:FailedList += $msg; Add-Content -Path $script:Log -Value "FAILED: $msg" }
 function section($msg) { Write-Host ""; Write-Host "── $msg ──" -ForegroundColor Cyan }
 
 function npx-add($label, $source) {
@@ -322,23 +331,51 @@ Read before every task to check if required knowledge is already here.
     ok "Learned topics index exists — skipping"
 }
 
-# ── Done ─────────────────────────────────────────────────────────────────────
+# ── Antigravity CLI sync (agy reads a different directory) ───────────────────
+section "Antigravity CLI (agy)"
+# Antigravity reads global skills from ~\.gemini\antigravity\skills\<name>\SKILL.md
+$repoSps = Join-Path $repoDir "skills\sps\SKILL.md"
+$agyDir  = "$env:USERPROFILE\.gemini\antigravity\skills\sps"
+if (Test-Path $repoSps) {
+    New-Item -ItemType Directory -Force -Path $agyDir | Out-Null
+    Copy-Item $repoSps "$agyDir\SKILL.md" -Force
+    ok "/sps synced to Antigravity (~\.gemini\antigravity\skills\sps\)"
+    if (Get-Command agy -ErrorAction SilentlyContinue) {
+        ok "agy CLI detected — /sps will auto-activate via progressive disclosure"
+    } else {
+        info "agy CLI not found — skill copied anyway; works once Antigravity is installed"
+    }
+} else {
+    fail "Antigravity sync (skills\sps\SKILL.md not found — run from repo root)"
+}
+
+# ── Verification ──────────────────────────────────────────────────────────────
+section "Verification"
+if (Get-Command claude -ErrorAction SilentlyContinue) {
+    $pluginCount = (claude plugin list 2>$null | Select-String "enabled").Count
+    ok "Claude plugins enabled: $pluginCount"
+}
+if (Test-Path "$env:USERPROFILE\.agents\skills\sps\SKILL.md") { ok "/sps present for universal agents" } else { info "/sps not in ~\.agents\skills\" }
+if (Test-Path "$agyDir\SKILL.md") { ok "/sps present for Antigravity" } else { info "/sps not synced to Antigravity" }
+
+# ── Summary ───────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║                     Installation complete                         ║" -ForegroundColor Green
+Write-Host "║  Installation complete                                            ║" -ForegroundColor Green
+Write-Host "╠══════════════════════════════════════════════════════════════════╣" -ForegroundColor Green
+Write-Host ("║  Installed/synced: {0,-3}   Failed: {1,-3}                            ║" -f $script:Installed, $script:Failed) -ForegroundColor Green
+Write-Host "╠══════════════════════════════════════════════════════════════════╣" -ForegroundColor Green
+Write-Host "║  Use it everywhere — describe what to build, or type /sps:        ║" -ForegroundColor Green
+Write-Host "║    Claude Code   ->  /sps [request]                              ║" -ForegroundColor Green
+Write-Host "║    Antigravity   ->  auto-activates (progressive disclosure)     ║" -ForegroundColor Green
+Write-Host "║    Cursor/Codex  ->  auto-loaded from skill dir                  ║" -ForegroundColor Green
 Write-Host "║                                                                  ║" -ForegroundColor Green
-Write-Host "║   Claude Code: type /sps [your request]                          ║" -ForegroundColor Green
-Write-Host "║   Cursor:      sps skill is auto-loaded from .cursor/rules/      ║" -ForegroundColor Green
-Write-Host "║   Codex:       skill in %USERPROFILE%\.codex\skills\sps\         ║" -ForegroundColor Green
-Write-Host "║   Windsurf:    skill in %USERPROFILE%\.windsurf\skills\sps\      ║" -ForegroundColor Green
-Write-Host "║   Others:      skill in %USERPROFILE%\.agents\skills\sps\        ║" -ForegroundColor Green
-Write-Host "║                                                                  ║" -ForegroundColor Green
-Write-Host "║   THREE RULES always active (no override):                       ║" -ForegroundColor Green
-Write-Host "║   1. Hallmark anti-slop — no AI-looking UI ever                  ║" -ForegroundColor Green
-Write-Host "║   2. Graphify — every project gets a knowledge graph             ║" -ForegroundColor Green
-Write-Host "║   3. Responsive — 320/768/1280/1440px before every handover      ║" -ForegroundColor Green
-Write-Host "║                                                                  ║" -ForegroundColor Green
-Write-Host "║   [!] lines above = failed installs. Run:                        ║" -ForegroundColor Green
-Write-Host "║       claude plugin list   to see installed Claude plugins.      ║" -ForegroundColor Green
+Write-Host "║  Six rules always on: anti-slop, graphify, responsive,           ║" -ForegroundColor Green
+Write-Host "║  a11y, design-tokens, conventional-commits                       ║" -ForegroundColor Green
 Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+if ($script:Failed -gt 0) {
+    Write-Host ""
+    Write-Host "$($script:Failed) item(s) failed — optional/best-effort, don't block /sps." -ForegroundColor Yellow
+    Write-Host "Full list saved to: $script:Log" -ForegroundColor Yellow
+}
 Write-Host ""
