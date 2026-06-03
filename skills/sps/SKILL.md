@@ -324,12 +324,6 @@ If anything fails — fix it first, then re-run the gate. Do not hand over faili
 - [ ] **No unnecessary re-renders.** Check that `useEffect`, `useMemo`, `useCallback` deps are correct.
 - [ ] **No N+1 query patterns** (fetching in a loop when one batched query would do).
 
-#### 4.3.5 — Performance basics
-- [ ] **No synchronous operations on the main thread** that could block rendering (large loops, heavy computation without workers).
-- [ ] **Images have explicit width/height** to prevent layout shift (CLS).
-- [ ] **No unnecessary re-renders.** Check that `useEffect`, `useMemo`, `useCallback` deps are correct.
-- [ ] **No N+1 query patterns** (fetching in a loop when one batched query would do).
-
 #### 4.3.6 — Accessibility (Rule 4)
 - [ ] **Keyboard navigation.** Every interactive element reachable by Tab, operable by Enter/Space.
 - [ ] **Focus rings visible.** No `outline: none` without a visible custom replacement.
@@ -1093,17 +1087,262 @@ Do not select skills by keywords alone. Use this reasoning process:
 | Redis, caching, pub/sub, queues, sessions | Redis skill | `npx skills add redis/redis` |
 | Vercel KV, Blob, Postgres (managed) | **vercel:vercel-storage** | built into Claude Code |
 
+#### ORM & Query Builders
+
+**Decision guide:**
+- Supabase project → use Supabase client directly (has its own typed query builder) — no ORM needed
+- Neon / PlanetScale / standard Postgres → **Drizzle** (lighter, SQL-first, great TS types) or **Prisma** (more mature, good DX)
+- Prefer SQL control → **Drizzle**; prefer auto-migrations and GUI → **Prisma**
+
+| Keywords | Skill | Use |
+|----------|-------|-----|
+| Prisma, ORM, schema, migrations, Prisma Client, Prisma Studio | Use **engineering-skills** + Context7 for current Prisma docs | `npm install prisma @prisma/client` |
+| Drizzle, drizzle-orm, SQL-first ORM, Drizzle Kit | Use **engineering-skills** + Context7 for current Drizzle docs | `npm install drizzle-orm` + `npm install -D drizzle-kit` |
+
+**Prisma setup checklist** (when chosen):
+- [ ] `prisma/schema.prisma` with correct datasource + generator
+- [ ] `lib/db.ts` exports a singleton Prisma client (prevent connection exhaustion in dev)
+- [ ] `.env` has `DATABASE_URL`, `.env.example` documents it
+- [ ] `prisma/migrations/` committed to git
+- [ ] `postinstall` script runs `prisma generate` so teammates don't need to run it manually
+
+**Drizzle setup checklist** (when chosen):
+- [ ] `src/db/schema.ts` defines all tables with proper TypeScript types
+- [ ] `src/db/index.ts` exports the db instance (singleton)
+- [ ] `drizzle.config.ts` at project root with schema + out paths
+- [ ] `.env` has `DATABASE_URL`, `.env.example` documents it
+- [ ] Migration flow documented in README (`npm run db:push` or `npm run db:migrate`)
+
+---
+
+#### Type-safe APIs (tRPC)
+
+| Keywords | Skill | Install |
+|----------|-------|---------|
+| tRPC, type-safe API, end-to-end typesafe, trpc router, trpc client, trpc React | Use **engineering-skills** + Context7 for current tRPC v11 docs | `npm install @trpc/server @trpc/client @trpc/react-query @tanstack/react-query` |
+
+**tRPC setup checklist** (when chosen):
+- [ ] `src/server/trpc.ts` — base `t` object with context and middleware
+- [ ] `src/server/routers/` — one router file per domain (e.g. `user.ts`, `post.ts`)
+- [ ] `src/server/routers/_app.ts` — root router merging all domain routers
+- [ ] `src/app/api/trpc/[trpc]/route.ts` — Next.js App Router adapter
+- [ ] `src/lib/trpc/client.ts` — browser client setup
+- [ ] `src/lib/trpc/server.ts` — server-side caller for RSC and server actions
+- [ ] All inputs validated with **Zod** (see Forms & Validation section)
+- [ ] Error handling: custom error formatter in `t` setup
+- [ ] Context includes authenticated user from session (Supabase/Clerk)
+
+---
+
+#### State Management
+
+**Decision guide — pick the right tool for the job:**
+- Server data (API responses, cache, refetch) → **TanStack Query** (not Zustand)
+- Simple shared UI state (modal open, theme, sidebar) → **Zustand**
+- Complex local state with many consumers → **Zustand** or **Jotai**
+- Legacy codebases or large teams with strict patterns → **Redux Toolkit**
+- Never use Redux for server state — use TanStack Query instead
+
+| Keywords | Library | Install |
+|----------|---------|---------|
+| Zustand, global state, store, useStore, shared state, client state | Zustand | `npm install zustand` |
+| Jotai, atoms, atomic state, granular state | Jotai | `npm install jotai` |
+| Redux, Redux Toolkit, RTK, createSlice, useDispatch, useSelector | Redux Toolkit | `npm install @reduxjs/toolkit react-redux` |
+
+**Zustand store pattern** (always use this structure):
+```ts
+// src/stores/useUIStore.ts
+/**
+ * useUIStore.ts
+ * Global UI state: sidebar, modals, theme.
+ * Server data belongs in TanStack Query, not here.
+ */
+import { create } from 'zustand'
+
+interface UIState {
+  isSidebarOpen: boolean
+  openSidebar: () => void
+  closeSidebar: () => void
+  toggleSidebar: () => void
+}
+
+export const useUIStore = create<UIState>((set) => ({
+  isSidebarOpen: false,
+  openSidebar:   () => set({ isSidebarOpen: true }),
+  closeSidebar:  () => set({ isSidebarOpen: false }),
+  toggleSidebar: () => set((s) => ({ isSidebarOpen: !s.isSidebarOpen })),
+}))
+```
+
+---
+
+#### Data Fetching & Server State (TanStack Query)
+
+| Keywords | Library | Install |
+|----------|---------|---------|
+| TanStack Query, React Query, useQuery, useMutation, queryClient, server state, data fetching, caching, refetch, optimistic updates, infinite scroll | TanStack Query v5 | `npm install @tanstack/react-query` + `npm install -D @tanstack/react-query-devtools` |
+| SWR, useSWR, stale-while-revalidate | SWR (lighter alternative) | `npm install swr` |
+
+**TanStack Query setup checklist** (when chosen):
+- [ ] `src/lib/queryClient.ts` — singleton `QueryClient` with sensible defaults
+- [ ] `QueryClientProvider` wrapping the app in `src/app/providers.tsx` or layout
+- [ ] `ReactQueryDevtools` added in development only
+- [ ] Query keys in a centralized `src/constants/queryKeys.ts` file — no string literals spread through components
+- [ ] Custom hooks for every query: `useUser()`, `usePosts()`, `useProduct(id)` — never use `useQuery` directly in components
+- [ ] Mutations use `useMutation` with `onSuccess` invalidating the relevant query key
+- [ ] Loading and error states handled in every hook consumer
+
+**Query key constants pattern:**
+```ts
+// src/constants/queryKeys.ts
+export const QUERY_KEYS = {
+  users: {
+    all:    () => ['users'] as const,
+    detail: (id: string) => ['users', id] as const,
+  },
+  posts: {
+    all:       () => ['posts'] as const,
+    byUser:    (userId: string) => ['posts', 'byUser', userId] as const,
+    detail:    (id: string) => ['posts', id] as const,
+  },
+} as const
+```
+
+---
+
+#### Forms & Validation
+
+**Always use React Hook Form + Zod together. No exceptions for any non-trivial form.**
+- React Hook Form handles form state, submission, and re-render optimization
+- Zod handles schema definition and validation (also used for API input validation with tRPC)
+
+| Keywords | Library | Install |
+|----------|---------|---------|
+| React Hook Form, useForm, form state, form validation, register, Controller, FormProvider | React Hook Form | `npm install react-hook-form` |
+| Zod, schema validation, z.object, z.string, zod schema, input validation, type inference | Zod | `npm install zod` |
+| React Hook Form + Zod, zodResolver, form with zod schema | Both together | `npm install react-hook-form zod @hookform/resolvers` |
+
+**Standard form pattern** (always structure forms this way):
+```ts
+// src/components/forms/ContactForm.tsx
+/**
+ * ContactForm.tsx
+ * Contact form with React Hook Form + Zod validation.
+ * Submits to /api/contact via server action or API route.
+ * Used by: app/(marketing)/contact/page.tsx
+ */
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+// Define schema with Zod — single source of truth for types AND validation
+const contactSchema = z.object({
+  name:    z.string().min(2, 'Name must be at least 2 characters'),
+  email:   z.string().email('Please enter a valid email address'),
+  message: z.string().min(10, 'Message must be at least 10 characters').max(1000),
+})
+
+type ContactFormValues = z.infer<typeof contactSchema>
+
+export function ContactForm() {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
+  })
+
+  const onSubmit = async (data: ContactFormValues) => { /* ... */ }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Each field shows its error via errors.fieldName?.message */}
+    </form>
+  )
+}
+```
+
+**Form checklist** (every form must have):
+- [ ] Zod schema defined — types inferred from it, not defined separately
+- [ ] `zodResolver` wiring React Hook Form to Zod
+- [ ] Every field shows its validation error beneath it via `errors.field?.message`
+- [ ] Submit button shows loading state during `isSubmitting`
+- [ ] Success and error feedback after submission
+- [ ] All strings from `constants/copy.ts` (labels, placeholders, error messages)
+- [ ] Form is keyboard-navigable and meets a11y Rule 4
+
+---
+
+#### File Upload & Media
+
+**Decision guide:**
+- Next.js project, want simplest setup → **UploadThing**
+- Need transformations (resize, crop, format conversion) → **Cloudinary** or **Imagekit**
+- Already using AWS or need raw control → **AWS S3** + presigned URLs
+- Already using Supabase → **Supabase Storage** (built in, no extra service)
+
+| Keywords | Library | Install / Use |
+|----------|---------|--------------|
+| UploadThing, file upload, uploadthing, UTApi, useUploadThing | UploadThing | `npm install uploadthing @uploadthing/react` — use **engineering-skills** + Context7 |
+| Cloudinary, image transformation, resize, crop, format, CDN images | Cloudinary | `npm install next-cloudinary` — use **engineering-skills** + Context7 |
+| AWS S3, presigned URL, S3 upload, object storage | AWS SDK v3 | `npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner` |
+| Supabase Storage, storage bucket, Supabase upload | Supabase Storage | use Supabase client — already installed with Supabase setup |
+| Imagekit, image optimization, image CDN, lazy load | Imagekit | `npm install imagekitio-next` |
+
+**File upload checklist** (regardless of provider):
+- [ ] File type validation on both client AND server (never trust client-only validation)
+- [ ] File size limit enforced server-side
+- [ ] Uploaded file URL stored in database, not the file itself
+- [ ] Old files deleted from storage when replaced (no orphaned files)
+- [ ] Files served via CDN, not directly from origin
+- [ ] Env vars for API keys in `.env.example`
+- [ ] Upload progress shown to user (not just a spinner)
+- [ ] Error state shown if upload fails with retry option
+
+---
+
+#### Email & Notifications
+| Keywords | Skill | Install |
+|----------|-------|---------|
+| Resend, transactional email, email API | Resend skill | `npx skills add resend/resend` |
+| React Email, email templates, email component, mjml alternative | React Email | `npm install react-email @react-email/components` — pair with Resend for sending |
+| Resend + React Email, design email templates send with Resend | Both together | `npm install resend react-email @react-email/components` |
+| Courier, multi-channel notifications, push, SMS, email, chat, in-app | Courier skill | `npx skills add trycourier/courier-skills` |
+
+**React Email + Resend pattern:**
+```
+src/emails/
+├── WelcomeEmail.tsx          ← React Email template component
+├── PasswordResetEmail.tsx
+├── OrderConfirmationEmail.tsx
+└── README.md                 ← documents each template and its variables
+```
+Preview templates locally: `npx react-email dev` (opens at localhost:3000)
+
+---
+
+#### PWA & Service Workers
+
+| Keywords | Library | Install / Use |
+|----------|---------|--------------|
+| PWA, Progressive Web App, installable, offline, service worker, web app manifest, add to home screen | next-pwa or Serwist | `npm install @serwist/next serwist` (modern) or `npm install next-pwa` (simpler) |
+| Web push notifications, push API, notification permission, background sync | Web Push | `npm install web-push` (server) + browser Push API (no install) |
+| offline first, cache strategy, cache API, workbox | Serwist / Workbox | `npm install serwist` — use Context7 for current Serwist docs |
+
+**PWA checklist** (when requested):
+- [ ] `public/manifest.json` with name, icons (192×192, 512×512), theme color, display mode
+- [ ] Service worker registered in app root
+- [ ] Favicon + apple-touch-icon in `public/`
+- [ ] Cache strategy documented: what's cached (static assets, API responses?), what's not
+- [ ] Offline fallback page (`/offline`) renders something useful when network is unavailable
+- [ ] `meta name="theme-color"` in `<head>`
+- [ ] Tested with Lighthouse PWA audit (score ≥ 90)
+- [ ] Install prompt handled gracefully (don't annoy users — show it once, respect dismissal)
+
+---
+
 #### Payments & Commerce
 | Keywords | Skill | Install |
 |----------|-------|---------|
 | Stripe, payments, checkout, subscription, webhook, billing | Stripe skill | `npx skills add stripe/stripe-best-practices` |
 | Coinbase, crypto payments, Web3 | Coinbase skill | `npx skills add coinbase/coinbase` |
-
-#### Email & Notifications
-| Keywords | Skill | Install |
-|----------|-------|---------|
-| Resend, transactional email, email API, React Email | Resend skill | `npx skills add resend/resend` |
-| Courier, multi-channel, push, SMS, email, chat notifications | Courier skill | `npx skills add trycourier/courier-skills` |
 
 #### CMS & Content
 | Keywords | Skill | Install |
