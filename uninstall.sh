@@ -88,6 +88,7 @@ if command -v claude >/dev/null 2>&1; then
     "universal-build-orchestrator@shahid-personal-skillset"
     "ui-ux-pro-max@ui-ux-pro-max-skill"
     "gsap-scrolltrigger@claude-design-skillstack"
+    "frontend-design@claude-design-skillstack"
     "motion-framer@claude-design-skillstack"
     "animejs@claude-design-skillstack"
     "locomotive-scroll@claude-design-skillstack"
