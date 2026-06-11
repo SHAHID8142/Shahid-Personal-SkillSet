@@ -38,7 +38,7 @@ function Step {
     $script:StepNum++
     Write-Host ("-> [{0,2}/{1}] {2} ... " -f $script:StepNum, $script:Total, $Label) -NoNewline
     $start = Get-Date
-    $tmpOut = ".\.tmp.step.out"
+    $tmpOut = ".\.sps\step.out"
     Clear-Content -Path $tmpOut -ErrorAction SilentlyContinue
     
     $job = Start-Job -ScriptBlock $Action -Name "InstallJob"
@@ -167,10 +167,15 @@ section "Antigravity CLI (agy)"
 $repoSps = Join-Path $repoDir "skills\sps\SKILL.md"
 $agyDir  = "$env:USERPROFILE\.gemini\antigravity\skills\sps"
 if (Test-Path $repoSps) {
-    New-Item -ItemType Directory -Force -Path $agyDir | Out-Null
-    Copy-Item $repoSps "$agyDir\SKILL.md" -Force
-    note "/sps synced to Antigravity (~\.gemini\antigravity\skills\sps\)"
-    if (have agy) { note "agy detected - /sps auto-activates via progressive disclosure" } else { note "agy not found - copied anyway" }
+    try {
+        New-Item -ItemType Directory -Force -Path $agyDir -ErrorAction Stop | Out-Null
+        Copy-Item -Path $repoSps -Destination "$agyDir\SKILL.md" -Force -ErrorAction Stop
+        note "✓ /sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)"
+    } catch {
+        note "– /sps sync failed (permission denied to ~/.gemini)"
+    }
+    if (have agy) { note "agy detected - /sps auto-activates via progressive disclosure" }
+    else          { note "agy not found - copied anyway; works once Antigravity is installed" }
 } else { note "skills\sps\SKILL.md not found - run from repo root" }
 
 # -- Profile + memory seed (never overwrites) ----------------------------------

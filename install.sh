@@ -37,7 +37,8 @@ note()    { echo -e "${DIM}  $*${NC}"; }
 # Portable timeout — macOS has no `timeout`
 run_timeout() {
   local secs="$1"; shift
-  "$@" >/dev/null 2>&1 &
+  local out_file="$1"; shift
+  "$@" >"$out_file" 2>&1 &
   local cmd_pid=$!
   ( sleep "$secs"; kill -TERM "$cmd_pid" 2>/dev/null; sleep 2; kill -KILL "$cmd_pid" 2>/dev/null ) >/dev/null 2>&1 &
   local watch_pid=$!
@@ -51,9 +52,9 @@ step() {
   STEP=$((STEP+1))
   local start=$SECONDS
   printf "${YELLOW}→${NC} [%2d/%d] %s ... " "$STEP" "$TOTAL" "$label"
-  local tmp_out=".tmp.step.out"
+  local tmp_out="./.sps/step.out"
   : > "$tmp_out"
-  if run_timeout "$NETWORK_TIMEOUT" "$@" > "$tmp_out" 2>&1; then
+  if run_timeout "$NETWORK_TIMEOUT" "$tmp_out" "$@"; then
     cat "$tmp_out" >> "$LOG"
     local elapsed=$((SECONDS-start))
     echo -e "${GREEN}done${NC} ${DIM}(${elapsed}s)${NC}"; INSTALLED=$((INSTALLED+1))
@@ -181,8 +182,11 @@ section "Antigravity CLI (agy)"
 REPO_SPS="$REPO/skills/sps/SKILL.md"
 AGY_DIR="$HOME/.gemini/antigravity/skills/sps"
 if [ -f "$REPO_SPS" ]; then
-  mkdir -p "$AGY_DIR" && cp "$REPO_SPS" "$AGY_DIR/SKILL.md"
-  note "✓ /sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)"
+  if mkdir -p "$AGY_DIR" 2>/dev/null && cp "$REPO_SPS" "$AGY_DIR/SKILL.md" 2>/dev/null; then
+    note "✓ /sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)"
+  else
+    note "– /sps sync failed (permission denied to ~/.gemini)"
+  fi
   have agy && note "agy detected — /sps auto-activates via progressive disclosure" \
             || note "agy not found — copied anyway; works once Antigravity is installed"
 else
