@@ -29,7 +29,7 @@ LOG="./.sps/install.log"
 mkdir -p "./.sps"; : > "$LOG"
 
 # Total steps (keep in sync with step() calls below)
-TOTAL=49
+TOTAL=54
 
 section() { echo ""; echo -e "${BOLD}── $* ──${NC}"; }
 note()    { echo -e "${DIM}  $*${NC}"; }
@@ -108,6 +108,11 @@ step "npxskillui-components"     npx skills add amaancoderx/npxskillui
 step "webgpu-claude-skill"       npx skills add dgreenheck/webgpu-claude-skill
 step "awesome-design-md"         npx skills add VoltAgent/awesome-design-md
 step "taste-skill"               npx skills add Leonxlnx/taste-skill
+step "drizzle-orm"               npx skills add drizzle-team/drizzle-orm
+step "prisma-orm"                npx skills add prisma/prisma
+step "tanstack-query"            npx skills add TanStack/query
+step "zustand-state"             npx skills add pmndrs/zustand
+step "github-actions-ci"         npx skills add actions/starter-workflows
 
 # ── Steps 7-30: ALL Claude design & animation plugins ─────────────────────────
 if have claude; then

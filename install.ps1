@@ -23,7 +23,7 @@ $NetworkTimeout          = 90
 $script:Installed = 0
 $script:Skipped   = 0
 $script:StepNum   = 0
-$script:Total     = 49
+$script:Total     = 54
 $spsHome = ".\.sps"
 New-Item -ItemType Directory -Force -Path "$spsHome\learned" | Out-Null
 $script:Log = "$spsHome\install.log"
@@ -98,6 +98,11 @@ Step "npxskillui-components"   { npx skills add amaancoderx/npxskillui }
 Step "webgpu-claude-skill"     { npx skills add dgreenheck/webgpu-claude-skill }
 Step "awesome-design-md"       { npx skills add VoltAgent/awesome-design-md }
 Step "taste-skill"             { npx skills add Leonxlnx/taste-skill }
+Step "drizzle-orm"             { npx skills add drizzle-team/drizzle-orm }
+Step "prisma-orm"              { npx skills add prisma/prisma }
+Step "tanstack-query"          { npx skills add TanStack/query }
+Step "zustand-state"           { npx skills add pmndrs/zustand }
+Step "github-actions-ci"       { npx skills add actions/starter-workflows }
 
 # -- Steps 7-30: ALL Claude design & animation plugins -------------------------
 if (have claude) {

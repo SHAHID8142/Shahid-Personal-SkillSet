@@ -59,7 +59,13 @@ Remove-AgentSkill "awwwards-animations"
 $r3fSkills = @("r3f-animation","r3f-fundamentals","r3f-geometry","r3f-interaction","r3f-lighting","r3f-loaders","r3f-materials","r3f-physics","r3f-postprocessing","r3f-shaders","r3f-textures")
 foreach ($s in $r3fSkills) { Remove-AgentSkill $s }
 
-$otherSkills = @("tailwind-design-system","threejs-fundamentals","nextjs-app-router-patterns","vercel-composition-patterns","vercel-react-best-practices","supabase","supabase-postgres-best-practices")
+$otherSkills = @(
+    "tailwind-design-system", "threejs-fundamentals", "nextjs-app-router-patterns", 
+    "vercel-composition-patterns", "vercel-react-best-practices", "supabase", "supabase-postgres-best-practices",
+    "astro", "expo", "tauri", "playwright", "vitest", "impeccable", "npxskillui",
+    "webgpu-claude-skill", "awesome-design-md", "taste-skill", "andrej-karpathy-skills",
+    "drizzle-orm", "prisma", "query", "zustand", "starter-workflows"
+)
 foreach ($s in $otherSkills) { Remove-AgentSkill $s }
 
 # -- Remove Claude plugins -----------------------------------------------------

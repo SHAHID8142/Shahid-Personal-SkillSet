@@ -156,6 +156,23 @@ Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity, a
 | **Playwright** | E2E testing, browser automation, testing | `VoltAgent/awesome-agent-skills` |
 | **Vitest** | Unit testing, test runner, jest | `VoltAgent/awesome-agent-skills` |
 
+### State Management & Data Fetching
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **TanStack Query** | React Query, data fetching, caching, server state | `VoltAgent/awesome-agent-skills` |
+| **Zustand** | global state, zustand, stores, jotai | `VoltAgent/awesome-agent-skills` |
+
+### Databases & ORMs
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Drizzle ORM** | drizzle, SQL, schema, migrations, relational | `VoltAgent/awesome-agent-skills` |
+| **Prisma** | prisma, schema.prisma, ORM, postgres | `VoltAgent/awesome-agent-skills` |
+
+### CI/CD & Automation
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **GitHub Actions** | workflows, CI/CD, automation, pipelines | `VoltAgent/awesome-agent-skills` |
+
 ### Performance, Debug & Security
 | Skill | Keywords | Source |
 |-------|----------|--------|

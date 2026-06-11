@@ -310,7 +310,7 @@ export function RevealText({ children, delay = 0 }: { children: React.ReactNode;
 
 ---
 
-## STEP 7 — SIX CORE RULES
+## STEP 7 — SIXTEEN CORE RULES
 
 These apply to every task, every time. No exceptions.
 
@@ -320,28 +320,35 @@ These apply to every task, every time. No exceptions.
 
 **3. RESPONSIVE** — Before every handover: verified at 320px / 768px / 1280px / 1440px. State it explicitly.
 
-**4. DESIGN TOKENS** — Zero hardcoded colors/spacing/fonts in components. Everything through CSS variables or Tailwind `@theme` tokens.
-```css
-/* globals.css */
-@theme {
-  --color-brand: oklch(55% 0.18 240);
-  --font-display: 'Instrument Serif', serif;
-}
-/* Component: use text-brand, font-display — never hardcode */
-```
+**4. DESIGN TOKENS (ANTI-FRANKENSTEIN)** — Zero hardcoded colors/spacing/fonts. Everything must use CSS variables or Tailwind `@theme` tokens. Absolutely NO arbitrary Tailwind values (e.g., no `w-[323px]` or `text-[#FF0000]`).
 
 **5. A11Y** — Every UI: keyboard nav, focus rings, ARIA labels, semantic HTML, contrast ≥ 4.5:1 body / 3:1 large text. `prefers-reduced-motion` respected on all animations.
 
-**6. CONVENTIONAL COMMITS** — Every commit: `type(scope): description`
-```
-feat(hero): add Lenis smooth scroll with GSAP ScrollTrigger
-fix(auth): handle Supabase session refresh on middleware
-style(pricing): apply hallmark stat-led macrostructure
-```
+**6. GIT BRANCHING & CONVENTIONAL COMMITS** — Every commit: `type(scope): description`. NEVER push directly to `main` or `master`. Always create a feature branch (`git checkout -b feature/...`) and run `git push -u origin HEAD` on that branch.
+
+**7. DUAL-TONE SUPPORT** — Ensure every UI component supports light and dark modes via semantic color tokens.
+
+**8. LOCALIZATION (i18n)** — All user-facing text must be stored in `constants/copy.ts` or a translation file to allow for future i18n.
+
+**9. SECURITY** — Validate all user inputs via Zod; implement sanitization; ensure secure headers; never expose DB secrets in client-side code.
+
+**10. ERROR BOUNDARIES & FALLBACKS** — Every network request or data fetch must have a corresponding loading skeleton, error boundary, and empty state gracefully handled.
+
+**11. DATABASE MIGRATIONS** — Never modify production or local database schemas directly via raw SQL scripts. Always generate a formal migration file (e.g., via Drizzle Kit or Prisma) so changes are tracked and reversible.
+
+**12. 3-STRIKE & ROLLBACK RULE** — If you attempt to fix a bug or pass a quality gate 3 times and fail, DO NOT keep hacking. Use `git restore <file>` or `git reset` to roll back to the last working state, document the failure in `./.sps/handoff.md`, and ask the user for help.
+
+**13. SECRETS & ENV SAFETY** — Never commit `.env` files. If your code requires new environment variables, add them to `.env.example` and explicitly instruct the user to add the real keys locally.
+
+**14. CODE CLEANUP & LINTING** — Before handover, run `npm run lint` and `npm run format` (or equivalent). Remove all debugging `console.log` statements.
+
+**15. DATA FETCHING & STATE** — NEVER use `useEffect` for data fetching. Always use TanStack Query (React Query) for client-side fetching or React Server Components. Use Zustand or Jotai for global state, never bloated Redux.
+
+**16. CI/CD PIPELINES** — On new project initialization, always scaffold a `.github/workflows/ci.yml` to automatically run linters, type checks, and Playwright tests on every Pull Request.
 
 ---
 
-## STEP 8 — QUALITY GATE (10 checks before every handover)
+## STEP 8 — QUALITY GATE (15 checks before every handover)
 
 Run before showing output to user. Fix anything that fails, then re-run.
 
@@ -357,6 +364,11 @@ Run before showing output to user. Fix anything that fails, then re-run.
 | 8 | **Responsive** | 320/768/1280/1440px stated and checked (Rule 3) |
 | 9 | **A11y basics** | keyboard nav, labels, contrast (Rule 5) |
 | 10 | **One file per component** | PascalCase.tsx per component, hooks in `hooks/`, utils in `utils/` |
+| 11 | **Language check (i18n)** | No hardcoded text if the project is multi-language |
+| 12 | **Dual-tone check** | Component adapts correctly if dual-tone/dark mode is active |
+| 13 | **Automated Testing** | Core business logic / critical flows have basic Vitest or Playwright tests |
+| 14 | **Clean Code** | No debug `console.log`, linter passes, codebase formatted |
+| 15 | **State check** | No `useEffect` used for data fetching; TanStack/Zustand used correctly |
 
 ---
 

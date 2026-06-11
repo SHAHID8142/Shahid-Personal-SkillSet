@@ -6,8 +6,8 @@ description: >
   software. Detects the task type and INVOKES the real best-in-class specialist skill (epic-design
   for design, senior-frontend/backend/fullstack for engineering, awwwards-animations for motion,
   stripe-integration-expert for payments, code-reviewer before handover) instead of generic output,
-  then layers fourteen enforced rules: hallmark anti-slop, graphify, responsive 320-1440px, a11y WCAG AA,
-  design tokens, branching & commits, dual-tone support, i18n, security, error boundaries, DB safety, rollback, secrets, and linting.
+  then layers sixteen enforced rules: hallmark anti-slop, graphify, responsive 320-1440px, a11y WCAG AA,
+  design tokens, branching & commits, dual-tone support, i18n, security, error boundaries, DB safety, rollback, secrets, linting, state management, and CI/CD.
   Reads both global (~/.sps/) and local (./.sps/) profile/mistakes files before every task; researches unknown tools into
   ./.sps/learned/. Builds section by section, never a whole page at once.
 ---
@@ -25,8 +25,8 @@ Shahid-Personal-SkillSet repo. All behaviour is identical:
 - **STEP 4 — Design execution:** invoke `epic-design` first, then the design stack
 - **STEP 5 — One tool per job:** Lenis for smooth scroll, GSAP for scroll-triggers, etc.
 - **STEP 6 — Skill catalog**
-- **STEP 7 — Fourteen core rules:** anti-slop, graphify, responsive, a11y, tokens, branch & commits, dual-tone, i18n, security, error bounds, DB, rollback, secrets, linting
-- **STEP 8 — Quality gate:** 14 checks before every handover
+- **STEP 7 — Sixteen core rules:** anti-slop, graphify, responsive, a11y, tokens, branch & commits, dual-tone, i18n, security, error bounds, DB, rollback, secrets, linting, state, CI/CD
+- **STEP 8 — Quality gate:** 15 checks before every handover
 
 Refer to `skills/sps/SKILL.md` for the complete instructions.
 Install per-project: `npx skills add SHAHID8142/Shahid-Personal-SkillSet` + `bash install.sh`
