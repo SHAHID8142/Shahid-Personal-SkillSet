@@ -64,7 +64,7 @@ $otherSkills = @(
     "vercel-composition-patterns", "vercel-react-best-practices", "supabase", "supabase-postgres-best-practices",
     "astro", "expo", "tauri", "playwright", "vitest", "impeccable", "npxskillui",
     "webgpu-claude-skill", "awesome-design-md", "taste-skill", "andrej-karpathy-skills",
-    "drizzle-orm", "prisma", "query", "zustand", "starter-workflows"
+    "drizzle-orm", "prisma", "query", "zustand", "starter-workflows", "husky", "lint-staged"
 )
 foreach ($s in $otherSkills) { Remove-AgentSkill $s }
 

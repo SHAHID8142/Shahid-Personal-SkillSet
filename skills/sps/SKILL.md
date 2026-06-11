@@ -310,7 +310,7 @@ export function RevealText({ children, delay = 0 }: { children: React.ReactNode;
 
 ---
 
-## STEP 7 — SIXTEEN CORE RULES
+## STEP 7 — TWENTY CORE RULES
 
 These apply to every task, every time. No exceptions.
 
@@ -346,9 +346,17 @@ These apply to every task, every time. No exceptions.
 
 **16. CI/CD PIPELINES** — On new project initialization, always scaffold a `.github/workflows/ci.yml` to automatically run linters, type checks, and Playwright tests on every Pull Request.
 
+**17. PRE-COMMIT HOOKS** — Always configure Husky and `lint-staged` so that ESLint and Prettier run automatically, physically preventing messy code from being committed.
+
+**18. TSDOC / DOCUMENTATION** — Every exported function, React component, interface, and type MUST have standard TSDoc/JSDoc comments explaining its purpose. Undocumented code is considered broken.
+
+**19. SECURITY AUDITING** — Always run `npm audit` before finalizing dependencies. Use strict package pinning to prevent unexpected breaking changes.
+
+**20. STRICT MODULARITY** — Never build large "god files". Always use separate files for separate components. A single file should rarely exceed 150-200 lines. Extract logic into custom hooks in `hooks/` and pure functions into `utils/`.
+
 ---
 
-## STEP 8 — QUALITY GATE (15 checks before every handover)
+## STEP 8 — QUALITY GATE (19 checks before every handover)
 
 Run before showing output to user. Fix anything that fails, then re-run.
 
@@ -369,6 +377,10 @@ Run before showing output to user. Fix anything that fails, then re-run.
 | 13 | **Automated Testing** | Core business logic / critical flows have basic Vitest or Playwright tests |
 | 14 | **Clean Code** | No debug `console.log`, linter passes, codebase formatted |
 | 15 | **State check** | No `useEffect` used for data fetching; TanStack/Zustand used correctly |
+| 16 | **Git Hooks Configuration** | Husky and lint-staged are active and functioning |
+| 17 | **Full Documentation** | All exported types/functions have TSDoc/JSDoc comments |
+| 18 | **Dependency Security** | `npm audit` shows 0 high/critical vulnerabilities |
+| 19 | **Strict Modularity** | Exactly 1 component per file; files are < 200 lines long |
 
 ---
 

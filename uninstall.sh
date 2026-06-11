@@ -76,7 +76,7 @@ for skill in r3f-animation r3f-fundamentals r3f-geometry r3f-interaction r3f-lig
 done
 
 # Other installed
-for skill in tailwind-design-system threejs-fundamentals nextjs-app-router-patterns vercel-composition-patterns vercel-react-best-practices supabase supabase-postgres-best-practices astro expo tauri playwright vitest impeccable npxskillui webgpu-claude-skill awesome-design-md taste-skill andrej-karpathy-skills drizzle-orm prisma query zustand starter-workflows; do
+for skill in tailwind-design-system threejs-fundamentals nextjs-app-router-patterns vercel-composition-patterns vercel-react-best-practices supabase supabase-postgres-best-practices astro expo tauri playwright vitest impeccable npxskillui webgpu-claude-skill awesome-design-md taste-skill andrej-karpathy-skills drizzle-orm prisma query zustand starter-workflows husky lint-staged; do
   remove_agent_skill "$skill"
 done
 

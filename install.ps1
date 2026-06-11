@@ -23,7 +23,7 @@ $NetworkTimeout          = 90
 $script:Installed = 0
 $script:Skipped   = 0
 $script:StepNum   = 0
-$script:Total     = 54
+$script:Total     = 56
 $spsHome = ".\.sps"
 New-Item -ItemType Directory -Force -Path "$spsHome\learned" | Out-Null
 $script:Log = "$spsHome\install.log"
@@ -105,6 +105,8 @@ Step "prisma-orm"              { npx skills add prisma/prisma }
 Step "tanstack-query"          { npx skills add TanStack/query }
 Step "zustand-state"           { npx skills add pmndrs/zustand }
 Step "github-actions-ci"       { npx skills add actions/starter-workflows }
+Step "husky-hooks"             { npx skills add typicode/husky }
+Step "lint-staged"             { npx skills add lint-staged/lint-staged }
 
 # -- Steps 7-30: ALL Claude design & animation plugins -------------------------
 if (have claude) {
@@ -247,9 +249,10 @@ Write-Host ("|  Installed: {0,-3}   Skipped (will retry on demand): {1,-3}      
 Write-Host "+------------------------------------------------------------------+" -ForegroundColor Green
 Write-Host "|  Use it:  Claude Code -> /sps [request]                          |" -ForegroundColor Green
 Write-Host "|           Antigravity -> just describe what to build             |" -ForegroundColor Green
-Write-Host "|  Sixteen rules always on: anti-slop, graphify, responsive,       |"
+Write-Host "|  Twenty rules always on: anti-slop, graphify, responsive,        |"
 Write-Host "|  a11y, tokens, branches, dual-tone, i18n, security, error-bounds,|"
-Write-Host "|  DB, rollback, secrets, linting, state, CI/CD.                   |"
+Write-Host "|  DB, rollback, secrets, linting, state, CI/CD, hooks, TSDoc,     |"
+Write-Host "|  auditing, modularity.                                           |"
 Write-Host "+==================================================================+"
 
 if ($script:Skipped -gt 0) {

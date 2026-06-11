@@ -29,7 +29,7 @@ LOG="./.sps/install.log"
 mkdir -p "./.sps"; : > "$LOG"
 
 # Total steps (keep in sync with step() calls below)
-TOTAL=54
+TOTAL=56
 
 section() { echo ""; echo -e "${BOLD}── $* ──${NC}"; }
 note()    { echo -e "${DIM}  $*${NC}"; }
@@ -115,6 +115,8 @@ step "prisma-orm"                npx skills add prisma/prisma
 step "tanstack-query"            npx skills add TanStack/query
 step "zustand-state"             npx skills add pmndrs/zustand
 step "github-actions-ci"         npx skills add actions/starter-workflows
+step "husky-hooks"               npx skills add typicode/husky
+step "lint-staged"               npx skills add lint-staged/lint-staged
 
 # ── Steps 7-30: ALL Claude design & animation plugins ─────────────────────────
 if have claude; then
@@ -270,9 +272,10 @@ printf "|  Installed: %-3s   Skipped (will retry on demand): %-3s          |\n" 
 echo "+------------------------------------------------------------------+"
 echo "|  Use it:  Claude Code -> /sps [request]                          |"
 echo "|           Antigravity -> just describe what to build             |"
-echo "|  Sixteen rules always on: anti-slop, graphify, responsive,       |"
+echo "|  Twenty rules always on: anti-slop, graphify, responsive,        |"
 echo "|  a11y, tokens, branches, dual-tone, i18n, security, error-bounds,|"
-echo "|  DB, rollback, secrets, linting, state, CI/CD.                   |"
+echo "|  DB, rollback, secrets, linting, state, CI/CD, hooks, TSDoc,     |"
+echo "|  auditing, modularity.                                           |"
 echo "+==================================================================+"
 if [ "$FAILED" -gt 0 ]; then
   note "Skipped items: /sps installs any missing tool on demand at runtime."

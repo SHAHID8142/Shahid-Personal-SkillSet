@@ -2,13 +2,13 @@
 
 An extremely opinionated, enterprise-grade build orchestrator for AI coding agents. 
 
-With a single install command, it wires up a **54-step** ecosystem of best-in-class skills and lays down **16 unbreakable rules** across Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, and Antigravity.
+With a single install command, it wires up a **54-step** ecosystem of best-in-class skills and lays down **20 unbreakable rules** across Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, and Antigravity.
 
 When you type `/sps [your request]`, it reads your prompt, dynamically detects which framework specialists are needed, auto-installs anything missing, and strictly enforces quality gates before handing the code back to you.
 
 ---
 
-## The 16 Unbreakable Rules
+## The 20 Unbreakable Rules
 This orchestrator fundamentally changes how your AI behaves. It forces the AI to act like a senior engineer, preventing "slop", infinite loops, and broken architectures.
 
 | Rule | What it does |
@@ -29,6 +29,10 @@ This orchestrator fundamentally changes how your AI behaves. It forces the AI to
 | **14. Clean Code** | The AI must run `npm run lint`, `npm run format`, and strip all leftover `console.log` statements before handover. |
 | **15. Safe State** | **No `useEffect` fetching.** It must use TanStack Query or Server Components. Zustand/Jotai is mandated over bloated Redux. |
 | **16. Auto CI/CD** | On new projects, it automatically scaffolds a `.github/workflows/ci.yml` to run Playwright tests and linters in the cloud. |
+| **17. Pre-commit Hooks** | Always sets up Husky and `lint-staged` so that ESLint and Prettier run automatically before allowing any git commits. |
+| **18. Full Documentation** | Every exported function, React component, interface, and type MUST have standard TSDoc/JSDoc comments. |
+| **19. Security Auditing** | Always runs `npm audit` before finalizing dependencies, using strict package pinning to prevent breaking changes. |
+| **20. Strict Modularity** | Absolutely no "god files". Files must rarely exceed 150-200 lines. Pure functions go in `utils/`, logic goes in `hooks/`. |
 
 ---
 
