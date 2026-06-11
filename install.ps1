@@ -48,7 +48,9 @@ function Step {
     } else {
         Stop-Job  $job -ErrorAction SilentlyContinue
         Remove-Job $job -Force -ErrorAction SilentlyContinue
-        Write-Host ("skipped ({0}s - will retry on demand)" -f $secs) -ForegroundColor Yellow
+        Write-Host "failed ($secs`s)" -ForegroundColor Red
+        Write-Host "   > Error snippet:" -ForegroundColor Yellow
+        Get-Content $script:Log -Tail 3 | ForEach-Object { Write-Host "     $_" -ForegroundColor DarkGray }
         $script:Skipped++
         Add-Content -Path $script:Log -Value "SKIPPED: $Label"
     }
@@ -245,11 +247,13 @@ Write-Host ("|  Installed: {0,-3}   Skipped (will retry on demand): {1,-3}      
 Write-Host "+------------------------------------------------------------------+" -ForegroundColor Green
 Write-Host "|  Use it:  Claude Code -> /sps [request]                          |" -ForegroundColor Green
 Write-Host "|           Antigravity -> just describe what to build             |" -ForegroundColor Green
-Write-Host "|  Six rules always on: anti-slop, graphify, responsive,           |" -ForegroundColor Green
-Write-Host "|  a11y, design-tokens, conventional-commits.                      |" -ForegroundColor Green
-Write-Host "+==================================================================+" -ForegroundColor Green
+Write-Host "|  Sixteen rules always on: anti-slop, graphify, responsive,       |"
+Write-Host "|  a11y, tokens, branches, dual-tone, i18n, security, error-bounds,|"
+Write-Host "|  DB, rollback, secrets, linting, state, CI/CD.                   |"
+Write-Host "+==================================================================+"
+
 if ($script:Skipped -gt 0) {
-    note "Skipped items: /sps installs any missing tool on demand at runtime."
-    note "Details: $script:Log"
+    note "Failed items will automatically try to install themselves on demand."
+    note "Check .\.sps\install.log for full details."
 }
 Write-Host ""

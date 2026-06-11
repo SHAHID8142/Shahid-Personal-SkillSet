@@ -56,8 +56,10 @@ step() {
     echo -e "${GREEN}done${NC} ${DIM}(${elapsed}s)${NC}"; INSTALLED=$((INSTALLED+1))
   else
     local elapsed=$((SECONDS-start))
-    echo -e "${YELLOW}skipped${NC} ${DIM}(${elapsed}s — will retry or use on demand)${NC}"
-    FAILED=$((FAILED+1)); echo "SKIPPED: $label" >> "$LOG"
+    echo -e "${RED}FAILED${NC} ${DIM}(${elapsed}s)${NC}"
+    echo -e "${YELLOW}   > Error snippet:${NC}"
+    tail -n 3 "$LOG" | while read -r line; do echo "     $line"; done
+    FAILED=$((FAILED+1)); echo "FAILED: $label" >> "$LOG"
   fi
 }
 
@@ -268,8 +270,9 @@ printf "|  Installed: %-3s   Skipped (will retry on demand): %-3s          |\n" 
 echo "+------------------------------------------------------------------+"
 echo "|  Use it:  Claude Code -> /sps [request]                          |"
 echo "|           Antigravity -> just describe what to build             |"
-echo "|  Six rules always on: anti-slop, graphify, responsive,           |"
-echo "|  a11y, design-tokens, conventional-commits.                      |"
+echo "|  Sixteen rules always on: anti-slop, graphify, responsive,       |"
+echo "|  a11y, tokens, branches, dual-tone, i18n, security, error-bounds,|"
+echo "|  DB, rollback, secrets, linting, state, CI/CD.                   |"
 echo "+==================================================================+"
 if [ "$FAILED" -gt 0 ]; then
   note "Skipped items: /sps installs any missing tool on demand at runtime."
