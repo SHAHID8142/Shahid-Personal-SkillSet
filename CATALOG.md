@@ -40,10 +40,8 @@ Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity, a
 ### Animation & Motion
 | Skill | Keywords | Source |
 |-------|----------|--------|
-| **gsap-scrolltrigger** | GSAP, ScrollTrigger, timeline, parallax, pin, scrub | `greensock/gsap-skills` |
-| **gsap-react / gsap-plugins** | GSAP React, useGSAP, SplitText, MorphSVG, DrawSVG | `greensock/gsap-skills` |
-| **motion-framer** | Framer Motion, variants, AnimatePresence, spring, layout | `freshtechbro/claudedesignskills` |
-| **locomotive-scroll** | smooth scroll, Lenis, locomotive scroll | `freshtechbro/claudedesignskills` |
+| **gsap-animation** | GSAP, ScrollTrigger, timeline, pin, scrub, parallax | `~/.claude/skills/gsap-animation/` |
+| **lenis-scroll** | Lenis, smooth scroll, momentum, butter scroll | `~/.claude/skills/lenis-scroll/` |
 | **animejs** | Anime.js, SVG morphing, stagger, keyframe | `freshtechbro/claudedesignskills` |
 | **awwwards-animations** | award-level, magnetic cursor, 60fps, Awwwards, FWA | `devmartinese/awwwards-animations-skill` |
 | **react-spring-physics** | React Spring, physics, spring dynamics, inertia | `freshtechbro/claudedesignskills` |
@@ -58,24 +56,27 @@ Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity, a
 | **threejs-webgl** | Three.js, WebGL, 3D scene, mesh, shader | `freshtechbro/claudedesignskills` |
 | **react-three-fiber** | R3F, drei, @react-three, 3D in React | `freshtechbro/claudedesignskills` |
 | **babylonjs** | Babylon.js, physics, XR, VR, AR | `freshtechbro/claudedesignskills` |
-| **aframe-webxr** | A-Frame, WebXR, VR, AR, 360 | `freshtechbro/claudedesignskills` |
-| **spline-interactive** | Spline, no-code 3D, visual editor | `freshtechbro/claudedesignskills` |
+| **aframe-webxr** | A-Frame, WebXR, VR, AR | `freshtechbro/claudedesignskills` |
+| **webgpu-claude-skill**| WebGPU, WGSL, compute shaders, graphics API | `dgreenheck/webgpu-claude-skill` |
+| **spline-interactive** | Spline, 3D embed, interactive | `freshtechbro/claudedesignskills` |
 | **pixijs-2d** | PixiJS, 2D WebGL, sprites, canvas | `freshtechbro/claudedesignskills` |
 | **lightweight-3d-effects** | Zdog, Vanta, vanilla-tilt, lightweight 3D | `freshtechbro/claudedesignskills` |
 | **playcanvas-engine** | PlayCanvas, browser game, entity-component | `freshtechbro/claudedesignskills` |
 | **web3d-integration-patterns** | multi-library 3D + animation integration | `freshtechbro/claudedesignskills` |
 | **blender-web-pipeline** | Blender, glTF export, 3D asset pipeline | `freshtechbro/claudedesignskills` |
 
-### Frontend Framework (built into Claude Code)
-| Skill | Keywords |
-|-------|----------|
-| **vercel:nextjs** | Next.js, App Router, RSC, SSR, SSG |
-| **vercel:react-best-practices** | React hooks, patterns, best practices |
-| **vercel:routing-middleware** | routing, middleware, redirects, rewrites |
-| **vercel:next-cache-components** | caching, ISR, static, streaming |
-| **vercel:turbopack** | Turbopack, fast builds |
-| **vercel:shadcn** | shadcn/ui, Radix, Tailwind components |
-| **feature-flags-architect** | feature flags, A/B testing, experiments |
+### Frontend Frameworks & UI
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **frontend-design** | React, Next.js, frontend, UI components, pages | `freshtechbro/claudedesignskills` |
+| **astro-framework** | Astro, static sites, islands architecture | `withastro/astro` |
+| **impeccable** | impeccable standard, high quality UI, anti-slop | `pbakaus/impeccable` |
+| **npxskillui** | UI components, templates, pre-built sections | `amaancoderx/npxskillui` |
+| **taste-skill** | premium taste, cinematic design, aesthetics | `Leonxlnx/taste-skill` |
+| **awesome-design-md** | design guidelines, markdown references | `VoltAgent/awesome-design-md` |
+| **vercel:shadcn** | shadcn, shadcn/ui, Radix, accessible UI components | built-in Claude Code |
+| **tailwind-design-system** | Tailwind CSS v4, design tokens, variables | `VoltAgent/awesome-agent-skills` |
+| **feature-flags-architect** | feature flags, A/B testing, experiments | `VoltAgent/awesome-agent-skills` |
 
 ### Authentication
 | Skill | Keywords | Source |
@@ -122,11 +123,13 @@ Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity, a
 | **Firecrawl** | web scraping, web data, crawl | `VoltAgent/awesome-agent-skills` |
 | **Remotion** | video rendering, programmatic video | `VoltAgent/awesome-agent-skills` |
 | **Replicate** | AI models, image generation API | `VoltAgent/awesome-agent-skills` |
+| **andrej-karpathy-skills** | machine learning, deep learning, PyTorch, AI models | `multica-ai/andrej-karpathy-skills` |
 
-### Mobile
+### Mobile & Desktop Apps
 | Skill | Keywords | Source |
 |-------|----------|--------|
 | **Expo** | React Native, Expo, mobile, iOS, Android | `VoltAgent/awesome-agent-skills` |
+| **Tauri** | Desktop apps, Rust, Tauri, macOS, Windows | `VoltAgent/awesome-agent-skills` |
 
 ### AI & LLM (built into Claude Code)
 | Skill | Keywords |
@@ -146,6 +149,12 @@ Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, Antigravity, a
 | **docker-development** | Docker, containers, Dockerfile | `alirezarezvani/claude-skills` |
 | **kubernetes-operator** | Kubernetes, k8s, Helm | `alirezarezvani/claude-skills` |
 | **terraform-patterns** | Terraform, IaC | `alirezarezvani/claude-skills` |
+
+### Testing & QA
+| Skill | Keywords | Source |
+|-------|----------|--------|
+| **Playwright** | E2E testing, browser automation, testing | `VoltAgent/awesome-agent-skills` |
+| **Vitest** | Unit testing, test runner, jest | `VoltAgent/awesome-agent-skills` |
 
 ### Performance, Debug & Security
 | Skill | Keywords | Source |

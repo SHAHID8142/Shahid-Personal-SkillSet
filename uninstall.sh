@@ -89,7 +89,6 @@ if command -v claude >/dev/null 2>&1; then
     "ui-ux-pro-max@ui-ux-pro-max-skill"
     "gsap-scrolltrigger@claude-design-skillstack"
     "frontend-design@claude-design-skillstack"
-    "motion-framer@claude-design-skillstack"
     "animejs@claude-design-skillstack"
     "locomotive-scroll@claude-design-skillstack"
     "modern-web-design@claude-design-skillstack"
@@ -132,7 +131,7 @@ if command -v claude >/dev/null 2>&1; then
     "markdown-html@claude-code-skills"
   )
   for plugin in "${plugins[@]}"; do
-    claude plugin uninstall "$plugin" --scope user >/dev/null 2>&1 && removed "$plugin" || true
+    claude plugin uninstall "$plugin" --scope project >/dev/null 2>&1 && removed "$plugin" || true
   done
 
   # Remove marketplaces
@@ -141,7 +140,7 @@ if command -v claude >/dev/null 2>&1; then
   done
 
   # Remove Context7 MCP
-  claude mcp remove context7 --scope user >/dev/null 2>&1 && removed "Context7 MCP" || true
+  claude mcp remove context7 --scope project >/dev/null 2>&1 && removed "Context7 MCP" || true
 else
   info "claude CLI not found — skipping Claude plugin removal"
 fi

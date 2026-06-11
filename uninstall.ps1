@@ -75,7 +75,6 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
         "playcanvas-engine@claude-design-skillstack",
         "web3d-integration-patterns@claude-design-skillstack",
         "blender-web-pipeline@claude-design-skillstack",
-        "motion-framer@claude-design-skillstack",
         "animejs@claude-design-skillstack",
         "locomotive-scroll@claude-design-skillstack",
         "modern-web-design@claude-design-skillstack",
@@ -99,7 +98,7 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
         "docker-development@claude-code-skills"
     )
     foreach ($p in $plugins) {
-        claude plugin uninstall $p --scope user 2>$null
+        claude plugin uninstall $p --scope project 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) { removed $p }
     }
 
@@ -108,7 +107,7 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
         if ($LASTEXITCODE -eq 0) { removed "marketplace: $mkt" }
     }
 
-    claude mcp remove context7 --scope user 2>$null
+    claude mcp remove context7 --scope project 2>&1 | Out-Null
     if ($LASTEXITCODE -eq 0) { removed "Context7 MCP" }
 } else {
     info "claude CLI not found - skipping Claude plugin removal"

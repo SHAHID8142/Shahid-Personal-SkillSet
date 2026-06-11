@@ -48,9 +48,9 @@ instead of generic.
 
 | Task type | Trigger words | Specialist skill to INVOKE | Text fallback if absent |
 |-----------|--------------|----------------------------|-------------------------|
-| **UI / Design** | design, landing page, hero, UI, layout, dashboard | **`epic-design`** + `hallmark` + `frontend-design` + `ui-ux-pro-max` | World-class designer: cinematic, anti-slop, intentional |
-| **Animation / Motion** | animate, scroll, parallax, motion, GSAP, Lenis | **`awwwards-animations`** + `gsap-animation` / `framer-motion` | Motion director: purposeful 60fps motion |
-| **3D / WebGL** | 3D, WebGL, Three.js, R3F, shader, scene | **`babylonjs`** / r3f skills / threejs skills | Creative technologist: perf + impact |
+| **UI / Design** | design, landing page, UI, layout, impeccable, taste | **`epic-design`** + `impeccable` + `taste-skill` + `ui-ux-pro-max` | World-class designer: cinematic, impeccable taste |
+| **Animation / Motion** | animate, scroll, parallax, motion, GSAP, Lenis | **`awwwards-animations`** + `gsap-animation` / `animejs` | Motion director: purposeful 60fps motion |
+| **3D / WebGL / GPU** | 3D, WebGL, WebGPU, WGSL, Three.js, R3F, shader | **`webgpu-claude-skill`** / r3f / threejs / babylonjs | Creative technologist: perf + impact |
 | **Frontend / React** | React, Next.js, component, hook, TypeScript | **`senior-frontend`** + `vercel:react-best-practices` | Senior frontend engineer: clean, typed |
 | **Backend / API** | API, backend, Node, REST, GraphQL, server | **`senior-backend`** + `engineering-skills` | Senior backend engineer: correct, secure |
 | **Full-stack** | full-stack, auth + database + UI, complete app | **`senior-fullstack`** + design + backend skills | Senior fullstack with design taste |
@@ -210,9 +210,13 @@ export function RevealText({ children, delay = 0 }: { children: React.ReactNode;
 | Keywords | Skill | Install / Location |
 |----------|-------|-------------------|
 | design, UI, page, landing, hero, layout, dashboard, component | **hallmark** | `npx skills add nutlope/hallmark` |
-| design system, color palette, typography, font pairing, UX | **ui-ux-pro-max** | `claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope user` |
+| design system, color palette, typography, font pairing, UX | **ui-ux-pro-max** | `claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope project` |
 | React, Next.js, frontend, production UI | **frontend-design** | built-in Claude Code |
-| Tailwind, design tokens, CSS variables, Tailwind v4 | **tailwind-design-system** | `~/.agents/skills/tailwind-design-system/` |
+| Tailwind, design tokens, CSS variables | **tailwind-design-system** | `~/.agents/skills/` |
+| impeccable standard, high quality frontend UI, anti-slop | **impeccable** | `npx skills add pbakaus/impeccable` |
+| UI components, templates, pre-built sections | **npxskillui** | `npx skills add amaancoderx/npxskillui` |
+| premium taste, cinematic design, aesthetics | **taste-skill** | `npx skills add Leonxlnx/taste-skill` |
+| Astro, static sites, islands architecture | **astro-framework** | `npx skills add withastro/astro` |
 | shadcn, shadcn/ui, Radix, headless UI | **vercel:shadcn** | built-in Claude Code |
 | micro-interactions, reveal, magnetic, premium animations | **awwwards-animations** | `~/.claude/skills/awwwards-animations/` |
 | Figma, design handoff, tokens export | **figma** | `npx skills add figma/figma` |

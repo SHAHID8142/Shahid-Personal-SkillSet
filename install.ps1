@@ -23,8 +23,8 @@ $NetworkTimeout          = 90
 $script:Installed = 0
 $script:Skipped   = 0
 $script:StepNum   = 0
-$script:Total     = 39
-$spsHome = "$env:USERPROFILE\.sps"
+$script:Total     = 49
+$spsHome = ".\.sps"
 New-Item -ItemType Directory -Force -Path "$spsHome\learned" | Out-Null
 $script:Log = "$spsHome\install.log"
 "" | Set-Content -Path $script:Log
@@ -71,64 +71,76 @@ $repoDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # -- Step 1: /sps on all agents ------------------------------------------------
 section "Core orchestrator"
-Step "/sps for all agents" { npx skills add -g SHAHID8142/Shahid-Personal-SkillSet }
+Step "/sps for all agents" { npx skills add SHAHID8142/Shahid-Personal-SkillSet }
 
 # -- Steps 2-3: Claude core (if available) -------------------------------------
 if (have claude) {
     $rd = $repoDir
     Step "/sps Claude marketplace" ([scriptblock]::Create("claude plugin marketplace add `"$rd`""))
-    Step "/sps Claude plugin"      { claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope user }
+    Step "/sps Claude plugin"      { claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope project }
 } else { $script:StepNum += 2; note "claude not found - skipped 2 Claude steps" }
 
 # -- Steps 4-6: Core npx skills ------------------------------------------------
 section "Core design & animation skills (npx)"
-Step "hallmark (anti-slop)"    { npx skills add -g nutlope/hallmark }
-Step "GSAP animation suite"    { npx skills add -g https://github.com/greensock/gsap-skills }
-Step "awwwards-animations"     { npx skills add -g devmartinese/awwwards-animations }
+Step "hallmark (anti-slop)"    { npx skills add nutlope/hallmark }
+Step "GSAP animation suite"    { npx skills add https://github.com/greensock/gsap-skills }
+Step "awwwards-animations"     { npx skills add devmartinese/awwwards-animations }
+
+section "Core Engineering & ML skills (npx)"
+Step "andrej-karpathy-skills"  { npx skills add multica-ai/andrej-karpathy-skills }
+Step "astro-framework"         { npx skills add withastro/astro }
+Step "expo-mobile-skills"      { npx skills add expo/expo }
+Step "tauri-desktop-skills"    { npx skills add tauri-apps/tauri }
+Step "playwright-e2e"          { npx skills add microsoft/playwright }
+Step "vitest-unit-testing"     { npx skills add vitest-dev/vitest }
+Step "impeccable-ui"           { npx skills add pbakaus/impeccable }
+Step "npxskillui-components"   { npx skills add amaancoderx/npxskillui }
+Step "webgpu-claude-skill"     { npx skills add dgreenheck/webgpu-claude-skill }
+Step "awesome-design-md"       { npx skills add VoltAgent/awesome-design-md }
+Step "taste-skill"             { npx skills add Leonxlnx/taste-skill }
 
 # -- Steps 7-30: ALL Claude design & animation plugins -------------------------
 if (have claude) {
     section "Design system & UI plugins"
     Step "ui-ux-pro-max marketplace"      { claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill }
-    Step "ui-ux-pro-max"                  { claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope user }
+    Step "ui-ux-pro-max"                  { claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope project }
     Step "design-skillstack marketplace"  { claude plugin marketplace add freshtechbro/claudedesignskills }
-    Step "frontend-design"                { claude plugin install frontend-design@claude-design-skillstack --scope user }
-    Step "modern-web-design"              { claude plugin install modern-web-design@claude-design-skillstack --scope user }
-    Step "animated-component-libraries"   { claude plugin install animated-component-libraries@claude-design-skillstack --scope user }
+    Step "frontend-design"                { claude plugin install frontend-design@claude-design-skillstack --scope project }
+    Step "modern-web-design"              { claude plugin install modern-web-design@claude-design-skillstack --scope project }
+    Step "animated-component-libraries"   { claude plugin install animated-component-libraries@claude-design-skillstack --scope project }
 
     section "Animation & motion plugins"
-    Step "motion-framer"                  { claude plugin install motion-framer@claude-design-skillstack --scope user }
-    Step "locomotive-scroll"              { claude plugin install locomotive-scroll@claude-design-skillstack --scope user }
-    Step "animejs"                        { claude plugin install animejs@claude-design-skillstack --scope user }
-    Step "react-spring-physics"           { claude plugin install react-spring-physics@claude-design-skillstack --scope user }
-    Step "lottie-animations"              { claude plugin install lottie-animations@claude-design-skillstack --scope user }
-    Step "rive-interactive"               { claude plugin install rive-interactive@claude-design-skillstack --scope user }
-    Step "scroll-reveal-libraries"        { claude plugin install scroll-reveal-libraries@claude-design-skillstack --scope user }
-    Step "barba-js (page transitions)"    { claude plugin install barba-js@claude-design-skillstack --scope user }
+    Step "locomotive-scroll"              { claude plugin install locomotive-scroll@claude-design-skillstack --scope project }
+    Step "animejs"                        { claude plugin install animejs@claude-design-skillstack --scope project }
+    Step "react-spring-physics"           { claude plugin install react-spring-physics@claude-design-skillstack --scope project }
+    Step "lottie-animations"              { claude plugin install lottie-animations@claude-design-skillstack --scope project }
+    Step "rive-interactive"               { claude plugin install rive-interactive@claude-design-skillstack --scope project }
+    Step "scroll-reveal-libraries"        { claude plugin install scroll-reveal-libraries@claude-design-skillstack --scope project }
+    Step "barba-js (page transitions)"    { claude plugin install barba-js@claude-design-skillstack --scope project }
 
     section "3D, WebGL & XR plugins"
-    Step "react-three-fiber (R3F)"        { claude plugin install react-three-fiber@claude-design-skillstack --scope user }
-    Step "threejs-webgl"                  { claude plugin install threejs-webgl@claude-design-skillstack --scope user }
-    Step "babylonjs-engine"               { claude plugin install babylonjs-engine@claude-design-skillstack --scope user }
-    Step "aframe-webxr"                   { claude plugin install aframe-webxr@claude-design-skillstack --scope user }
-    Step "spline-interactive"             { claude plugin install spline-interactive@claude-design-skillstack --scope user }
-    Step "pixijs-2d"                      { claude plugin install pixijs-2d@claude-design-skillstack --scope user }
-    Step "lightweight-3d-effects"         { claude plugin install lightweight-3d-effects@claude-design-skillstack --scope user }
-    Step "playcanvas-engine"              { claude plugin install playcanvas-engine@claude-design-skillstack --scope user }
-    Step "web3d-integration-patterns"     { claude plugin install web3d-integration-patterns@claude-design-skillstack --scope user }
-    Step "blender-web-pipeline"           { claude plugin install blender-web-pipeline@claude-design-skillstack --scope user }
-} else { $script:StepNum += 24; note "claude not found - skipped 24 design plugin steps" }
+    Step "react-three-fiber (R3F)"        { claude plugin install react-three-fiber@claude-design-skillstack --scope project }
+    Step "threejs-webgl"                  { claude plugin install threejs-webgl@claude-design-skillstack --scope project }
+    Step "babylonjs-engine"               { claude plugin install babylonjs-engine@claude-design-skillstack --scope project }
+    Step "aframe-webxr"                   { claude plugin install aframe-webxr@claude-design-skillstack --scope project }
+    Step "spline-interactive"             { claude plugin install spline-interactive@claude-design-skillstack --scope project }
+    Step "pixijs-2d"                      { claude plugin install pixijs-2d@claude-design-skillstack --scope project }
+    Step "lightweight-3d-effects"         { claude plugin install lightweight-3d-effects@claude-design-skillstack --scope project }
+    Step "playcanvas-engine"              { claude plugin install playcanvas-engine@claude-design-skillstack --scope project }
+    Step "web3d-integration-patterns"     { claude plugin install web3d-integration-patterns@claude-design-skillstack --scope project }
+    Step "blender-web-pipeline"           { claude plugin install blender-web-pipeline@claude-design-skillstack --scope project }
+} else { $script:StepNum += 23; note "claude not found - skipped 23 design plugin steps" }
 
 # -- Steps 31-37: Engineering, marketing & DevOps plugins ----------------------
 if (have claude) {
     section "Engineering, marketing & DevOps plugins"
     Step "claude-code-skills marketplace"                  { claude plugin marketplace add alirezarezvani/claude-skills }
-    Step "engineering-skills (epic-design, senior-*, code-reviewer)" { claude plugin install engineering-skills@claude-code-skills --scope user }
-    Step "engineering-advanced-skills"                     { claude plugin install engineering-advanced-skills@claude-code-skills --scope user }
-    Step "marketing-skills (SEO, copy, CRO)"               { claude plugin install marketing-skills@claude-code-skills --scope user }
-    Step "a11y-audit"                                      { claude plugin install a11y-audit@claude-code-skills --scope user }
-    Step "research-ops-skills"                             { claude plugin install research-ops-skills@claude-code-skills --scope user }
-    Step "docker-development"                              { claude plugin install docker-development@claude-code-skills --scope user }
+    Step "engineering-skills (epic-design, senior-*, code-reviewer)" { claude plugin install engineering-skills@claude-code-skills --scope project }
+    Step "engineering-advanced-skills"                     { claude plugin install engineering-advanced-skills@claude-code-skills --scope project }
+    Step "marketing-skills (SEO, copy, CRO)"               { claude plugin install marketing-skills@claude-code-skills --scope project }
+    Step "a11y-audit"                                      { claude plugin install a11y-audit@claude-code-skills --scope project }
+    Step "research-ops-skills"                             { claude plugin install research-ops-skills@claude-code-skills --scope project }
+    Step "docker-development"                              { claude plugin install docker-development@claude-code-skills --scope project }
 } else { $script:StepNum += 7; note "claude not found - skipped 7 engineering plugin steps" }
 
 # -- Step 38: Graphify ---------------------------------------------------------
@@ -141,7 +153,7 @@ if (have uv) {
 
 # -- Step 39: Context7 MCP -----------------------------------------------------
 if (have claude) {
-    Step "Context7 MCP (live library docs)" { claude mcp add --scope user context7 -- npx -y '@upstash/context7-mcp' }
+    Step "Context7 MCP (live library docs)" { claude mcp add --scope project context7 -- npx -y '@upstash/context7-mcp' }
 } else { $script:StepNum++ }
 
 # -- Antigravity CLI sync ------------------------------------------------------
@@ -209,7 +221,10 @@ if (-not (Test-Path "$spsHome\mistakes.md")) {
 if (-not (Test-Path "$spsHome\learned\INDEX.md")) {
     "# SPS Learned Topics`nResearched tools saved here. Check before researching.`n`n---" | Set-Content "$spsHome\learned\INDEX.md" -Encoding UTF8
 }
-note "mistakes.md + learned/INDEX.md ready"
+if (-not (Test-Path "$spsHome\handoff.md")) {
+    "# SPS Project Handoff & State`nRead this to understand the current project context, completed tasks, and next steps.`n`n## Current Status`n- `n`n## Conversation Log`n- `n" | Set-Content "$spsHome\handoff.md" -Encoding UTF8
+}
+note "mistakes.md, learned/INDEX.md, and handoff.md ready"
 
 # -- Verify + summary ----------------------------------------------------------
 section "Verification"

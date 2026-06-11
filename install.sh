@@ -25,11 +25,11 @@ NETWORK_TIMEOUT=90
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 
 INSTALLED=0; FAILED=0; STEP=0
-LOG="$HOME/.sps/install.log"
-mkdir -p "$HOME/.sps"; : > "$LOG"
+LOG="./.sps/install.log"
+mkdir -p "./.sps"; : > "$LOG"
 
 # Total steps (keep in sync with step() calls below)
-TOTAL=39
+TOTAL=49
 
 section() { echo ""; echo -e "${BOLD}── $* ──${NC}"; }
 note()    { echo -e "${DIM}  $*${NC}"; }
@@ -80,56 +80,68 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── Step 1: /sps on all agents (npx) ─────────────────────────────────────────
 section "Core orchestrator"
-step "/sps for all agents"  npx skills add -g SHAHID8142/Shahid-Personal-SkillSet
+step "/sps for all agents"  npx skills add SHAHID8142/Shahid-Personal-SkillSet
 
 # ── Steps 2-3: Claude marketplace + plugin (if claude available) ──────────────
 if have claude; then
   step "/sps Claude marketplace"  claude plugin marketplace add "$REPO"
-  step "/sps Claude plugin"       claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope user
+  step "/sps Claude plugin"       claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope project
 else
   STEP=$((STEP+2)); note "claude not found — skipped 2 Claude steps"
 fi
 
 # ── Steps 4-6: Core npx skills (small verified repos) ────────────────────────
 section "Core design & animation skills (npx)"
-step "hallmark (anti-slop)"      npx skills add -g nutlope/hallmark
-step "GSAP animation suite"      npx skills add -g https://github.com/greensock/gsap-skills
-step "awwwards-animations"       npx skills add -g devmartinese/awwwards-animations
+step "hallmark (anti-slop)"      npx skills add nutlope/hallmark
+step "GSAP animation suite"      npx skills add https://github.com/greensock/gsap-skills
+step "awwwards-animations"       npx skills add devmartinese/awwwards-animations
+
+section "Core Engineering & ML skills (npx)"
+step "andrej-karpathy-skills"    npx skills add multica-ai/andrej-karpathy-skills
+step "astro-framework"           npx skills add withastro/astro
+step "expo-mobile-skills"        npx skills add expo/expo
+step "tauri-desktop-skills"      npx skills add tauri-apps/tauri
+step "playwright-e2e"            npx skills add microsoft/playwright
+step "vitest-unit-testing"       npx skills add vitest-dev/vitest
+step "impeccable-ui"             npx skills add pbakaus/impeccable
+step "npxskillui-components"     npx skills add amaancoderx/npxskillui
+step "webgpu-claude-skill"       npx skills add dgreenheck/webgpu-claude-skill
+step "awesome-design-md"         npx skills add VoltAgent/awesome-design-md
+step "taste-skill"               npx skills add Leonxlnx/taste-skill
 
 # ── Steps 7-30: ALL Claude design & animation plugins ─────────────────────────
 if have claude; then
   section "Design system & UI plugins"
   step "ui-ux-pro-max marketplace"          claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
-  step "ui-ux-pro-max"                      claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope user
+  step "ui-ux-pro-max"                      claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope project
 
   step "design-skillstack marketplace"      claude plugin marketplace add freshtechbro/claudedesignskills
-  step "frontend-design"                    claude plugin install frontend-design@claude-design-skillstack --scope user
-  step "modern-web-design"                  claude plugin install modern-web-design@claude-design-skillstack --scope user
-  step "animated-component-libraries"       claude plugin install animated-component-libraries@claude-design-skillstack --scope user
+  step "frontend-design"                    claude plugin install frontend-design@claude-design-skillstack --scope project
+  step "modern-web-design"                  claude plugin install modern-web-design@claude-design-skillstack --scope project
+  step "animated-component-libraries"       claude plugin install animated-component-libraries@claude-design-skillstack --scope project
 
   section "Animation & motion plugins"
-  step "motion-framer"                      claude plugin install motion-framer@claude-design-skillstack --scope user
-  step "locomotive-scroll"                  claude plugin install locomotive-scroll@claude-design-skillstack --scope user
-  step "animejs"                            claude plugin install animejs@claude-design-skillstack --scope user
-  step "react-spring-physics"               claude plugin install react-spring-physics@claude-design-skillstack --scope user
-  step "lottie-animations"                  claude plugin install lottie-animations@claude-design-skillstack --scope user
-  step "rive-interactive"                   claude plugin install rive-interactive@claude-design-skillstack --scope user
-  step "scroll-reveal-libraries"            claude plugin install scroll-reveal-libraries@claude-design-skillstack --scope user
-  step "barba-js (page transitions)"        claude plugin install barba-js@claude-design-skillstack --scope user
+  step "locomotive-scroll"                  claude plugin install locomotive-scroll@claude-design-skillstack --scope project
+  step "animejs"                            claude plugin install animejs@claude-design-skillstack --scope project
+  step "react-spring-physics"               claude plugin install react-spring-physics@claude-design-skillstack --scope project
+  step "lottie-animations"                  claude plugin install lottie-animations@claude-design-skillstack --scope project
+  step "rive-interactive"                   claude plugin install rive-interactive@claude-design-skillstack --scope project
+  step "scroll-reveal-libraries"            claude plugin install scroll-reveal-libraries@claude-design-skillstack --scope project
+  step "barba-js (page transitions)"        claude plugin install barba-js@claude-design-skillstack --scope project
 
   section "3D, WebGL & XR plugins"
-  step "react-three-fiber (R3F)"            claude plugin install react-three-fiber@claude-design-skillstack --scope user
-  step "threejs-webgl"                      claude plugin install threejs-webgl@claude-design-skillstack --scope user
-  step "babylonjs-engine"                   claude plugin install babylonjs-engine@claude-design-skillstack --scope user
-  step "aframe-webxr"                       claude plugin install aframe-webxr@claude-design-skillstack --scope user
-  step "spline-interactive"                 claude plugin install spline-interactive@claude-design-skillstack --scope user
-  step "pixijs-2d"                          claude plugin install pixijs-2d@claude-design-skillstack --scope user
-  step "lightweight-3d-effects"             claude plugin install lightweight-3d-effects@claude-design-skillstack --scope user
-  step "playcanvas-engine"                  claude plugin install playcanvas-engine@claude-design-skillstack --scope user
-  step "web3d-integration-patterns"         claude plugin install web3d-integration-patterns@claude-design-skillstack --scope user
-  step "blender-web-pipeline"               claude plugin install blender-web-pipeline@claude-design-skillstack --scope user
+  step "react-three-fiber (R3F)"            claude plugin install react-three-fiber@claude-design-skillstack --scope project
+  step "threejs-webgl"                      claude plugin install threejs-webgl@claude-design-skillstack --scope project
+  step "babylonjs-engine"                   claude plugin install babylonjs-engine@claude-design-skillstack --scope project
+  step "aframe-webxr"                       claude plugin install aframe-webxr@claude-design-skillstack --scope project
+  step "spline-interactive"                 claude plugin install spline-interactive@claude-design-skillstack --scope project
+  step "pixijs-2d"                          claude plugin install pixijs-2d@claude-design-skillstack --scope project
+  step "lightweight-3d-effects"             claude plugin install lightweight-3d-effects@claude-design-skillstack --scope project
+  step "playcanvas-engine"                  claude plugin install playcanvas-engine@claude-design-skillstack --scope project
+  step "web3d-integration-patterns"         claude plugin install web3d-integration-patterns@claude-design-skillstack --scope project
+  step "blender-web-pipeline"               claude plugin install blender-web-pipeline@claude-design-skillstack --scope project
 else
-  STEP=$((STEP+24)); note "claude not found — skipped 24 design plugin steps"
+  STEP=$((STEP+23)); note "claude not found — skipped 23 design plugin steps"
 fi
 
 # ── Steps 31-37: Engineering, marketing & devops plugins ─────────────────────
@@ -137,12 +149,12 @@ if have claude; then
   section "Engineering, marketing & DevOps plugins"
   step "claude-code-skills marketplace"     claude plugin marketplace add alirezarezvani/claude-skills
   step "engineering-skills (epic-design, senior-*, code-reviewer)" \
-                                            claude plugin install engineering-skills@claude-code-skills --scope user
-  step "engineering-advanced-skills"        claude plugin install engineering-advanced-skills@claude-code-skills --scope user
-  step "marketing-skills (SEO, copy, CRO)" claude plugin install marketing-skills@claude-code-skills --scope user
-  step "a11y-audit"                         claude plugin install a11y-audit@claude-code-skills --scope user
-  step "research-ops-skills"                claude plugin install research-ops-skills@claude-code-skills --scope user
-  step "docker-development"                 claude plugin install docker-development@claude-code-skills --scope user
+                                            claude plugin install engineering-skills@claude-code-skills --scope project
+  step "engineering-advanced-skills"        claude plugin install engineering-advanced-skills@claude-code-skills --scope project
+  step "marketing-skills (SEO, copy, CRO)" claude plugin install marketing-skills@claude-code-skills --scope project
+  step "a11y-audit"                         claude plugin install a11y-audit@claude-code-skills --scope project
+  step "research-ops-skills"                claude plugin install research-ops-skills@claude-code-skills --scope project
+  step "docker-development"                 claude plugin install docker-development@claude-code-skills --scope project
 else
   STEP=$((STEP+7)); note "claude not found — skipped 7 engineering plugin steps"
 fi
@@ -159,7 +171,7 @@ fi
 
 # ── Step 39: Context7 MCP (live docs) ────────────────────────────────────────
 if have claude; then
-  step "Context7 MCP (live library docs)"  claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp
+  step "Context7 MCP (live library docs)"  claude mcp add --scope project context7 -- npx -y @upstash/context7-mcp
 else
   STEP=$((STEP+1))
 fi
@@ -179,9 +191,9 @@ fi
 
 # ── Profile + memory seed (never overwrites existing) ────────────────────────
 section "Profile & memory"
-mkdir -p "$HOME/.sps/learned"
-if [ ! -f "$HOME/.sps/profile.md" ]; then
-  cat > "$HOME/.sps/profile.md" <<'P'
+mkdir -p "./.sps/learned"
+if [ ! -f "./.sps/profile.md" ]; then
+  cat > "./.sps/profile.md" <<'P'
 # SPS User Profile
 Last updated:
 
@@ -227,9 +239,10 @@ P
 else
   note "profile.md kept (already exists)"
 fi
-[ -f "$HOME/.sps/mistakes.md" ]        || printf '# SPS Mistake Log\nRead before every task. Never repeat these.\n\n---\n' > "$HOME/.sps/mistakes.md"
-[ -f "$HOME/.sps/learned/INDEX.md" ]   || printf '# SPS Learned Topics\nResearched tools saved here. Check before researching.\n\n---\n' > "$HOME/.sps/learned/INDEX.md"
-note "mistakes.md + learned/INDEX.md ready"
+[ -f "./.sps/mistakes.md" ]        || printf '# SPS Mistake Log\nRead before every task. Never repeat these.\n\n---\n' > "./.sps/mistakes.md"
+[ -f "./.sps/learned/INDEX.md" ]   || printf '# SPS Learned Topics\nResearched tools saved here. Check before researching.\n\n---\n' > "./.sps/learned/INDEX.md"
+[ -f "./.sps/handoff.md" ]         || printf '# SPS Project Handoff & State\nRead this to understand the current project context, completed tasks, and next steps.\n\n## Current Status\n- \n\n## Conversation Log\n- \n' > "./.sps/handoff.md"
+note "mistakes.md, learned/INDEX.md, and handoff.md ready"
 
 # ── Verify + summary ──────────────────────────────────────────────────────────
 section "Verification"

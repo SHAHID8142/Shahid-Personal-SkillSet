@@ -6,10 +6,10 @@ description: >
   software. Detects the task type and INVOKES the real best-in-class specialist skill (epic-design
   for design, senior-frontend/backend/fullstack for engineering, awwwards-animations for motion,
   stripe-integration-expert for payments, code-reviewer before handover) instead of generic output,
-  then layers six enforced rules: hallmark anti-slop, graphify every project, responsive
-  320/768/1280/1440px, a11y WCAG AA, design tokens (no hardcoded values), conventional commits.
-  Reads ~/.sps/profile.md and ~/.sps/mistakes.md before every task; researches unknown tools into
-  ~/.sps/learned/. Builds section by section, never a whole page at once.
+  then layers fourteen enforced rules: hallmark anti-slop, graphify, responsive 320-1440px, a11y WCAG AA,
+  design tokens, branching & commits, dual-tone support, i18n, security, error boundaries, DB safety, rollback, secrets, and linting.
+  Reads both global (~/.sps/) and local (./.sps/) profile/mistakes files before every task; researches unknown tools into
+  ./.sps/learned/. Builds section by section, never a whole page at once.
 ---
 
 This is the Claude plugin entry point for **/sps**.
@@ -17,16 +17,16 @@ This is the Claude plugin entry point for **/sps**.
 The full, authoritative skill definition lives in `skills/sps/SKILL.md` in the
 Shahid-Personal-SkillSet repo. All behaviour is identical:
 
-- **STEP 0 — Memory:** read `~/.sps/profile.md`, `~/.sps/mistakes.md`, `~/.sps/learned/INDEX.md`
+- **STEP 0 — Memory:** read both `~/.sps/` (global preferences) and `./.sps/` (project-specific stack/fonts, and `./.sps/handoff.md` for context continuity)
 - **STEP 1 — Detect task type → invoke the real specialist skill** (epic-design, senior-frontend,
   senior-backend, awwwards-animations, stripe-integration-expert, etc.), with text fallback
-- **STEP 2 — Unknown tool protocol:** research → save to `~/.sps/learned/` → apply
+- **STEP 2 — Unknown tool protocol:** research → save to `./.sps/learned/` → apply
 - **STEP 3 — Section by section:** never build a whole page at once
 - **STEP 4 — Design execution:** invoke `epic-design` first, then the design stack
 - **STEP 5 — One tool per job:** Lenis for smooth scroll, GSAP for scroll-triggers, etc.
 - **STEP 6 — Skill catalog**
-- **STEP 7 — Six core rules:** anti-slop · graphify · responsive · a11y · design-tokens · conventional-commits
-- **STEP 8 — Quality gate:** 10 checks before every handover
+- **STEP 7 — Fourteen core rules:** anti-slop, graphify, responsive, a11y, tokens, branch & commits, dual-tone, i18n, security, error bounds, DB, rollback, secrets, linting
+- **STEP 8 — Quality gate:** 14 checks before every handover
 
 Refer to `skills/sps/SKILL.md` for the complete instructions.
-Install everywhere: `npx skills add -g SHAHID8142/Shahid-Personal-SkillSet` + `bash install.sh`
+Install per-project: `npx skills add SHAHID8142/Shahid-Personal-SkillSet` + `bash install.sh`
