@@ -180,9 +180,9 @@ if (Test-Path $repoSps) {
     try {
         New-Item -ItemType Directory -Force -Path $agyDir -ErrorAction Stop | Out-Null
         Copy-Item -Path $repoSps -Destination "$agyDir\SKILL.md" -Force -ErrorAction Stop
-        note "✓ /sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)"
+        note "+ /sps synced to Antigravity (~/.gemini/antigravity/skills/sps/)"
     } catch {
-        note "– /sps sync failed (permission denied to ~/.gemini)"
+        note "- /sps sync failed (permission denied to ~/.gemini)"
     }
     if (have agy) { note "agy detected - /sps auto-activates via progressive disclosure" }
     else          { note "agy not found - copied anyway; works once Antigravity is installed" }
