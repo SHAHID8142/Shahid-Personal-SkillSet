@@ -157,10 +157,20 @@ if (have uv) {
     Step "graphify (via pip)" { pip install graphifyy; graphify install }
 } else { $script:StepNum++; note "no uv/pip - graphify skipped (install uv: https://docs.astral.sh/uv/)" }
 
-# -- Step 39: Context7 MCP -----------------------------------------------------
+# -- Step 39: Context7 MCP (live library docs) ------------------------------------------
 if (have claude) {
-    Step "Context7 MCP (live library docs)" { claude mcp add --scope project context7 -- npx -y '@upstash/context7-mcp' }
-} else { $script:StepNum++ }
+    Step "Context7 MCP (live library docs)" {
+        $out = claude mcp add --scope project context7 -- npx -y @upstash/context7-mcp 2>&1
+        if ($LASTEXITCODE -ne 0 -and $out -match "already exists") {
+            Write-Output "MCP server context7 already exists"
+        } else {
+            if ($LASTEXITCODE -ne 0) { throw $out }
+            Write-Output $out
+        }
+    }
+} else {
+    $script:StepNum++
+}
 
 # -- Antigravity CLI sync ------------------------------------------------------
 section "Antigravity CLI (agy)"

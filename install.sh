@@ -171,8 +171,20 @@ else
 fi
 
 # ── Step 39: Context7 MCP (live docs) ────────────────────────────────────────
+add_context7() {
+  local out
+  out=$(claude mcp add --scope project context7 -- npx -y @upstash/context7-mcp 2>&1)
+  local rc=$?
+  if [ $rc -ne 0 ] && echo "$out" | grep -q "already exists"; then
+    echo "MCP server context7 already exists"
+    return 0
+  fi
+  echo "$out"
+  return $rc
+}
+
 if have claude; then
-  step "Context7 MCP (live library docs)"  claude mcp add --scope project context7 -- npx -y @upstash/context7-mcp
+  step "Context7 MCP (live library docs)"  add_context7
 else
   STEP=$((STEP+1))
 fi
