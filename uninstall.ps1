@@ -62,9 +62,8 @@ foreach ($s in $r3fSkills) { Remove-AgentSkill $s }
 $otherSkills = @(
     "tailwind-design-system", "threejs-fundamentals", "nextjs-app-router-patterns", 
     "vercel-composition-patterns", "vercel-react-best-practices", "supabase", "supabase-postgres-best-practices",
-    "astro", "expo", "tauri", "playwright", "vitest", "impeccable", "npxskillui",
-    "webgpu-claude-skill", "awesome-design-md", "taste-skill", "andrej-karpathy-skills",
-    "drizzle-orm", "prisma", "query", "zustand", "starter-workflows", "husky", "lint-staged"
+    "astro", "playwright", "vitest", "impeccable", 
+    "webgpu-claude-skill", "taste-skill", "andrej-karpathy-skills"
 )
 foreach ($s in $otherSkills) { Remove-AgentSkill $s }
 

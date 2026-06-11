@@ -29,7 +29,7 @@ LOG="./.sps/install.log"
 mkdir -p "./.sps"; : > "$LOG"
 
 # Total steps (keep in sync with step() calls below)
-TOTAL=56
+TOTAL=43
 
 section() { echo ""; echo -e "${BOLD}── $* ──${NC}"; }
 note()    { echo -e "${DIM}  $*${NC}"; }
@@ -51,14 +51,18 @@ step() {
   STEP=$((STEP+1))
   local start=$SECONDS
   printf "${YELLOW}→${NC} [%2d/%d] %s ... " "$STEP" "$TOTAL" "$label"
-  if run_timeout "$NETWORK_TIMEOUT" "$@"; then
+  local tmp_out=".tmp.step.out"
+  : > "$tmp_out"
+  if run_timeout "$NETWORK_TIMEOUT" "$@" > "$tmp_out" 2>&1; then
+    cat "$tmp_out" >> "$LOG"
     local elapsed=$((SECONDS-start))
     echo -e "${GREEN}done${NC} ${DIM}(${elapsed}s)${NC}"; INSTALLED=$((INSTALLED+1))
   else
+    cat "$tmp_out" >> "$LOG"
     local elapsed=$((SECONDS-start))
     echo -e "${RED}FAILED${NC} ${DIM}(${elapsed}s)${NC}"
     echo -e "${YELLOW}   > Error snippet:${NC}"
-    tail -n 3 "$LOG" | while read -r line; do echo "     $line"; done
+    tail -n 3 "$tmp_out" | while read -r line; do echo "     $line"; done
     FAILED=$((FAILED+1)); echo "FAILED: $label" >> "$LOG"
   fi
 }
@@ -96,27 +100,15 @@ fi
 section "Core design & animation skills (npx)"
 step "hallmark (anti-slop)"      npx skills add nutlope/hallmark
 step "GSAP animation suite"      npx skills add https://github.com/greensock/gsap-skills
-step "awwwards-animations"       npx skills add devmartinese/awwwards-animations
 
 section "Core Engineering & ML skills (npx)"
 step "andrej-karpathy-skills"    npx skills add multica-ai/andrej-karpathy-skills
 step "astro-framework"           npx skills add withastro/astro
-step "expo-mobile-skills"        npx skills add expo/expo
-step "tauri-desktop-skills"      npx skills add tauri-apps/tauri
 step "playwright-e2e"            npx skills add microsoft/playwright
 step "vitest-unit-testing"       npx skills add vitest-dev/vitest
 step "impeccable-ui"             npx skills add pbakaus/impeccable
-step "npxskillui-components"     npx skills add amaancoderx/npxskillui
 step "webgpu-claude-skill"       npx skills add dgreenheck/webgpu-claude-skill
-step "awesome-design-md"         npx skills add VoltAgent/awesome-design-md
 step "taste-skill"               npx skills add Leonxlnx/taste-skill
-step "drizzle-orm"               npx skills add drizzle-team/drizzle-orm
-step "prisma-orm"                npx skills add prisma/prisma
-step "tanstack-query"            npx skills add TanStack/query
-step "zustand-state"             npx skills add pmndrs/zustand
-step "github-actions-ci"         npx skills add actions/starter-workflows
-step "husky-hooks"               npx skills add typicode/husky
-step "lint-staged"               npx skills add lint-staged/lint-staged
 
 # ── Steps 7-30: ALL Claude design & animation plugins ─────────────────────────
 if have claude; then
@@ -125,7 +117,6 @@ if have claude; then
   step "ui-ux-pro-max"                      claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope project
 
   step "design-skillstack marketplace"      claude plugin marketplace add freshtechbro/claudedesignskills
-  step "frontend-design"                    claude plugin install frontend-design@claude-design-skillstack --scope project
   step "modern-web-design"                  claude plugin install modern-web-design@claude-design-skillstack --scope project
   step "animated-component-libraries"       claude plugin install animated-component-libraries@claude-design-skillstack --scope project
 
@@ -150,7 +141,7 @@ if have claude; then
   step "web3d-integration-patterns"         claude plugin install web3d-integration-patterns@claude-design-skillstack --scope project
   step "blender-web-pipeline"               claude plugin install blender-web-pipeline@claude-design-skillstack --scope project
 else
-  STEP=$((STEP+23)); note "claude not found — skipped 23 design plugin steps"
+  STEP=$((STEP+22)); note "claude not found — skipped 22 design plugin steps"
 fi
 
 # ── Steps 31-37: Engineering, marketing & devops plugins ─────────────────────

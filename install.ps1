@@ -23,7 +23,7 @@ $NetworkTimeout          = 90
 $script:Installed = 0
 $script:Skipped   = 0
 $script:StepNum   = 0
-$script:Total     = 56
+$script:Total     = 43
 $spsHome = ".\.sps"
 New-Item -ItemType Directory -Force -Path "$spsHome\learned" | Out-Null
 $script:Log = "$spsHome\install.log"
@@ -37,22 +37,30 @@ function Step {
     param([string]$Label, [scriptblock]$Action, [int]$TimeoutSec = $NetworkTimeout)
     $script:StepNum++
     Write-Host ("-> [{0,2}/{1}] {2} ... " -f $script:StepNum, $script:Total, $Label) -NoNewline
-    $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $job = Start-Job -ScriptBlock $Action
-    $finished = Wait-Job $job -Timeout $TimeoutSec
-    $secs = [int]$sw.Elapsed.TotalSeconds
-    if ($finished -and $job.State -eq 'Completed') {
+    $start = Get-Date
+    $tmpOut = ".\.tmp.step.out"
+    Clear-Content -Path $tmpOut -ErrorAction SilentlyContinue
+    
+    $job = Start-Job -ScriptBlock $Action -Name "InstallJob"
+    Wait-Job -Job $job -Timeout $TimeoutSec | Out-Null
+    Receive-Job -Job $job 2>&1 | Out-File -FilePath $tmpOut -Append
+    
+    if ($job.State -eq 'Completed') {
+        $elapsedSec = [math]::Round((Get-Date).Subtract($start).TotalSeconds)
+        Get-Content $tmpOut -ErrorAction SilentlyContinue | Add-Content -Path $script:Log
         Remove-Job $job -Force -ErrorAction SilentlyContinue
-        Write-Host ("done ({0}s)" -f $secs) -ForegroundColor Green
+        Write-Host "done ($elapsedSec`s)" -ForegroundColor Green
         $script:Installed++
     } else {
         Stop-Job  $job -ErrorAction SilentlyContinue
         Remove-Job $job -Force -ErrorAction SilentlyContinue
-        Write-Host "failed ($secs`s)" -ForegroundColor Red
+        $elapsedSec = [math]::Round((Get-Date).Subtract($start).TotalSeconds)
+        Get-Content $tmpOut -ErrorAction SilentlyContinue | Add-Content -Path $script:Log
+        Write-Host "failed ($elapsedSec`s)" -ForegroundColor Red
         Write-Host "   > Error snippet:" -ForegroundColor Yellow
-        Get-Content $script:Log -Tail 3 | ForEach-Object { Write-Host "     $_" -ForegroundColor DarkGray }
+        Get-Content $tmpOut -Tail 3 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "     $_" -ForegroundColor DarkGray }
         $script:Skipped++
-        Add-Content -Path $script:Log -Value "SKIPPED: $Label"
+        Add-Content -Path $script:Log -Value "FAILED: $Label"
     }
 }
 
@@ -86,37 +94,24 @@ if (have claude) {
 section "Core design & animation skills (npx)"
 Step "hallmark (anti-slop)"    { npx skills add nutlope/hallmark }
 Step "GSAP animation suite"    { npx skills add https://github.com/greensock/gsap-skills }
-Step "awwwards-animations"     { npx skills add devmartinese/awwwards-animations }
 
 section "Core Engineering & ML skills (npx)"
 Step "andrej-karpathy-skills"  { npx skills add multica-ai/andrej-karpathy-skills }
 Step "astro-framework"         { npx skills add withastro/astro }
-Step "expo-mobile-skills"      { npx skills add expo/expo }
-Step "tauri-desktop-skills"    { npx skills add tauri-apps/tauri }
 Step "playwright-e2e"          { npx skills add microsoft/playwright }
 Step "vitest-unit-testing"     { npx skills add vitest-dev/vitest }
 Step "impeccable-ui"           { npx skills add pbakaus/impeccable }
-Step "npxskillui-components"   { npx skills add amaancoderx/npxskillui }
 Step "webgpu-claude-skill"     { npx skills add dgreenheck/webgpu-claude-skill }
-Step "awesome-design-md"       { npx skills add VoltAgent/awesome-design-md }
 Step "taste-skill"             { npx skills add Leonxlnx/taste-skill }
-Step "drizzle-orm"             { npx skills add drizzle-team/drizzle-orm }
-Step "prisma-orm"              { npx skills add prisma/prisma }
-Step "tanstack-query"          { npx skills add TanStack/query }
-Step "zustand-state"           { npx skills add pmndrs/zustand }
-Step "github-actions-ci"       { npx skills add actions/starter-workflows }
-Step "husky-hooks"             { npx skills add typicode/husky }
-Step "lint-staged"             { npx skills add lint-staged/lint-staged }
 
 # -- Steps 7-30: ALL Claude design & animation plugins -------------------------
 if (have claude) {
     section "Design system & UI plugins"
     Step "ui-ux-pro-max marketplace"      { claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill }
     Step "ui-ux-pro-max"                  { claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope project }
-    Step "design-skillstack marketplace"  { claude plugin marketplace add freshtechbro/claudedesignskills }
-    Step "frontend-design"                { claude plugin install frontend-design@claude-design-skillstack --scope project }
-    Step "modern-web-design"              { claude plugin install modern-web-design@claude-design-skillstack --scope project }
-    Step "animated-component-libraries"   { claude plugin install animated-component-libraries@claude-design-skillstack --scope project }
+    Step "design-skillstack marketplace" { claude plugin marketplace add freshtechbro/claudedesignskills }
+    Step "modern-web-design"             { claude plugin install modern-web-design@claude-design-skillstack --scope project }
+    Step "animated-component-libraries"  { claude plugin install animated-component-libraries@claude-design-skillstack --scope project }
 
     section "Animation & motion plugins"
     Step "locomotive-scroll"              { claude plugin install locomotive-scroll@claude-design-skillstack --scope project }
@@ -138,7 +133,9 @@ if (have claude) {
     Step "playcanvas-engine"              { claude plugin install playcanvas-engine@claude-design-skillstack --scope project }
     Step "web3d-integration-patterns"     { claude plugin install web3d-integration-patterns@claude-design-skillstack --scope project }
     Step "blender-web-pipeline"           { claude plugin install blender-web-pipeline@claude-design-skillstack --scope project }
-} else { $script:StepNum += 23; note "claude not found - skipped 23 design plugin steps" }
+} else {
+    $script:StepNum += 22; note "claude not found - skipped 22 design plugin steps"
+}
 
 # -- Steps 31-37: Engineering, marketing & DevOps plugins ----------------------
 if (have claude) {
