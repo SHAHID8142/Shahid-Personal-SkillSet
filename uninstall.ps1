@@ -33,12 +33,21 @@ section "Removing globally installed skills"
 function Remove-AgentSkill($name) {
     $paths = @(
         "$env:USERPROFILE\.agents\skills\$name",
+        ".\.agents\skills\$name",
         "$env:USERPROFILE\.claude\skills\$name",
+        ".\.claude\skills\$name",
         "$env:USERPROFILE\.cursor\rules\$name.mdc",
+        ".\.cursor\rules\$name.mdc",
         "$env:USERPROFILE\.codex\skills\$name",
+        ".\.codex\skills\$name",
         "$env:USERPROFILE\.gemini\skills\$name",
+        ".\.gemini\skills\$name",
         "$env:USERPROFILE\.gemini\antigravity\skills\$name",
-        "$env:USERPROFILE\.windsurf\skills\$name"
+        ".\.gemini\antigravity\skills\$name",
+        "$env:USERPROFILE\.windsurf\skills\$name",
+        ".\.windsurf\skills\$name",
+        "$env:USERPROFILE\.antigravity\skills\$name",
+        ".\.antigravity\skills\$name"
     )
     $found = $false
     foreach ($p in $paths) {
@@ -49,23 +58,16 @@ function Remove-AgentSkill($name) {
 
 Remove-AgentSkill "sps"
 Remove-AgentSkill "universal-build-orchestrator"
-Remove-AgentSkill "hallmark"
-
-$gsapSkills = @("gsap-core","gsap-frameworks","gsap-performance","gsap-plugins","gsap-react","gsap-scrolltrigger","gsap-timeline","gsap-utils")
-foreach ($s in $gsapSkills) { Remove-AgentSkill $s }
-
-Remove-AgentSkill "awwwards-animations"
-
-$r3fSkills = @("r3f-animation","r3f-fundamentals","r3f-geometry","r3f-interaction","r3f-lighting","r3f-loaders","r3f-materials","r3f-physics","r3f-postprocessing","r3f-shaders","r3f-textures")
-foreach ($s in $r3fSkills) { Remove-AgentSkill $s }
-
-$otherSkills = @(
-    "tailwind-design-system", "threejs-fundamentals", "nextjs-app-router-patterns", 
-    "vercel-composition-patterns", "vercel-react-best-practices", "supabase", "supabase-postgres-best-practices",
-    "astro", "playwright", "vitest", "impeccable", 
-    "webgpu-claude-skill", "taste-skill", "andrej-karpathy-skills"
+$allSkills = @(
+    "analyze-github-action-logs", "astro-developer", "astro-pr-writer", "brandkit", "changeset",
+    "design-taste-frontend", "design-taste-frontend-v1", "full-output-enforcement", "gpt-taste",
+    "gsap-core", "gsap-frameworks", "gsap-performance", "gsap-plugins", "gsap-react", "gsap-scrolltrigger",
+    "gsap-timeline", "gsap-utils", "hallmark", "high-end-visual-design", "image-to-code",
+    "imagegen-frontend-mobile", "imagegen-frontend-web", "impeccable", "industrial-brutalist-ui",
+    "karpathy-guidelines", "merge", "minimalist-ui", "playwright-dev", "playwright-devops",
+    "redesign-existing-projects", "stitch-design-taste", "triage", "typo-checker", "webgpu-threejs-tsl"
 )
-foreach ($s in $otherSkills) { Remove-AgentSkill $s }
+foreach ($s in $allSkills) { Remove-AgentSkill $s }
 
 # -- Remove Claude plugins -----------------------------------------------------
 section "Removing Claude plugins"

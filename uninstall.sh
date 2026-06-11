@@ -36,17 +36,25 @@ section "Removing globally installed skills"
 
 remove_agent_skill() {
   local name="$1"
+  local found=false
   local paths=(
     "$HOME/.agents/skills/$name"
+    "./.agents/skills/$name"
     "$HOME/.claude/skills/$name"
+    "./.claude/skills/$name"
     "$HOME/.cursor/rules/$name.mdc"
+    "./.cursor/rules/$name.mdc"
     "$HOME/.codex/skills/$name"
+    "./.codex/skills/$name"
     "$HOME/.gemini/skills/$name"
+    "./.gemini/skills/$name"
     "$HOME/.gemini/antigravity/skills/$name"
+    "./.gemini/antigravity/skills/$name"
     "$HOME/.windsurf/skills/$name"
+    "./.windsurf/skills/$name"
     "$HOME/.antigravity/skills/$name"
+    "./.antigravity/skills/$name"
   )
-  local found=false
   for p in "${paths[@]}"; do
     if [ -e "$p" ]; then
       rm -rf "$p" && found=true
@@ -59,24 +67,15 @@ remove_agent_skill() {
 remove_agent_skill "sps"
 remove_agent_skill "universal-build-orchestrator"
 
-# Design skills
-remove_agent_skill "hallmark"
-
-# GSAP suite
-for skill in gsap-core gsap-frameworks gsap-performance gsap-plugins gsap-react gsap-scrolltrigger gsap-timeline gsap-utils; do
-  remove_agent_skill "$skill"
-done
-
-# Awwwards
-remove_agent_skill "awwwards-animations"
-
-# R3F suite
-for skill in r3f-animation r3f-fundamentals r3f-geometry r3f-interaction r3f-lighting r3f-loaders r3f-materials r3f-physics r3f-postprocessing r3f-shaders r3f-textures; do
-  remove_agent_skill "$skill"
-done
-
-# Other installed
-for skill in tailwind-design-system threejs-fundamentals nextjs-app-router-patterns vercel-composition-patterns vercel-react-best-practices supabase supabase-postgres-best-practices astro playwright vitest impeccable webgpu-claude-skill taste-skill andrej-karpathy-skills; do
+# Known skills installed by npx skills add
+for skill in \
+  analyze-github-action-logs astro-developer astro-pr-writer brandkit changeset \
+  design-taste-frontend design-taste-frontend-v1 full-output-enforcement gpt-taste \
+  gsap-core gsap-frameworks gsap-performance gsap-plugins gsap-react gsap-scrolltrigger \
+  gsap-timeline gsap-utils hallmark high-end-visual-design image-to-code \
+  imagegen-frontend-mobile imagegen-frontend-web impeccable industrial-brutalist-ui \
+  karpathy-guidelines merge minimalist-ui playwright-dev playwright-devops \
+  redesign-existing-projects stitch-design-taste triage typo-checker webgpu-threejs-tsl; do
   remove_agent_skill "$skill"
 done
 
