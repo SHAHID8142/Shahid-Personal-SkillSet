@@ -17,11 +17,10 @@ This is the Claude plugin entry point for **/sps**.
 The full, authoritative skill definition lives in `skills/sps/SKILL.md` in the
 Shahid-Personal-SkillSet repo. All behaviour is identical:
 
-- **STEP 0 — Memory:** read both `~/.sps/` (global preferences) and `./.sps/` (project-specific stack/fonts, and `./.sps/handoff.md` for context continuity)
-- **STEP 1 — Detect task type → invoke the real specialist skill** (epic-design, senior-frontend,
-  senior-backend, awwwards-animations, stripe-integration-expert, etc.), with text fallback
-- **STEP 2 — Unknown tool protocol:** research → save to `./.sps/learned/` → apply
-- **STEP 3 — Section by section:** never build a whole page at once
+- **STEP 0 — Initialization & Memory:** Setup local `.sps/` docs on first run; parse rules.
+- **STEP 1 — Detect & invoke:** Call expert skills, never just roleplay.
+- **STEP 2 — Vertical Slicing:** Strict section-by-section approval. Fullstack at once.
+- **STEP 3 — Unknown tool protocol:** Research missing skills with Context7.
 - **STEP 4 — Design execution:** invoke `epic-design` first, then the design stack
 - **STEP 5 — One tool per job:** Lenis for smooth scroll, GSAP for scroll-triggers, etc.
 - **STEP 6 — Skill catalog**

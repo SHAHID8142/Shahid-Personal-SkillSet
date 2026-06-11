@@ -19,17 +19,16 @@ description: >
 
 ---
 
-## STEP 0 — MEMORY (always before anything else)
+## STEP 0 — INITIALIZATION & MEMORY (FIRST RUN PROTOCOL)
 
-**Read these files** at the start of every session. Apply everything in them.
+If this is the **FIRST TIME** `/sps` is used on a project:
+1. Initialize the local `./.sps/` directory in the project root.
+2. Setup essential docs (`./.sps/profile.md`, `./.sps/mistakes.md`, `./.sps/handoff.md`).
+3. Write a complete architectural plan and save it to `./.sps/architecture.md`.
+4. Ask the user for any **new project-specific rules**. If provided, strictly add them to `./.sps/profile.md` and enforce them on all future tasks.
+5. Pause and wait for user approval on the initial docs before writing code.
 
-1. `~/.sps/profile.md` — user's preferred stack, aesthetic, verbosity, mode preference
-2. `~/.sps/mistakes.md` — logged mistakes; acknowledge any relevant ones, never repeat them
-3. `~/.sps/learned/INDEX.md` — topics researched in past sessions; check before researching
-
-If any file doesn't exist, create it (templates in `~/.sps/` — see install.sh).
-After every task: update `~/.sps/mistakes.md` if a mistake was made. Update `~/.sps/profile.md`
-if a new preference was stated, confirmed, or observed.
+**On EVERY subsequent run**, strictly read and apply the global `~/.sps/profile.md` AND the local `./.sps/profile.md`. Read `./.sps/handoff.md` to resume context. Update mistakes logs if errors occur.
 
 ---
 
@@ -78,35 +77,24 @@ whatever specialist skill you invoke.
 
 ---
 
-## STEP 2 — UNKNOWN TOOL PROTOCOL
+## STEP 2 — VERTICAL SLICING & SECTION-BY-SECTION (The Workflow)
+
+**You must strictly follow this interactive workflow. Never build an entire page at once. Never do "design first, wiring later."**
+
+1. **Sub-sectioning:** When starting a major section (e.g., a Navbar), first output a detailed plan breaking it down into *subsections* (e.g., Logo, Desktop Links, Mobile Menu, Auth Buttons). Wait for approval.
+2. **Vertical Slicing:** Work on exactly ONE subsection at a time. For that subsection, you must complete the frontend, backend, API wiring, state management, and functions **all at once**. 
+3. **Approval & Upgrades:** After finishing the subsection, **STOP**. Ask the user to check it. Explicitly ask for their approval to continue, and proactively **suggest upgrades or enhancements** you could apply to make it even better. Do not proceed until approved.
+
+---
+
+## STEP 3 — UNKNOWN TOOL PROTOCOL
 
 If the request mentions a library or tool **not in the catalog below**:
-
 1. Say: "I don't have [topic] in my catalog — researching now..."
 2. Research: use Context7 for official docs + web for real examples
 3. Save to `~/.sps/learned/[topic]/` (notes.md, quickstart.md, references.md)
 4. Register in `~/.sps/learned/INDEX.md`
 5. Apply the knowledge. Tell user: "Learned [topic], saved notes for future use."
-
----
-
-## STEP 3 — SECTION BY SECTION (absolute rule, no exceptions)
-
-**Never output an entire page or large component in one response.**
-
-1. List the full section plan first and wait for approval:
-   ```
-   Section plan:
-   [ ] 1. Navbar — logo, links, mobile hamburger
-   [ ] 2. Hero — headline, CTA, background animation
-   [ ] 3. Features grid
-   [ ] 4. Testimonials
-   [ ] 5. Pricing
-   [ ] 6. Footer
-   ```
-2. Build **one section at a time**. After each: "Section done — continue to [next]?"
-3. Each section passes quality gates before moving on.
-4. If user says "do it all at once" — reply: "Building section by section for better quality. Starting with [1]..."
 
 ---
 
