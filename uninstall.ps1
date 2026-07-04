@@ -1,14 +1,21 @@
 # Shahid Personal SkillSet - Uninstaller (Windows PowerShell)
 # -------------------------------------------------------------
-# Removes all /sps skills and catalog skills from all agents.
-# Does NOT delete your personal data: ~/.sps/profile.md, mistakes.md, learned/
+# Removes /sps and the curated profile installs from all supported agents.
+# By default, this removes ~/.sps/ personal data too.
 #
 # Usage: .\uninstall.ps1
-#        .\uninstall.ps1 -All    (also removes ~/.sps/ personal data)
+#        .\uninstall.ps1 -KeepPersonal
+#        .\uninstall.ps1 -Agents "claude-code,cursor"
 
-param([switch]$All)
+param(
+    [switch]$KeepPersonal,
+    [switch]$Yes,
+    [string]$Agents = "*"
+)
 
 $ErrorActionPreference = "Continue"
+$env:npm_config_cache = Join-Path $env:USERPROFILE ".sps\npm-cache"
+$env:NPX_NO_UPDATE_NOTIFIER = "1"
 
 function ok($msg)      { Write-Host "  [OK] $msg" -ForegroundColor Green }
 function info($msg)    { Write-Host "   --> $msg" -ForegroundColor Yellow }
@@ -21,8 +28,11 @@ Write-Host "|         Shahid Personal SkillSet - Uninstaller (Windows)         |
 Write-Host "+==================================================================+" -ForegroundColor Magenta
 Write-Host ""
 
-if ($All) {
-    Write-Host "WARNING: -All flag set. Will also delete $env:USERPROFILE\.sps\" -ForegroundColor Red
+Write-Host "This will remove /sps and everything installed by the SPS installer." -ForegroundColor Red
+if (-not $KeepPersonal) {
+    Write-Host "It will also delete $env:USERPROFILE\.sps\" -ForegroundColor Red
+}
+if (-not $Yes) {
     $confirm = Read-Host "Are you sure? (yes/no)"
     if ($confirm -ne "yes") { Write-Host "Aborted."; exit 0 }
 }
@@ -33,17 +43,23 @@ section "Removing globally installed skills"
 function Remove-AgentSkill($name) {
     $paths = @(
         "$env:USERPROFILE\.agents\skills\$name",
+        "$env:USERPROFILE\.config\agents\skills\$name",
         ".\.agents\skills\$name",
         "$env:USERPROFILE\.claude\skills\$name",
         ".\.claude\skills\$name",
+        "$env:USERPROFILE\.cursor\skills\$name",
         "$env:USERPROFILE\.cursor\rules\$name.mdc",
         ".\.cursor\rules\$name.mdc",
+        ".\.cursor\skills\$name",
         "$env:USERPROFILE\.codex\skills\$name",
         ".\.codex\skills\$name",
         "$env:USERPROFILE\.gemini\skills\$name",
         ".\.gemini\skills\$name",
+        "$env:USERPROFILE\.gemini\config\skills\$name",
         "$env:USERPROFILE\.gemini\antigravity\skills\$name",
         ".\.gemini\antigravity\skills\$name",
+        "$env:USERPROFILE\.gemini\antigravity-cli\skills\$name",
+        ".\.gemini\antigravity-cli\skills\$name",
         "$env:USERPROFILE\.windsurf\skills\$name",
         ".\.windsurf\skills\$name",
         "$env:USERPROFILE\.antigravity\skills\$name",
@@ -56,66 +72,69 @@ function Remove-AgentSkill($name) {
     if ($found) { removed $name }
 }
 
-Remove-AgentSkill "sps"
+function Get-AgentArgs {
+    if ($Agents -eq "*") { return @("--agent","claude-code","--agent","cursor","--agent","codex","--agent","antigravity","--agent","antigravity-cli","--agent","universal") }
+    $args = @()
+    foreach ($agent in ($Agents -split ",")) {
+        if ($agent.Trim()) {
+            $args += "--agent"
+            $args += $agent.Trim()
+        }
+    }
+    return $args
+}
+
+$manifestPath = "$env:USERPROFILE\.sps\install-manifest.env"
+$managedSkills = @("sps","hallmark","impeccable","taste-skill","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","astro-framework","webgpu-claude-skill")
+$claudePlugins = @("universal-build-orchestrator@shahid-personal-skillset","ui-ux-pro-max@ui-ux-pro-max-skill","engineering-skills@claude-code-skills","engineering-advanced-skills@claude-code-skills","marketing-skills@claude-code-skills","a11y-audit@claude-code-skills","docker-development@claude-code-skills")
+$claudeMarketplaces = @("shahid-personal-skillset","ui-ux-pro-max-skill","claude-code-skills")
+$useContext7 = 0
+$useGraphify = 0
+
+if (Test-Path $manifestPath) {
+    Get-Content $manifestPath | ForEach-Object {
+        if ($_ -match "^(.*?)=(.*)$") {
+            $key = $matches[1]
+            $value = $matches[2]
+            switch ($key) {
+                "MANAGED_SKILLS" { if ($value) { $managedSkills = $value -split "," } }
+                "CLAUDE_PLUGINS" { if ($value) { $claudePlugins = $value -split "," } else { $claudePlugins = @() } }
+                "CLAUDE_MARKETPLACES" { if ($value) { $claudeMarketplaces = $value -split "," } else { $claudeMarketplaces = @() } }
+                "USE_CONTEXT7" { $useContext7 = [int]$value }
+                "USE_GRAPHIFY" { $useGraphify = [int]$value }
+            }
+        }
+    }
+}
+
+$agentArgs = Get-AgentArgs
+if (Get-Command npx -ErrorAction SilentlyContinue) {
+    section "Removing skills via Skills CLI"
+    $skillArgs = @("skills","remove") + $managedSkills + @("-g","-y") + $agentArgs
+    & npx @skillArgs 2>&1 | Out-Null
+}
+
+foreach ($s in $managedSkills) { Remove-AgentSkill $s }
 Remove-AgentSkill "universal-build-orchestrator"
-$allSkills = @(
-    "analyze-github-action-logs", "astro-developer", "astro-pr-writer", "brandkit", "changeset",
-    "design-taste-frontend", "design-taste-frontend-v1", "full-output-enforcement", "gpt-taste",
-    "gsap-core", "gsap-frameworks", "gsap-performance", "gsap-plugins", "gsap-react", "gsap-scrolltrigger",
-    "gsap-timeline", "gsap-utils", "hallmark", "high-end-visual-design", "image-to-code",
-    "imagegen-frontend-mobile", "imagegen-frontend-web", "impeccable", "industrial-brutalist-ui",
-    "karpathy-guidelines", "merge", "minimalist-ui", "playwright-dev", "playwright-devops",
-    "redesign-existing-projects", "stitch-design-taste", "triage", "typo-checker", "webgpu-threejs-tsl"
-)
-foreach ($s in $allSkills) { Remove-AgentSkill $s }
 
 # -- Remove Claude plugins -----------------------------------------------------
 section "Removing Claude plugins"
 
 if (Get-Command claude -ErrorAction SilentlyContinue) {
-    $plugins = @(
-        "universal-build-orchestrator@shahid-personal-skillset",
-        "ui-ux-pro-max@ui-ux-pro-max-skill",
-        "gsap-scrolltrigger@claude-design-skillstack",
-        "frontend-design@claude-design-skillstack",
-        "scroll-reveal-libraries@claude-design-skillstack",
-        "playcanvas-engine@claude-design-skillstack",
-        "web3d-integration-patterns@claude-design-skillstack",
-        "blender-web-pipeline@claude-design-skillstack",
-        "animejs@claude-design-skillstack",
-        "locomotive-scroll@claude-design-skillstack",
-        "modern-web-design@claude-design-skillstack",
-        "animated-component-libraries@claude-design-skillstack",
-        "threejs-webgl@claude-design-skillstack",
-        "react-three-fiber@claude-design-skillstack",
-        "babylonjs-engine@claude-design-skillstack",
-        "aframe-webxr@claude-design-skillstack",
-        "spline-interactive@claude-design-skillstack",
-        "pixijs-2d@claude-design-skillstack",
-        "lightweight-3d-effects@claude-design-skillstack",
-        "react-spring-physics@claude-design-skillstack",
-        "lottie-animations@claude-design-skillstack",
-        "rive-interactive@claude-design-skillstack",
-        "barba-js@claude-design-skillstack",
-        "engineering-skills@claude-code-skills",
-        "engineering-advanced-skills@claude-code-skills",
-        "marketing-skills@claude-code-skills",
-        "research-ops-skills@claude-code-skills",
-        "a11y-audit@claude-code-skills",
-        "docker-development@claude-code-skills"
-    )
-    foreach ($p in $plugins) {
+    foreach ($p in $claudePlugins) {
         claude plugin uninstall $p --scope project 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) { removed $p }
     }
 
-    foreach ($mkt in @("shahid-personal-skillset","ui-ux-pro-max-skill","claude-design-skillstack","claude-code-skills")) {
+    foreach ($mkt in $claudeMarketplaces) {
         claude plugin marketplace remove $mkt 2>$null
         if ($LASTEXITCODE -eq 0) { removed "marketplace: $mkt" }
     }
 
-    claude mcp remove context7 --scope project 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0) { removed "Context7 MCP" }
+    if ($useContext7 -eq 1) {
+        claude mcp remove context7 --scope project 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) { removed "Context7 MCP" }
+    }
 } else {
     info "claude CLI not found - skipping Claude plugin removal"
 }
@@ -123,24 +142,28 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
 # -- Remove graphify -----------------------------------------------------------
 section "Removing graphify"
 if (Get-Command uv -ErrorAction SilentlyContinue) {
-    uv tool uninstall graphifyy 2>$null
-    if ($LASTEXITCODE -eq 0) { removed "graphify (uv)" }
+    if ($useGraphify -eq 1) {
+        uv tool uninstall graphifyy 2>$null
+        if ($LASTEXITCODE -eq 0) { removed "graphify (uv)" }
+    }
 } elseif (Get-Command pip -ErrorAction SilentlyContinue) {
-    pip uninstall graphifyy -y 2>$null
-    if ($LASTEXITCODE -eq 0) { removed "graphify (pip)" }
+    if ($useGraphify -eq 1) {
+        pip uninstall graphifyy -y 2>$null
+        if ($LASTEXITCODE -eq 0) { removed "graphify (pip)" }
+    }
 }
 $graphifySkill = "$env:USERPROFILE\.claude\skills\graphify"
 if (Test-Path $graphifySkill) { Remove-Item -Recurse -Force $graphifySkill; removed "graphify skill" }
 
 # -- Remove personal data (only with -All) ------------------------------------
-if ($All) {
+if (-not $KeepPersonal) {
     section "Removing personal data (~/.sps/)"
     $spsDir = "$env:USERPROFILE\.sps"
     if (Test-Path $spsDir) { Remove-Item -Recurse -Force $spsDir; removed "~\.sps\ (profile, mistakes, learned)" }
 } else {
     section "Personal data kept"
     ok "~\.sps\ kept intact (profile, mistakes, learned topics)"
-    info "To also remove personal data: .\uninstall.ps1 -All"
+    info "To also remove personal data: .\uninstall.ps1"
 }
 
 # -- Done ----------------------------------------------------------------------

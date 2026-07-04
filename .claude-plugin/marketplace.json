@@ -2,14 +2,14 @@
   "name": "shahid-personal-skillset",
   "owner": { "name": "Shahidul Islam" },
   "metadata": {
-    "description": "Shahid-Personal-SkillSet: a universal build orchestrator that routes any task to the best real-world skill and auto-installs it on demand.",
-    "version": "1.0.0"
+    "description": "Shahid-Personal-SkillSet: a project-scoped build orchestrator with mandatory discovery, role-based routing, section approvals, and host-aware fallbacks across mainstream agent runtimes.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "universal-build-orchestrator",
       "source": "./plugins/universal-build-orchestrator",
-      "description": "Detects what a 'build this' request needs, auto-installs the right skill from a vetted catalog, and uses it."
+      "description": "Claude plugin entrypoint for the capability-aware /sps workflow."
     }
   ]
 }

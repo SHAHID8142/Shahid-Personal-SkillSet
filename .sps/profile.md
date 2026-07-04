@@ -1,34 +1,26 @@
-# SPS User Profile
+# SPS Project Profile
 Last updated:
 
-## Identity
-- Role / experience level:
-- What they typically build:
+## Project identity
+- Name:
+- Goal:
+- Users:
 
-## Tech preferences
+## Scope notes
+- Project-only rules live here.
+- Personal defaults belong in `~/.sps/personal-defaults.md`.
+- Session-only rules should not be written here unless promoted.
+
+## Project-only rules
+- Typography:
+- Spacing / sizing:
+- Color system:
+- Motion level:
 - Primary stack:
-- Preferred database:
-- Preferred auth:
-- Preferred deploy:
-- Libraries loved:
-- Libraries to avoid:
-- Package manager:
-
-## Design aesthetic
-- Style keywords:
-- Typography lean:
-- Color approach:
-- Likes to see:
-- Dislikes / patterns to avoid:
-- References / inspirations:
-
-## Mode preference
-- Color scheme default:
-
-## Communication style
-- Verbosity:
-- Prefers:
-- Dislikes:
+- CMS:
+- Storefront:
+- ERP / admin:
+- Deployment constraints:
 
 ## Explicit approvals
 -

@@ -1,31 +1,31 @@
 ---
 name: universal-build-orchestrator
 description: >
-  Shahid Personal SkillSet (/sps) — Claude plugin entry point. Mirrors skills/sps/SKILL.md exactly.
-  Use for ANY request to build, design, create, implement, animate, fix, debug, deploy, or improve
-  software. Detects the task type and INVOKES the real best-in-class specialist skill (epic-design
-  for design, senior-frontend/backend/fullstack for engineering, awwwards-animations for motion,
-  stripe-integration-expert for payments, code-reviewer before handover) instead of generic output,
-  then layers twenty enforced rules: hallmark anti-slop, graphify, responsive 320-1440px, a11y WCAG AA,
-  design tokens, branching & commits, dual-tone support, i18n, security, error boundaries, DB safety, rollback, secrets, linting, state management, CI/CD, hooks, TSDoc, auditing, and modularity.
-  Reads both global (~/.sps/) and local (./.sps/) profile/mistakes files before every task; researches unknown tools into
-  ./.sps/learned/. Builds section by section, never a whole page at once.
+  Claude plugin entry point for `/sps`. Use when the user asks to build,
+  design, implement, fix, refactor, test, or deploy software and wants the
+  project-scoped `/sps` workflow: discovery first, role-based routing,
+  section-by-section approvals, and capability-aware verification.
 ---
 
-This is the Claude plugin entry point for **/sps**.
+This file is the Claude-specific entry point for `/sps`.
 
-The full, authoritative skill definition lives in `skills/sps/SKILL.md` in the
-Shahid-Personal-SkillSet repo. All behaviour is identical:
+The canonical workflow lives in `skills/sps/SKILL.md`. Follow that file as the
+source of truth.
 
-- **STEP 0 — Initialization & Memory:** Setup local `.sps/` docs on first run; parse rules.
-- **STEP 1 — Detect & invoke:** Call expert skills, never just roleplay.
-- **STEP 2 — Vertical Slicing:** Strict section-by-section approval. Fullstack at once.
-- **STEP 3 — Unknown tool protocol:** Research missing skills with Context7.
-- **STEP 4 — Design execution:** invoke `epic-design` first, then the design stack
-- **STEP 5 — One tool per job:** Lenis for smooth scroll, GSAP for scroll-triggers, etc.
-- **STEP 6 — Skill catalog**
-- **STEP 7 — Twenty core rules:** anti-slop, graphify, responsive, a11y, tokens, branch & commits, dual-tone, i18n, security, error bounds, DB, rollback, secrets, linting, state, CI/CD, hooks, TSDoc, auditing, modularity
-- **STEP 8 — Quality gate:** 19 checks before every handover
+## Claude host notes
 
-Refer to `skills/sps/SKILL.md` for the complete instructions.
-Install per-project: `npx skills add SHAHID8142/Shahid-Personal-SkillSet` + `bash install.sh`
+- Claude can use richer plugin and MCP integrations than many other hosts.
+- Use those capabilities when available, but do not rewrite the core workflow
+  around Claude-only features.
+- Project-local rules still win over global defaults.
+- The workflow is still: discovery -> options -> role selection -> section
+  approvals -> verification.
+
+## Required behavior
+
+1. Load the canonical `/sps` workflow from `skills/sps/SKILL.md`.
+2. Follow the scoped memory rules from `skills/sps/PROFILE-SCOPING.md`.
+3. Route to the best available specialist stack without claiming that every
+   host behaves the same way.
+4. Use Claude-only enhancers only when they genuinely help and do not conflict
+   with the chosen portable workflow.

@@ -1,7 +1,7 @@
 {
   "name": "universal-build-orchestrator",
-  "description": "Routes any 'build/design/animate/debug/optimize X' request to the right specialized skill, and auto-installs that skill from a vetted catalog if it isn't installed yet.",
-  "version": "1.0.0",
+  "description": "Claude entrypoint for /sps: a project-scoped build orchestrator that runs discovery, routes to the best available specialist stack, and falls back cleanly when a host capability is missing.",
+  "version": "2.0.0",
   "author": { "name": "Shahidul Islam" },
-  "keywords": ["orchestrator", "skills", "frontend", "design", "animation", "backend", "seo", "auto-install"]
+  "keywords": ["orchestrator", "skills", "frontend", "design", "backend", "verification", "project-scoped"]
 }

@@ -1,4 +1,4 @@
 # SPS Mistake Log
-Read before every task. Never repeat these.
+Project-local mistakes only. Do not use this file for global cross-project rules.
 
 ---

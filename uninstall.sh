@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Shahid Personal SkillSet — Uninstaller (Mac / Linux)
 # ─────────────────────────────────────────────────────
-# Removes all /sps skills and catalog skills from all agents.
-# Does NOT delete your personal data: ~/.sps/profile.md, mistakes.md, learned/
-# Those are yours — delete manually if you want them gone.
+# Removes /sps and the curated profile installs from all supported agents.
+# By default, this removes ~/.sps/ personal data too.
 #
 # Usage: bash uninstall.sh
-#        bash uninstall.sh --all    (also removes ~/.sps/ personal data)
+#        bash uninstall.sh --keep-personal
+#        bash uninstall.sh --agents claude-code,cursor
 
 set -uo pipefail
+export npm_config_cache="${HOME}/.sps/npm-cache"
+export NPX_NO_UPDATE_NOTIFIER=1
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; NC='\033[0m'
 ok()      { echo -e "${GREEN}✓${NC} $*"; }
@@ -16,8 +18,38 @@ info()    { echo -e "${YELLOW}→${NC} $*"; }
 removed() { echo -e "${RED}−${NC} $*"; }
 section() { echo ""; echo -e "${BOLD}── $* ──${NC}"; }
 
-REMOVE_PERSONAL=false
-[[ "${1:-}" == "--all" ]] && REMOVE_PERSONAL=true
+KEEP_PERSONAL=false
+AGENTS="*"
+ASSUME_YES=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --keep-personal)
+      KEEP_PERSONAL=true
+      shift
+      ;;
+    --yes|-y)
+      ASSUME_YES=true
+      shift
+      ;;
+    --agents|-a)
+      AGENTS="${2:-}"
+      shift 2
+      ;;
+    --all)
+      KEEP_PERSONAL=false
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: bash uninstall.sh [--keep-personal] [--yes] [--agents '*'|agent1,agent2]"
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════════╗"
@@ -25,8 +57,9 @@ echo "║         Shahid Personal SkillSet — Uninstaller                   ║
 echo "╚══════════════════════════════════════════════════════════════════╝"
 echo ""
 
-if $REMOVE_PERSONAL; then
-  echo -e "${RED}WARNING: --all flag set. Will also delete ~/.sps/ (profile, mistakes, learned).${NC}"
+echo -e "${RED}This will remove /sps and everything installed by the SPS installer.${NC}"
+$KEEP_PERSONAL || echo -e "${RED}It will also remove ~/.sps/ personal data and the install manifest.${NC}"
+if ! $ASSUME_YES; then
   read -p "Are you sure? (yes/no): " confirm
   [[ "$confirm" != "yes" ]] && echo "Aborted." && exit 0
 fi
@@ -39,17 +72,23 @@ remove_agent_skill() {
   local found=false
   local paths=(
     "$HOME/.agents/skills/$name"
+    "$HOME/.config/agents/skills/$name"
     "./.agents/skills/$name"
     "$HOME/.claude/skills/$name"
     "./.claude/skills/$name"
+    "$HOME/.cursor/skills/$name"
     "$HOME/.cursor/rules/$name.mdc"
     "./.cursor/rules/$name.mdc"
+    "./.cursor/skills/$name"
     "$HOME/.codex/skills/$name"
     "./.codex/skills/$name"
     "$HOME/.gemini/skills/$name"
     "./.gemini/skills/$name"
+    "$HOME/.gemini/config/skills/$name"
     "$HOME/.gemini/antigravity/skills/$name"
     "./.gemini/antigravity/skills/$name"
+    "$HOME/.gemini/antigravity-cli/skills/$name"
+    "./.gemini/antigravity-cli/skills/$name"
     "$HOME/.windsurf/skills/$name"
     "./.windsurf/skills/$name"
     "$HOME/.antigravity/skills/$name"
@@ -64,82 +103,70 @@ remove_agent_skill() {
 }
 
 # Core orchestrator
-remove_agent_skill "sps"
-remove_agent_skill "universal-build-orchestrator"
+build_agent_args() {
+  REMOVE_AGENT_ARGS=()
+  if [[ "$AGENTS" == "*" ]]; then
+    REMOVE_AGENT_ARGS=(--agent "claude-code" --agent "cursor" --agent "codex" --agent "antigravity" --agent "antigravity-cli" --agent "universal")
+    return
+  fi
+  IFS=',' read -r -a _agents <<< "$AGENTS"
+  for agent in "${_agents[@]}"; do
+    [[ -n "$agent" ]] && REMOVE_AGENT_ARGS+=(--agent "$agent")
+  done
+}
 
-# Known skills installed by npx skills add
-for skill in \
-  analyze-github-action-logs astro-developer astro-pr-writer brandkit changeset \
-  design-taste-frontend design-taste-frontend-v1 full-output-enforcement gpt-taste \
-  gsap-core gsap-frameworks gsap-performance gsap-plugins gsap-react gsap-scrolltrigger \
-  gsap-timeline gsap-utils hallmark high-end-visual-design image-to-code \
-  imagegen-frontend-mobile imagegen-frontend-web impeccable industrial-brutalist-ui \
-  karpathy-guidelines merge minimalist-ui playwright-dev playwright-devops \
-  redesign-existing-projects stitch-design-taste triage typo-checker webgpu-threejs-tsl; do
+MANIFEST="$HOME/.sps/install-manifest.env"
+MANAGED_SKILLS=(sps hallmark impeccable taste-skill webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns astro-framework webgpu-claude-skill)
+CLAUDE_PLUGINS=(universal-build-orchestrator@shahid-personal-skillset ui-ux-pro-max@ui-ux-pro-max-skill engineering-skills@claude-code-skills engineering-advanced-skills@claude-code-skills marketing-skills@claude-code-skills a11y-audit@claude-code-skills docker-development@claude-code-skills)
+CLAUDE_MARKETPLACES=(shahid-personal-skillset ui-ux-pro-max-skill claude-code-skills)
+USE_CONTEXT7=0
+USE_GRAPHIFY=0
+
+if [ -f "$MANIFEST" ]; then
+  while IFS='=' read -r key value; do
+    case "$key" in
+      MANAGED_SKILLS) IFS=',' read -r -a MANAGED_SKILLS <<< "$value" ;;
+      CLAUDE_PLUGINS) IFS=',' read -r -a CLAUDE_PLUGINS <<< "$value" ;;
+      CLAUDE_MARKETPLACES) IFS=',' read -r -a CLAUDE_MARKETPLACES <<< "$value" ;;
+      USE_CONTEXT7) USE_CONTEXT7="$value" ;;
+      USE_GRAPHIFY) USE_GRAPHIFY="$value" ;;
+    esac
+  done < "$MANIFEST"
+fi
+
+build_agent_args
+
+if command -v npx >/dev/null 2>&1; then
+  section "Removing skills via Skills CLI"
+  npx skills remove "${MANAGED_SKILLS[@]}" -g -y "${REMOVE_AGENT_ARGS[@]}" >/dev/null 2>&1 || true
+fi
+
+for skill in "${MANAGED_SKILLS[@]}"; do
   remove_agent_skill "$skill"
 done
+remove_agent_skill "universal-build-orchestrator"
 
 # ── Remove Claude plugin system skills ───────────────────────────────────────
 section "Removing Claude plugins"
 
 if command -v claude >/dev/null 2>&1; then
-  plugins=(
-    "universal-build-orchestrator@shahid-personal-skillset"
-    "ui-ux-pro-max@ui-ux-pro-max-skill"
-    "gsap-scrolltrigger@claude-design-skillstack"
-    "frontend-design@claude-design-skillstack"
-    "animejs@claude-design-skillstack"
-    "locomotive-scroll@claude-design-skillstack"
-    "modern-web-design@claude-design-skillstack"
-    "animated-component-libraries@claude-design-skillstack"
-    "threejs-webgl@claude-design-skillstack"
-    "react-three-fiber@claude-design-skillstack"
-    "babylonjs-engine@claude-design-skillstack"
-    "aframe-webxr@claude-design-skillstack"
-    "spline-interactive@claude-design-skillstack"
-    "pixijs-2d@claude-design-skillstack"
-    "lightweight-3d-effects@claude-design-skillstack"
-    "playcanvas-engine@claude-design-skillstack"
-    "web3d-integration-patterns@claude-design-skillstack"
-    "blender-web-pipeline@claude-design-skillstack"
-    "react-spring-physics@claude-design-skillstack"
-    "lottie-animations@claude-design-skillstack"
-    "rive-interactive@claude-design-skillstack"
-    "scroll-reveal-libraries@claude-design-skillstack"
-    "barba-js@claude-design-skillstack"
-    "engineering-skills@claude-code-skills"
-    "engineering-advanced-skills@claude-code-skills"
-    "marketing-skills@claude-code-skills"
-    "research-ops-skills@claude-code-skills"
-    "a11y-audit@claude-code-skills"
-    "docker-development@claude-code-skills"
-    "kubernetes-operator@claude-code-skills"
-    "terraform-patterns@claude-code-skills"
-    "helm-chart-builder@claude-code-skills"
-    "c-level-skills@claude-code-skills"
-    "product-skills@claude-code-skills"
-    "pm-skills@claude-code-skills"
-    "business-growth-skills@claude-code-skills"
-    "demo-video@claude-code-skills"
-    "research-summarizer@claude-code-skills"
-    "statistical-analyst@claude-code-skills"
-    "feature-flags-architect@claude-code-skills"
-    "code-tour@claude-code-skills"
-    "chaos-engineering@claude-code-skills"
-    "slo-architect@claude-code-skills"
-    "markdown-html@claude-code-skills"
-  )
-  for plugin in "${plugins[@]}"; do
-    claude plugin uninstall "$plugin" --scope project >/dev/null 2>&1 && removed "$plugin" || true
-  done
+  if ((${#CLAUDE_PLUGINS[@]})); then
+    for plugin in "${CLAUDE_PLUGINS[@]}"; do
+      claude plugin uninstall "$plugin" --scope project >/dev/null 2>&1 && removed "$plugin" || true
+    done
+  fi
 
   # Remove marketplaces
-  for mkt in shahid-personal-skillset ui-ux-pro-max-skill claude-design-skillstack claude-code-skills; do
-    claude plugin marketplace remove "$mkt" >/dev/null 2>&1 && removed "marketplace: $mkt" || true
-  done
+  if ((${#CLAUDE_MARKETPLACES[@]})); then
+    for mkt in "${CLAUDE_MARKETPLACES[@]}"; do
+      claude plugin marketplace remove "$mkt" >/dev/null 2>&1 && removed "marketplace: $mkt" || true
+    done
+  fi
 
   # Remove Context7 MCP
-  claude mcp remove context7 --scope project >/dev/null 2>&1 && removed "Context7 MCP" || true
+  if [[ "$USE_CONTEXT7" == "1" ]]; then
+    claude mcp remove context7 --scope project >/dev/null 2>&1 && removed "Context7 MCP" || true
+  fi
 else
   info "claude CLI not found — skipping Claude plugin removal"
 fi
@@ -147,21 +174,24 @@ fi
 # ── Remove graphify ───────────────────────────────────────────────────────────
 section "Removing graphify"
 if command -v uv >/dev/null 2>&1; then
-  uv tool uninstall graphifyy >/dev/null 2>&1 && removed "graphify (uv)" || true
+  [[ "$USE_GRAPHIFY" == "1" ]] && uv tool uninstall graphifyy >/dev/null 2>&1 && removed "graphify (uv)" || true
 elif command -v pip >/dev/null 2>&1; then
-  pip uninstall graphifyy -y >/dev/null 2>&1 && removed "graphify (pip)" || true
+  [[ "$USE_GRAPHIFY" == "1" ]] && pip uninstall graphifyy -y >/dev/null 2>&1 && removed "graphify (pip)" || true
 fi
 # Remove graphify skill file
-rm -rf "$HOME/.claude/skills/graphify" && removed "graphify skill" || true
+if [ -e "$HOME/.claude/skills/graphify" ] || [ -e "$HOME/.config/agents/skills/graphify" ]; then
+  rm -rf "$HOME/.claude/skills/graphify" "$HOME/.config/agents/skills/graphify"
+  removed "graphify skill"
+fi
 
-# ── Remove personal data (only with --all) ────────────────────────────────────
-if $REMOVE_PERSONAL; then
+# ── Remove personal data ──────────────────────────────────────────────────────
+if ! $KEEP_PERSONAL; then
   section "Removing personal data (~/.sps/)"
   rm -rf "$HOME/.sps" && removed "~/.sps/ (profile, mistakes, learned)" || true
 else
   section "Personal data kept"
   ok "~/.sps/ kept intact (profile, mistakes, learned topics)"
-  info "To also remove personal data: bash uninstall.sh --all"
+  info "To also remove personal data: bash uninstall.sh"
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
@@ -170,7 +200,7 @@ echo "╔═══════════════════════�
 echo "║                    Uninstall complete                             ║"
 echo "║                                                                  ║"
 echo "║  All /sps skills and catalog skills removed.                     ║"
-if $REMOVE_PERSONAL; then
+if ! $KEEP_PERSONAL; then
 echo "║  Personal data (~/.sps/) also removed.                           ║"
 else
 echo "║  Your profile, mistakes, and learned topics are still at         ║"
