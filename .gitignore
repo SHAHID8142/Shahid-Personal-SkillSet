@@ -6,3 +6,5 @@
 skills-lock.json
 node_modules/
 .tmp.step.out
+.tmp-smoke*/
+.tmp-smoke-sps/

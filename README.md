@@ -11,12 +11,17 @@ capabilities.
 
 When you invoke `/sps`, the agent should:
 
-1. load project-scoped memory before global defaults
-2. ask mandatory discovery questions
-3. research options and recommend one path
-4. choose the best role and specialist stack for the phase
-5. build section by section with approvals
-6. verify the work before handoff
+1. detect the active host and write `./.sps/agent.md` with the SPS version stamp
+2. bootstrap `./.sps/` from templates if missing
+3. if the project never used `/sps` before, run a mandatory scored alignment
+   audit, write `./.sps/audit-report.md`, and give the report before building
+4. load project-scoped memory before global defaults
+5. reaffirm that `/sps` is required for this project
+6. ask mandatory discovery questions (or continue after the audit choice)
+7. research options and recommend one path with Known / Assumed / Unverified labels
+8. choose the best role and specialist stack for the phase
+9. build section by section with approvals, memory updates, low-end mobile gates, and asset budgets
+10. verify the work before handoff without inventing results
 
 ## Compatibility
 
@@ -32,57 +37,72 @@ For the detailed host model, see [`skills/sps/CAPABILITY-MATRIX.md`](skills/sps/
 
 ## Install
 
-### Minimal
+### One command (recommended)
 
-Installs only `/sps` for maximum portability.
-
-```bash
-npx skills add SHAHID8142/Shahid-Personal-SkillSet -g --agent claude-code --agent cursor --agent codex --agent antigravity --agent antigravity-cli --agent universal
-```
-
-### Balanced
-
-Recommended default. Installs `/sps` plus a small set of strong, portable
-specialist skills.
-
-```bash
-git clone https://github.com/SHAHID8142/Shahid-Personal-SkillSet
-cd Shahid-Personal-SkillSet
-bash install.sh --profile balanced --agents '*'
-```
-
-Windows:
-
-```powershell
-git clone https://github.com/SHAHID8142/Shahid-Personal-SkillSet
-cd Shahid-Personal-SkillSet
-powershell -ExecutionPolicy Bypass -File install.ps1 -Profile balanced -Agents "*"
-```
-
-### Full
-
-Adds optional host-specific enhancers such as Claude plugins, `graphify`, and
-MCP setup where supported.
-
-```bash
-bash install.sh --profile full --agents '*'
-```
-
-See [`skills/sps/INSTALL-PROFILES.md`](skills/sps/INSTALL-PROFILES.md).
-
-### One-command bootstrap
+Clones or updates the repo under `~/.sps/src/Shahid-Personal-SkillSet`, then
+runs the installer with a clean progress UI.
 
 Mac / Linux:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/install.sh) --profile balanced --agents '*'
+curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash
+```
+
+Noninteractive core install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --profile core --yes
 ```
 
 Windows PowerShell:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$tmp=Join-Path $env:TEMP 'sps-install.ps1'; irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/install.ps1 -OutFile $tmp; & $tmp -Profile balanced -Agents '*'"
+irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1 | iex
 ```
+
+Or:
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1))) -Profile core -Yes
+```
+
+### Profiles
+
+| Profile | What you get |
+|---|---|
+| `core` | **Recommended.** `/sps` + curated portable skills |
+| `full` | Core + Claude plugins / MCP / extras |
+
+Alias: `balanced` → `core`. Optional: `minimal` → `/sps` only.
+
+### Update later
+
+```bash
+bash ~/.sps/src/Shahid-Personal-SkillSet/scripts/sps-update.sh --profile core --yes
+# or
+curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --yes
+```
+
+### Health check
+
+```bash
+bash ~/.sps/src/Shahid-Personal-SkillSet/scripts/sps-doctor.sh
+```
+
+### Local install (already cloned)
+
+```bash
+bash install.sh --profile core --yes
+bash install.sh --profile full --yes
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File install.ps1 -Profile core -Yes
+```
+
+See [`skills/sps/INSTALL-PROFILES.md`](skills/sps/INSTALL-PROFILES.md).
 
 The installer writes an install manifest to `~/.sps/install-manifest.env` so the
 uninstaller can remove what the installer managed.
@@ -134,6 +154,7 @@ In any supported host:
 
 ```text
 /sps [your request]
+/sps audit
 ```
 
 Examples:
@@ -141,15 +162,39 @@ Examples:
 - `/sps build a dashboard section by section with approval checkpoints`
 - `/sps fix this production bug and verify the deploy path`
 - `/sps compare CMS options for this project and recommend one`
+- `/sps audit`
+- `/sps improve this existing website` (forces audit first if `.sps/` was missing)
 
 ## Key design rules
 
+- once `./.sps/` exists, `/sps` stays required for that project’s build work
 - project rules do not leak into other projects
+- memory files are written at boot and after every approved section
+- active agent identity + SPS version are stored in `./.sps/agent.md`
 - discovery happens before implementation
-- section-by-section approval is required
+- section-by-section approval is required, with abort conditions
 - capability detection happens before extra tooling
+- no invented files, APIs, packages, or “tests passed” claims
 - verification is required before handoff
-- low-end mobile and responsiveness are first-class concerns
+- UI work defaults to minimal mobile: responsive, low-end safe, budgeted assets, no fancy/laggy phone effects unless explicitly approved
+- repeated mistakes can be promoted into project or personal rules only with approval
+
+## Maintainer checks
+
+```bash
+bash scripts/lint-sps.sh
+bash scripts/smoke-sps.sh
+bash scripts/bootstrap-sps.sh /path/to/project
+```
+
+CI runs the same lint + smoke checks on every push and pull request via
+`.github/workflows/sps-ci.yml`.
+
+Windows PowerShell syntax (when `pwsh` is installed):
+
+```powershell
+pwsh -NoProfile -File scripts/check-powershell.ps1
+```
 
 ## Better defaults adopted
 
@@ -169,7 +214,18 @@ The repo also standardizes brand/logo sourcing around [`theSVG`](https://thesvg.
 ```text
 Shahid-Personal-SkillSet/
 ├── skills/sps/SKILL.md
-├── skills/sps/*.md                 # reference docs for capability, profiles, verification, etc.
+├── skills/sps/*.md                 # reference docs
+├── skills/sps/templates/           # project .sps bootstrap templates
+├── skills/sps/hosts/               # thin host adapters
+├── scripts/bootstrap-sps.sh
+├── scripts/lint-sps.sh
+├── scripts/smoke-sps.sh
+├── get-sps.sh
+├── get-sps.ps1
+├── scripts/sps-doctor.sh
+├── scripts/sps-update.sh
+├── scripts/check-powershell.ps1
+├── .github/workflows/sps-ci.yml
 ├── plugins/universal-build-orchestrator/
 ├── install.sh
 ├── install.ps1
@@ -183,4 +239,4 @@ Shahid-Personal-SkillSet/
 
 This repo intentionally avoids claiming that every agent or IDE supports the
 same workflow. Review third-party skills before trusting them, and prefer the
-`balanced` profile unless you specifically need host-specific extras.
+`core` profile unless you specifically need host-specific extras.

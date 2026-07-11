@@ -1,7 +1,9 @@
 param(
-    [ValidateSet("minimal","balanced","full")]
-    [string]$Profile = "balanced",
-    [string]$Agents = "*"
+    [ValidateSet("minimal","balanced","core","full","")]
+    [string]$Profile = "",
+    [string]$Agents = "*",
+    [switch]$Yes,
+    [switch]$Interactive
 )
 
 $ErrorActionPreference = "Continue"
@@ -12,10 +14,12 @@ $env:CI = "1"
 $env:npm_config_cache = Join-Path $env:USERPROFILE ".sps\npm-cache"
 $env:NPX_NO_UPDATE_NOTIFIER = "1"
 $NetworkTimeout = 90
+$script:Start = Get-Date
 
 $script:Installed = 0
 $script:Skipped = 0
 $script:StepNum = 0
+$script:TotalSteps = 1
 $repoDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $spsHome = Join-Path $env:USERPROFILE ".sps"
 $manifestPath = Join-Path $spsHome "install-manifest.env"
@@ -28,6 +32,8 @@ $script:ClaudePlugins = @()
 $script:ClaudeMarketplaces = @()
 $script:UseContext7 = 0
 $script:UseGraphify = 0
+$versionFile = Join-Path $repoDir "skills\sps\VERSION"
+$script:Version = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { "unknown" }
 $syncRoots = @(
     "$env:USERPROFILE\.claude\skills",
     "$env:USERPROFILE\.cursor\skills",
@@ -41,6 +47,8 @@ $syncRoots = @(
 )
 
 function note($msg)    { Write-Host "  $msg" -ForegroundColor DarkGray }
+function ok($msg)      { Write-Host "  [OK] $msg" -ForegroundColor Green }
+function warn($msg)    { Write-Host "  [!]  $msg" -ForegroundColor Yellow }
 function section($msg) { Write-Host ""; Write-Host "-- $msg --" -ForegroundColor Cyan }
 function have($cmd)    { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
 function Get-AgentArgs {
@@ -67,7 +75,8 @@ function Get-AgentArgString {
 function Step {
     param([string]$Label, [scriptblock]$Action, [int]$TimeoutSec = $NetworkTimeout)
     $script:StepNum++
-    Write-Host ("-> [{0,2}] {1} ... " -f $script:StepNum, $Label) -NoNewline
+    $bar = "[{0}/{1}]" -f $script:StepNum, $script:TotalSteps
+    Write-Host ("  {0} {1} ... " -f $bar, $Label) -NoNewline
     $start = Get-Date
     $tmpOut = Join-Path $spsHome ".step.out"
     Clear-Content -Path $tmpOut -ErrorAction SilentlyContinue
@@ -173,22 +182,72 @@ function Sync-CoreSkill {
 }
 
 Write-Host ""
-Write-Host "+==================================================================+" -ForegroundColor Magenta
-Write-Host "| Shahid Personal SkillSet install                                 |" -ForegroundColor Magenta
-Write-Host ("| Profile: {0,-56}|" -f $Profile) -ForegroundColor Magenta
-Write-Host ("| Agents: {0,-57}|" -f $Agents) -ForegroundColor Magenta
-Write-Host "+==================================================================+" -ForegroundColor Magenta
+Write-Host "+============================================================+" -ForegroundColor Cyan
+Write-Host ("|  Shahid Personal SkillSet   v{0,-28}|" -f $script:Version) -ForegroundColor Cyan
+Write-Host "|  Project-scoped /sps workflow for many AI agents           |" -ForegroundColor Cyan
+Write-Host "+============================================================+" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "Detected hosts" -ForegroundColor White
+if ((Test-Path "$env:USERPROFILE\.claude") -or (have claude)) { ok "Claude" } else { warn "Claude not detected" }
+if (Test-Path "$env:USERPROFILE\.cursor") { ok "Cursor" } else { warn "Cursor not detected" }
+if (Test-Path "$env:USERPROFILE\.codex") { ok "Codex" } else { warn "Codex not detected" }
+if (Test-Path "$env:USERPROFILE\.gemini") { ok "Gemini / Antigravity" } else { warn "Gemini / Antigravity not detected" }
+Write-Host ""
+
+if (-not $Profile) {
+    if ($Interactive -or (-not $Yes)) {
+        Write-Host "Choose install profile" -ForegroundColor White
+        Write-Host "  1) core  - recommended (/sps + portable skills)"
+        Write-Host "  2) full  - core + Claude extras"
+        $choice = if ($Yes) { "1" } else { Read-Host "Enter 1/2 [1]" }
+        switch ($choice) {
+            "2" { $Profile = "full" }
+            default { $Profile = "core" }
+        }
+    } else {
+        $Profile = "core"
+    }
+}
+
+if ($Profile -eq "balanced") { $Profile = "core" }
+
+Write-Host "Plan" -ForegroundColor White
+ok "profile = $Profile"
+ok "agents  = $Agents"
+ok "version = $($script:Version)"
+Write-Host ""
+
+if (-not $Yes) {
+    $confirm = Read-Host "Continue install? [Y/n]"
+    if ($confirm -match '^[Nn]') { Write-Host "Aborted."; exit 0 }
+}
 
 section "Prerequisites"
-if (have node) { note "Node.js $(node -v)" } else { Write-Host "Node.js required: https://nodejs.org" -ForegroundColor Red; exit 1 }
-if (have npx) { note "npx available" } else { Write-Host "npx required (ships with Node.js)" -ForegroundColor Red; exit 1 }
-if (have claude) { note "claude CLI found" } else { note "claude CLI not found - Claude extras will be skipped" }
-if (have uv) { note "uv found" } else { note "uv not found - graphify may use pip" }
-if (have pip) { note "pip found" } else { note "pip not found" }
+if (have node) { ok "Node.js $(node -v)" } else { Write-Host "Node.js required: https://nodejs.org" -ForegroundColor Red; exit 1 }
+if (have npx) { ok "npx available" } else { Write-Host "npx required (ships with Node.js)" -ForegroundColor Red; exit 1 }
+if (have claude) { ok "claude CLI found" } else { warn "claude CLI not found - Claude extras will be skipped" }
+if (have uv) { ok "uv found" } else { warn "uv not found - graphify may use pip" }
+if (have pip) { ok "pip found" } else { warn "pip not found" }
 $agentArgs = Get-AgentArgs
 $agentArgsString = Get-AgentArgString
 
-section "Core"
+switch ($Profile) {
+    "minimal" { $script:TotalSteps = 1 }
+    "core" { $script:TotalSteps = 8 }
+    "full" {
+        $script:TotalSteps = 10
+        if (have claude) { $script:TotalSteps += 11 }
+        if ((have uv) -or (have pip)) { $script:TotalSteps += 1 }
+    }
+    default {
+        Write-Host "Invalid profile: $Profile" -ForegroundColor Red
+        exit 1
+    }
+}
+note "Planned steps: $($script:TotalSteps)"
+
+section "Installing"
 Step "/sps core skill" ([scriptblock]::Create("npx skills add `"$repoDir`" -g --copy -y $agentArgsString"))
 
 if ($Profile -ne "minimal") {
@@ -265,21 +324,24 @@ Sync-CoreSkill
 Write-Manifest
 note "Wrote install manifest to ~/.sps/install-manifest.env"
 
-section "Summary"
-note "Installed steps: $script:Installed"
-note "Skipped/failed steps: $script:Skipped"
-if (Test-Path "$env:USERPROFILE\.claude\skills\sps\SKILL.md") { note "+ /sps present for Claude" } else { note "- /sps missing for Claude" }
-if (Test-Path "$env:USERPROFILE\.cursor\skills\sps\SKILL.md") { note "+ /sps present for Cursor" } else { note "- /sps missing for Cursor" }
-if (Test-Path "$env:USERPROFILE\.codex\skills\sps\SKILL.md") { note "+ /sps present for Codex" } else { note "- /sps missing for Codex" }
-if (Test-Path "$env:USERPROFILE\.gemini\config\skills\sps") { note "+ /sps present for Gemini/Antigravity shared path" } else { note "- /sps missing for Gemini/Antigravity shared path" }
-note "Log: $script:Log"
+section "Host verification"
+if (Test-Path "$env:USERPROFILE\.claude\skills\sps\SKILL.md") { ok "/sps on Claude" } else { warn "/sps missing on Claude" }
+if (Test-Path "$env:USERPROFILE\.cursor\skills\sps\SKILL.md") { ok "/sps on Cursor" } else { warn "/sps missing on Cursor" }
+if (Test-Path "$env:USERPROFILE\.codex\skills\sps\SKILL.md") { ok "/sps on Codex" } else { warn "/sps missing on Codex" }
+if (Test-Path "$env:USERPROFILE\.gemini\config\skills\sps") { ok "/sps on Gemini/Antigravity" } else { warn "/sps missing on Gemini/Antigravity" }
 
+$elapsed = [math]::Round((Get-Date).Subtract($script:Start).TotalSeconds)
 Write-Host ""
-Write-Host "+==================================================================+" -ForegroundColor Green
-Write-Host "| Install complete                                                 |" -ForegroundColor Green
-Write-Host ("| Profile: {0,-56}|" -f $Profile) -ForegroundColor Green
-Write-Host "+==================================================================+" -ForegroundColor Green
+Write-Host "+============================================================+" -ForegroundColor Green
+Write-Host "|  Install complete                                          |" -ForegroundColor Green
+Write-Host ("|  Profile: {0,-47}|" -f $Profile) -ForegroundColor Green
+Write-Host ("|  Version: {0,-47}|" -f $script:Version) -ForegroundColor Green
+Write-Host ("|  Time:    {0,-47}|" -f "${elapsed}s") -ForegroundColor Green
+Write-Host "|  Next: open a project and run  /sps                        |" -ForegroundColor Green
+Write-Host "|        old project?            /sps audit                  |" -ForegroundColor Green
+Write-Host "+============================================================+" -ForegroundColor Green
 Write-Host ""
+note "Log: $script:Log"
 
 if ($script:Skipped -gt 0) {
     exit 1

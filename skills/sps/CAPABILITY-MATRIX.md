@@ -32,12 +32,27 @@ If a capability is missing, fall back instead of pretending it exists.
 - Never assume the same skill directories exist on every runtime.
 - Never claim "works identically everywhere."
 
+## Write host identity every session
+
+After detecting the host, always update `./.sps/agent.md` with:
+
+- active host name
+- `/sps` required: yes
+- detected capabilities
+- fallback notes for missing capabilities
+
+Do this even on limited hosts. Memory writing is portable; advanced tooling is not.
+
 ## Generic fallback workflow
 
 When the host is unknown or limited:
 
-1. Run discovery in plain chat.
-2. Present options and recommendation in plain markdown.
-3. Use the best available local shell/filesystem workflow.
-4. Use project-local `.sps/` memory only.
-5. Handoff with a clear "verified vs not verified" summary.
+1. Write or refresh `./.sps/agent.md`.
+2. Run discovery in plain chat.
+3. Present options and recommendation in plain markdown with Known / Assumed /
+   Unverified labels.
+4. Use the best available local shell/filesystem workflow.
+5. Use project-local `.sps/` memory only, and update it after each approval.
+6. Apply the mobile / low-end gate even if browser tooling is missing; mark what
+   remains manually unverified.
+7. Handoff with a clear "verified vs not verified" summary.

@@ -13,9 +13,9 @@ The core workflow is portable. Advanced behavior depends on the host. See
 
 ## Install profiles
 
-- `minimal`: `/sps` only
-- `balanced`: `/sps` plus curated portable specialist skills
-- `full`: `balanced` plus optional host-specific enhancers
+- `core`: `/sps` plus curated portable specialist skills (recommended)
+- `full`: `core` plus optional host-specific enhancers
+- aliases: `balanced` → `core`, `minimal` → `/sps` only
 
 See `skills/sps/INSTALL-PROFILES.md`.
 

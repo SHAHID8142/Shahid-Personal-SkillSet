@@ -52,9 +52,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo ""
-echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║         Shahid Personal SkillSet — Uninstaller                   ║"
-echo "╚══════════════════════════════════════════════════════════════════╝"
+echo -e "\033[0;36m\033[1m╔══════════════════════════════════════════════════════════════════╗\033[0m"
+echo -e "\033[0;36m\033[1m║\033[0m  Shahid Personal SkillSet — Uninstaller                          \033[0;36m\033[1m║\033[0m"
+echo -e "\033[0;36m\033[1m╚══════════════════════════════════════════════════════════════════╝\033[0m"
 echo ""
 
 echo -e "${RED}This will remove /sps and everything installed by the SPS installer.${NC}"
@@ -121,6 +121,7 @@ CLAUDE_PLUGINS=(universal-build-orchestrator@shahid-personal-skillset ui-ux-pro-
 CLAUDE_MARKETPLACES=(shahid-personal-skillset ui-ux-pro-max-skill claude-code-skills)
 USE_CONTEXT7=0
 USE_GRAPHIFY=0
+SYNC_PATHS=()
 
 if [ -f "$MANIFEST" ]; then
   while IFS='=' read -r key value; do
@@ -130,6 +131,7 @@ if [ -f "$MANIFEST" ]; then
       CLAUDE_MARKETPLACES) IFS=',' read -r -a CLAUDE_MARKETPLACES <<< "$value" ;;
       USE_CONTEXT7) USE_CONTEXT7="$value" ;;
       USE_GRAPHIFY) USE_GRAPHIFY="$value" ;;
+      SYNC_PATHS) IFS=',' read -r -a SYNC_PATHS <<< "$value" ;;
     esac
   done < "$MANIFEST"
 fi
@@ -145,6 +147,29 @@ for skill in "${MANAGED_SKILLS[@]}"; do
   remove_agent_skill "$skill"
 done
 remove_agent_skill "universal-build-orchestrator"
+
+# Always clear installer-mirrored /sps roots (even if CLI remove missed them)
+section "Removing mirrored /sps sync paths"
+DEFAULT_SYNC_PATHS=(
+  "$HOME/.claude/skills"
+  "$HOME/.cursor/skills"
+  "$HOME/.codex/skills"
+  "$HOME/.agents/skills"
+  "$HOME/.config/agents/skills"
+  "$HOME/.gemini/config/skills"
+  "$HOME/.gemini/skills"
+  "$HOME/.gemini/antigravity/skills"
+  "$HOME/.gemini/antigravity-cli/skills"
+)
+if ((${#SYNC_PATHS[@]} == 0)); then
+  SYNC_PATHS=("${DEFAULT_SYNC_PATHS[@]}")
+fi
+for dest_root in "${SYNC_PATHS[@]}" "${DEFAULT_SYNC_PATHS[@]}"; do
+  [[ -z "$dest_root" ]] && continue
+  if [ -e "$dest_root/sps" ]; then
+    rm -rf "$dest_root/sps" && removed "${dest_root/#$HOME/\~}/sps"
+  fi
+done
 
 # ── Remove Claude plugin system skills ───────────────────────────────────────
 section "Removing Claude plugins"

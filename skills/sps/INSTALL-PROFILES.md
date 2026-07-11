@@ -1,64 +1,33 @@
 # Install Profiles
 
-`/sps` uses install profiles so the skillset can stay portable instead of
-forcing every machine into the same heavy setup.
+`/sps` uses two install profiles so the skillset stays simple and portable.
 
-## Minimal
+## Core (recommended default)
 
-Use for the widest compatibility and lowest conflict risk.
-
-Installs:
-- `/sps`
-
-Command:
-
-```bash
-npx skills add SHAHID8142/Shahid-Personal-SkillSet -g --agent claude-code --agent cursor --agent codex --agent antigravity --agent antigravity-cli --agent universal
-```
-
-## Balanced
-
-Use as the default for most users. This keeps the stack cross-agent friendly
-while adding high-confidence specialist skills.
+Use for day-to-day work across Claude, Cursor, Codex, Antigravity, and similar
+agents.
 
 Installs:
 - `/sps`
 - `hallmark`
 - `impeccable`
 - `taste-skill`
-- `microsoft/playwright`
-- `vitest-dev/vitest`
 - `webapp-testing`
 - `web-design-guidelines`
 - `vercel-react-best-practices`
 - `vercel-composition-patterns`
 
-Representative commands:
-
 ```bash
-npx skills add SHAHID8142/Shahid-Personal-SkillSet -g --agent '*'
-npx skills add nutlope/hallmark -g --agent '*'
-npx skills add pbakaus/impeccable -g --agent '*'
-npx skills add Leonxlnx/taste-skill -g --agent '*'
-npx skills add https://github.com/anthropics/skills --skill webapp-testing -g --agent '*'
-npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g --agent '*'
-npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g --agent '*'
-npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g --agent '*'
+curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --profile core --yes
 ```
 
-In the SPS installers, `--agents '*'` expands to:
-- `claude-code`
-- `cursor`
-- `codex`
-- `antigravity`
-- `antigravity-cli`
-- `universal`
+Alias: `balanced` still maps to `core`.
 
 ## Full
 
-Use only when the host and user actually benefit from extra tooling.
+Use when you want host-specific extras on top of `core`.
 
-Includes everything in `balanced`, plus optional host-specific enhancers such as:
+Includes everything in `core`, plus optional enhancers such as:
 - Claude plugin entrypoint
 - `ui-ux-pro-max`
 - `engineering-skills`
@@ -68,14 +37,38 @@ Includes everything in `balanced`, plus optional host-specific enhancers such as
 - `docker-development`
 - `graphify`
 - `Context7`
+- optional specialists like `astro-framework`
 
 The full profile is capability-aware:
 - if `claude` is not present, Claude plugin steps are skipped
 - if `uv` or `pip` is missing, `graphify` is skipped
 - if MCP is unavailable, MCP setup is skipped
 
+```bash
+curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --profile full --yes
+```
+
+## Optional alias: minimal
+
+`minimal` still works and installs **only `/sps`** (fastest / most portable).
+It is kept as an alias for power users, not a primary menu choice.
+
+```bash
+bash install.sh --profile minimal --yes
+```
+
+## Agent expansion
+
+In the SPS installers, `--agents '*'` expands to:
+- `claude-code`
+- `cursor`
+- `codex`
+- `antigravity`
+- `antigravity-cli`
+- `universal`
+
 ## Recommendation
 
-- `minimal`: use when you want portability first
-- `balanced`: use for day-to-day work on Claude, Cursor, Codex, and similar agents
-- `full`: use only when you want the extra host-specific integrations
+- `core`: default for almost everyone
+- `full`: only when you want Claude/MCP extras
+- `minimal`: only when you want `/sps` alone

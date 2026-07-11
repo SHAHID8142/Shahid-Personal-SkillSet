@@ -90,6 +90,7 @@ $claudePlugins = @("universal-build-orchestrator@shahid-personal-skillset","ui-u
 $claudeMarketplaces = @("shahid-personal-skillset","ui-ux-pro-max-skill","claude-code-skills")
 $useContext7 = 0
 $useGraphify = 0
+$syncPaths = @()
 
 if (Test-Path $manifestPath) {
     Get-Content $manifestPath | ForEach-Object {
@@ -102,6 +103,7 @@ if (Test-Path $manifestPath) {
                 "CLAUDE_MARKETPLACES" { if ($value) { $claudeMarketplaces = $value -split "," } else { $claudeMarketplaces = @() } }
                 "USE_CONTEXT7" { $useContext7 = [int]$value }
                 "USE_GRAPHIFY" { $useGraphify = [int]$value }
+                "SYNC_PATHS" { if ($value) { $syncPaths = $value -split "," } }
             }
         }
     }
@@ -116,6 +118,28 @@ if (Get-Command npx -ErrorAction SilentlyContinue) {
 
 foreach ($s in $managedSkills) { Remove-AgentSkill $s }
 Remove-AgentSkill "universal-build-orchestrator"
+
+section "Removing mirrored /sps sync paths"
+$defaultSyncPaths = @(
+    "$env:USERPROFILE\.claude\skills",
+    "$env:USERPROFILE\.cursor\skills",
+    "$env:USERPROFILE\.codex\skills",
+    "$env:USERPROFILE\.agents\skills",
+    "$env:USERPROFILE\.config\agents\skills",
+    "$env:USERPROFILE\.gemini\config\skills",
+    "$env:USERPROFILE\.gemini\skills",
+    "$env:USERPROFILE\.gemini\antigravity\skills",
+    "$env:USERPROFILE\.gemini\antigravity-cli\skills"
+)
+if ($syncPaths.Count -eq 0) { $syncPaths = $defaultSyncPaths }
+foreach ($destRoot in ($syncPaths + $defaultSyncPaths | Select-Object -Unique)) {
+    if (-not $destRoot) { continue }
+    $spsPath = Join-Path $destRoot "sps"
+    if (Test-Path $spsPath) {
+        Remove-Item -Recurse -Force $spsPath
+        removed "$spsPath"
+    }
+}
 
 # -- Remove Claude plugins -----------------------------------------------------
 section "Removing Claude plugins"

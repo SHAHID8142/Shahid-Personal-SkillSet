@@ -1,0 +1,32 @@
+name: sps-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-smoke:
+    name: Lint + smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh
+
+      - name: SPS lint
+        run: bash scripts/lint-sps.sh
+
+      - name: SPS smoke
+        run: bash scripts/smoke-sps.sh
+        env:
+          CI: "1"
+          npm_config_yes: "true"
+          NPX_NO_UPDATE_NOTIFIER: "1"

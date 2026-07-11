@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Shahid Personal SkillSet install (Mac / Linux)
 # Usage:
-#   bash install.sh --profile minimal
-#   bash install.sh --profile balanced
-#   bash install.sh --profile full
+#   bash install.sh                          # interactive menu when TTY
+#   bash install.sh --profile core --yes
+#   bash install.sh --profile full --agents '*'
+#
+# Prefer one-command bootstrap:
+#   curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash
 
 set -uo pipefail
 
@@ -11,13 +14,15 @@ export GIT_TERMINAL_PROMPT=0
 export GIT_SSH_COMMAND="ssh -oBatchMode=yes -oStrictHostKeyChecking=no"
 export GIT_CLONE_PROTECTION_ACTIVE=false
 export npm_config_yes=true
-export CI=1
+export CI="${CI:-1}"
 export npm_config_cache="${HOME}/.sps/npm-cache"
 export NPX_NO_UPDATE_NOTIFIER=1
 
 NETWORK_TIMEOUT=90
-PROFILE="balanced"
+PROFILE=""
 AGENTS="*"
+ASSUME_YES=false
+INTERACTIVE=false
 MANIFEST="$HOME/.sps/install-manifest.env"
 MANAGED_SKILLS=("sps")
 CLAUDE_PLUGINS=()
@@ -36,64 +41,123 @@ SYNC_PATHS=(
   "$HOME/.gemini/antigravity-cli/skills"
 )
 
+CYAN='\033[0;36m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
+INSTALLED=0; FAILED=0; STEP=0; TOTAL_STEPS=1
+LOG_DIR="$HOME/.sps"
+LOG="$LOG_DIR/install.log"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERSION="unknown"
+[[ -f "$REPO/skills/sps/VERSION" ]] && VERSION="$(tr -d '[:space:]' < "$REPO/skills/sps/VERSION")"
+START_TS=$SECONDS
+
 usage() {
   cat <<'EOF'
-Usage: bash install.sh [--profile minimal|balanced|full] [--agents '*'|agent1,agent2]
+Usage: bash install.sh [--profile core|full] [--agents '*'|list] [--yes] [--interactive]
 
 Profiles:
-  minimal   Install /sps only
-  balanced  Install /sps plus curated portable specialist skills
-  full      Install balanced profile plus optional Claude/MCP/graphify extras
+  core   Recommended default: /sps + curated portable skills
+  full   Core + Claude plugins / MCP / graphify extras
 
-Agents:
-  *         Install to the curated mainstream set: claude-code,cursor,codex,antigravity,antigravity-cli,universal
-  list      Comma-separated subset, e.g. claude-code,cursor,codex,antigravity,antigravity-cli
+Aliases (still accepted):
+  balanced -> core
+  minimal  -> /sps only (fastest, no specialist skills)
+
+One-command (clone/pull + install):
+  curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --profile|-p)
-      PROFILE="${2:-}"
-      shift 2
-      ;;
-    --agents|-a)
-      AGENTS="${2:-}"
-      shift 2
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
+    --profile|-p) PROFILE="${2:-}"; shift 2 ;;
+    --agents|-a)  AGENTS="${2:-}"; shift 2 ;;
+    --yes|-y)     ASSUME_YES=true; shift ;;
+    --interactive|-i) INTERACTIVE=true; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) echo "Unknown argument: $1"; usage; exit 1 ;;
+  esac
+done
+
+have() { command -v "$1" >/dev/null 2>&1; }
+section() { echo ""; echo -e "${BOLD}${CYAN}── $* ──${NC}"; }
+note()    { echo -e "${DIM}  $*${NC}"; }
+ok()      { echo -e "  ${GREEN}✓${NC} $*"; }
+warn()    { echo -e "  ${YELLOW}!${NC} $*"; }
+bad()     { echo -e "  ${RED}✗${NC} $*"; }
+
+banner() {
+  echo ""
+  echo -e "${CYAN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${CYAN}${BOLD}║${NC}  ${BOLD}Shahid Personal SkillSet${NC}   v${VERSION}                     ${CYAN}${BOLD}║${NC}"
+  echo -e "${CYAN}${BOLD}║${NC}  Project-scoped /sps workflow for many AI agents         ${CYAN}${BOLD}║${NC}"
+  echo -e "${CYAN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
+  echo ""
+}
+
+detect_hosts() {
+  echo -e "${BOLD}Detected hosts${NC}"
+  [[ -d "$HOME/.claude" || $(have claude && echo 1) ]] && ok "Claude" || warn "Claude not detected"
+  [[ -d "$HOME/.cursor" ]] && ok "Cursor" || warn "Cursor not detected"
+  [[ -d "$HOME/.codex" ]] && ok "Codex" || warn "Codex not detected"
+  [[ -d "$HOME/.gemini" ]] && ok "Gemini / Antigravity" || warn "Gemini / Antigravity not detected"
+  echo ""
+}
+
+choose_profile_interactive() {
+  echo -e "${BOLD}Choose install profile${NC}"
+  echo -e "  ${BOLD}1)${NC} core  — recommended (/sps + portable skills)  ${DIM}~1–3m${NC}"
+  echo -e "  ${BOLD}2)${NC} full  — core + Claude plugins / MCP extras   ${DIM}~3–6m${NC}"
+  echo ""
+  local choice=""
+  if [[ -t 0 ]]; then
+    read -r -p "Enter 1/2 [1]: " choice
+  else
+    choice="1"
+  fi
+  case "${choice:-1}" in
+    2|full) PROFILE="full" ;;
+    *) PROFILE="core" ;;
+  esac
+}
+
+normalize_profile() {
+  case "$PROFILE" in
+    balanced) PROFILE="core" ;;
+    minimal|core|full) ;;
     *)
-      echo "Unknown argument: $1"
+      echo "Invalid profile: $PROFILE"
       usage
       exit 1
       ;;
   esac
-done
+}
 
-case "$PROFILE" in
-  minimal|balanced|full) ;;
-  *)
-    echo "Invalid profile: $PROFILE"
-    usage
-    exit 1
-    ;;
-esac
+progress_bar() {
+  local cur="$1" total="$2"
+  [[ "$total" -lt 1 ]] && total=1
+  local width=22
+  local filled=$(( cur * width / total ))
+  (( filled > width )) && filled=$width
+  local empty=$(( width - filled ))
+  local bar
+  bar="$(printf '%0.s█' $(seq 1 "$filled" 2>/dev/null) 2>/dev/null || true)"
+  local pad
+  pad="$(printf '%0.s░' $(seq 1 "$empty" 2>/dev/null) 2>/dev/null || true)"
+  printf "${DIM}[%s%s] %s/%s${NC}" "$bar" "$pad" "$cur" "$total"
+}
 
-GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
-INSTALLED=0; FAILED=0; STEP=0
-LOG_DIR="$HOME/.sps"
-LOG="$LOG_DIR/install.log"
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-mkdir -p "$LOG_DIR/learned"
-: > "$LOG"
-
-section() { echo ""; echo -e "${BOLD}-- $* --${NC}"; }
-note()    { echo -e "${DIM}  $*${NC}"; }
-have()    { command -v "$1" >/dev/null 2>&1; }
+compute_total_steps() {
+  case "$PROFILE" in
+    minimal) TOTAL_STEPS=1 ;;
+    core) TOTAL_STEPS=8 ;;
+    full)
+      TOTAL_STEPS=10
+      if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 11)); fi
+      if have uv || have pip; then TOTAL_STEPS=$((TOTAL_STEPS + 1)); fi
+      ;;
+  esac
+}
 
 build_agent_args() {
   AGENT_ARGS=()
@@ -124,7 +188,9 @@ step() {
   STEP=$((STEP+1))
   local start=$SECONDS
   local tmp_out="$LOG_DIR/.step.out"
-  printf "${YELLOW}->${NC} [%02d] %s ... " "$STEP" "$label"
+  printf "  "
+  progress_bar "$STEP" "$TOTAL_STEPS"
+  printf "  ${YELLOW}%s${NC} ... " "$label"
   : > "$tmp_out"
   if run_timeout "$NETWORK_TIMEOUT" "$tmp_out" "$@"; then
     cat "$tmp_out" >> "$LOG"
@@ -133,8 +199,7 @@ step() {
   else
     cat "$tmp_out" >> "$LOG"
     echo -e "${RED}failed${NC} ${DIM}($((SECONDS-start))s)${NC}"
-    echo -e "${YELLOW}   > Error snippet:${NC}"
-    tail -n 3 "$tmp_out" | while read -r line; do echo "     $line"; done
+    echo -e "${YELLOW}     >${NC} $(tail -n 1 "$tmp_out" 2>/dev/null)"
     FAILED=$((FAILED+1))
     echo "FAILED: $label" >> "$LOG"
   fi
@@ -196,22 +261,23 @@ CLAUDE_MARKETPLACES=$claude_marketplaces
 USE_CONTEXT7=$USE_CONTEXT7
 USE_GRAPHIFY=$USE_GRAPHIFY
 SYNC_PATHS=$(IFS=,; echo "${SYNC_PATHS[*]}")
+SPS_VERSION=$VERSION
 EOF
 }
 
 sync_core_skill() {
   local src="$REPO/skills/sps"
   if [ ! -d "$src" ]; then
-    note "skills/sps not found - run from repo root"
+    warn "skills/sps not found - run from repo root"
     return
   fi
   for dest_root in "${SYNC_PATHS[@]}"; do
     if mkdir -p "$dest_root" 2>/dev/null; then
       rm -rf "$dest_root/sps"
       cp -R "$src" "$dest_root/"
-      note "+ synced /sps to ${dest_root/#$HOME/\~}/sps"
+      ok "synced /sps → ${dest_root/#$HOME/\~}/sps"
     else
-      note "- could not sync /sps to ${dest_root/#$HOME/\~}"
+      warn "could not sync → ${dest_root/#$HOME/\~}"
     fi
   done
 }
@@ -228,26 +294,72 @@ add_context7() {
   return $rc
 }
 
+print_success_card() {
+  local elapsed=$((SECONDS - START_TS))
+  echo ""
+  echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  ${BOLD}Install complete${NC}                                         ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}╠════════════════════════════════════════════════════════════╣${NC}"
+  printf "${GREEN}${BOLD}║${NC}  Profile: %-47s ${GREEN}${BOLD}║${NC}\n" "$PROFILE"
+  printf "${GREEN}${BOLD}║${NC}  Version: %-47s ${GREEN}${BOLD}║${NC}\n" "$VERSION"
+  printf "${GREEN}${BOLD}║${NC}  Time:    %-47s ${GREEN}${BOLD}║${NC}\n" "${elapsed}s"
+  printf "${GREEN}${BOLD}║${NC}  Steps:   %-47s ${GREEN}${BOLD}║${NC}\n" "$INSTALLED ok / $FAILED failed"
+  echo -e "${GREEN}${BOLD}╠════════════════════════════════════════════════════════════╣${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  ${BOLD}Next steps${NC}                                              ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  1. Open any project in your agent                       ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  2. Run:  /sps                                           ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  3. Old project?  /sps audit                             ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  4. Health check: bash scripts/sps-doctor.sh             ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
+  echo ""
+  note "Log: $LOG"
+  note "Source: $REPO"
+}
+
+# ── main ─────────────────────────────────────────────────────────────────────
+mkdir -p "$LOG_DIR/learned"
+: > "$LOG"
+
+banner
+detect_hosts
+
+if [[ -z "$PROFILE" ]]; then
+  if $INTERACTIVE || { [[ -t 0 ]] && ! $ASSUME_YES; }; then
+    choose_profile_interactive
+  else
+    PROFILE="core"
+  fi
+fi
+
+normalize_profile
+
+echo -e "${BOLD}Plan${NC}"
+ok "profile = $PROFILE"
+ok "agents  = $AGENTS"
+ok "version = $VERSION"
 echo ""
-echo "+==================================================================+"
-echo "| Shahid Personal SkillSet install                                 |"
-printf "| Profile: %-55s |\n" "$PROFILE"
-printf "| Agents: %-56s|\n" "$AGENTS"
-echo "+==================================================================+"
+
+if ! $ASSUME_YES && [[ -t 0 ]]; then
+  read -r -p "Continue install? [Y/n] " confirm
+  case "${confirm:-Y}" in
+    n|N|no|NO) echo "Aborted."; exit 0 ;;
+  esac
+fi
 
 section "Prerequisites"
-have node   && note "Node.js $(node -v)" || { echo "Node.js required: https://nodejs.org"; exit 1; }
-have npx    && note "npx available"      || { echo "npx required (ships with Node.js)"; exit 1; }
-have claude && note "claude CLI found"   || note "claude CLI not found - Claude extras will be skipped"
-have uv     && note "uv found"           || note "uv not found - graphify may use pip"
-have pip    && note "pip found"          || note "pip not found"
+have node   && ok "Node.js $(node -v)" || { bad "Node.js required: https://nodejs.org"; exit 1; }
+have npx    && ok "npx available"      || { bad "npx required (ships with Node.js)"; exit 1; }
+have claude && ok "claude CLI found"   || warn "claude CLI not found — Claude extras will be skipped"
+have uv     && ok "uv found"           || warn "uv not found — graphify may use pip"
+have pip    && ok "pip found"          || warn "pip not found"
 build_agent_args
+compute_total_steps
+note "Planned steps: $TOTAL_STEPS"
 
-section "Core"
+section "Installing"
 step "/sps core skill" npx skills add "$REPO" -g --copy -y "${AGENT_ARGS[@]}"
 
 if [[ "$PROFILE" != "minimal" ]]; then
-  section "Balanced portable stack"
   MANAGED_SKILLS+=(hallmark impeccable taste-skill webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns)
   step "hallmark" npx skills add nutlope/hallmark -g -y "${AGENT_ARGS[@]}"
   step "impeccable" npx skills add pbakaus/impeccable -g -y "${AGENT_ARGS[@]}"
@@ -259,13 +371,11 @@ if [[ "$PROFILE" != "minimal" ]]; then
 fi
 
 if [[ "$PROFILE" == "full" ]]; then
-  section "Optional specialists"
   MANAGED_SKILLS+=(astro-framework webgpu-claude-skill)
   step "astro-framework" npx skills add withastro/astro -g -y "${AGENT_ARGS[@]}"
   step "webgpu-claude-skill" npx skills add dgreenheck/webgpu-claude-skill -g -y "${AGENT_ARGS[@]}"
 
   if have claude; then
-    section "Claude extras"
     CLAUDE_MARKETPLACES+=(shahid-personal-skillset ui-ux-pro-max-skill claude-code-skills)
     CLAUDE_PLUGINS+=(universal-build-orchestrator@shahid-personal-skillset ui-ux-pro-max@ui-ux-pro-max-skill engineering-skills@claude-code-skills engineering-advanced-skills@claude-code-skills marketing-skills@claude-code-skills a11y-audit@claude-code-skills docker-development@claude-code-skills)
     step "/sps Claude marketplace" claude plugin marketplace add "$REPO"
@@ -281,10 +391,9 @@ if [[ "$PROFILE" == "full" ]]; then
     USE_CONTEXT7=1
     step "Context7 MCP" add_context7
   else
-    note "Claude extras skipped because claude CLI was not found"
+    warn "Claude extras skipped because claude CLI was not found"
   fi
 
-  section "Optional research tools"
   if have uv; then
     USE_GRAPHIFY=1
     step "graphify" bash -c 'uv tool install graphifyy && graphify install'
@@ -292,32 +401,24 @@ if [[ "$PROFILE" == "full" ]]; then
     USE_GRAPHIFY=1
     step "graphify (pip)" bash -c 'pip install graphifyy && graphify install'
   else
-    note "graphify skipped because neither uv nor pip is available"
+    warn "graphify skipped because neither uv nor pip is available"
   fi
 fi
 
 section "Shared setup"
 seed_global_memory
-note "Seeded ~/.sps/personal-defaults.md, ~/.sps/global-mistakes.md, and ~/.sps/learned/INDEX.md"
+ok "seeded ~/.sps personal defaults / mistakes / learned index"
 sync_core_skill
 write_manifest
-note "Wrote install manifest to ~/.sps/install-manifest.env"
+ok "wrote install manifest → ~/.sps/install-manifest.env"
 
-section "Summary"
-note "Installed steps: $INSTALLED"
-note "Skipped/failed steps: $FAILED"
-[ -f "$HOME/.claude/skills/sps/SKILL.md" ] && note "+ /sps present for Claude" || note "- /sps missing for Claude"
-[ -f "$HOME/.cursor/skills/sps/SKILL.md" ] && note "+ /sps present for Cursor" || note "- /sps missing for Cursor"
-[ -f "$HOME/.codex/skills/sps/SKILL.md" ] && note "+ /sps present for Codex" || note "- /sps missing for Codex"
-[ -d "$HOME/.gemini/config/skills/sps" ] && note "+ /sps present for Gemini/Antigravity shared path" || note "- /sps missing for Gemini/Antigravity shared path"
-note "Log: $LOG"
+section "Host verification"
+[ -f "$HOME/.claude/skills/sps/SKILL.md" ] && ok "/sps on Claude" || bad "/sps missing on Claude"
+[ -f "$HOME/.cursor/skills/sps/SKILL.md" ] && ok "/sps on Cursor" || bad "/sps missing on Cursor"
+[ -f "$HOME/.codex/skills/sps/SKILL.md" ] && ok "/sps on Codex" || bad "/sps missing on Codex"
+[ -d "$HOME/.gemini/config/skills/sps" ] && ok "/sps on Gemini/Antigravity" || bad "/sps missing on Gemini/Antigravity"
 
-echo ""
-echo "+==================================================================+"
-echo "| Install complete                                                 |"
-printf "| Profile: %-55s |\n" "$PROFILE"
-echo "+==================================================================+"
-echo ""
+print_success_card
 
 if ((FAILED > 0)); then
   exit 1
