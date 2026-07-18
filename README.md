@@ -1,186 +1,182 @@
 # Shahid Personal SkillSet (`/sps`)
 
-`/sps` is a project-scoped master workflow for AI coding agents.
+**Version:** 3.0.1
 
-It is designed to work across Claude, Cursor, Codex, Antigravity, and similar
-skills-compatible agents, but it does **not** pretend every host has identical
-features. The core workflow is portable. Advanced integrations depend on host
-capabilities.
+`/sps` tells your coding agent **how to build a project step by step** — with
+memory, approvals, and (when you use a CMS) **storefront + admin controls
+together**.
 
-## What `/sps` does
+It works on **skills-compatible coding agents** (Claude Code, Cursor, Codex,
+Antigravity, Windsurf, Copilot, OpenCode, and similar).  
+It does **not** work the same on every tool, and it is **not** for ChatGPT-style
+chatbots.
 
-When you invoke `/sps`, the agent should:
+---
 
-1. read the Method Card; detect host; write `./.sps/agent.md` + VERSION
-2. bootstrap enhanced `.sps/` docs + root mirrors (`AGENTS.md` / `GEMINI.md` / `CLAUDE.md`)
-3. legacy projects: scored audit (+ CMS debt) before building
-4. discovery grill including team/multi-agent and deploy target/method
-5. docs pack + pre-build “anything missing?” confirm
-6. CMS Foundation (when CMS enabled), then section-by-section **UI + CMS together**
-7. skill router (install-or-instruct), roles, todos, design gate, hygiene, cleanup
-8. stop for approval after Section DoD (including CMS round-trip proof)
-9. use `/sps sync` for storefront/CMS debt on pending projects
-10. verify honestly before handoff (Known / Assumed / Unverified)
+## Quick start (install)
 
-Portability: skills-compatible coding agents. Not identical everywhere. Not for
-generic chatbots.
-
-## Compatibility
-
-| Host | Support level | Notes |
-|---|---|---|
-| Claude Code | Full | Best host for `/sps`, including plugin and MCP enhancers. |
-| Cursor | High | Core workflow is strong; use Cursor-native tools instead of Claude plugin assumptions. |
-| Codex | High | Core workflow is portable; advanced integrations vary by runtime. |
-| Antigravity / Gemini CLI | Medium | Requires root mirrors; keep stack simple and capability-aware. |
-| Windsurf / Copilot / OpenCode family | Medium–Varies | Portable laws via SKILL.md + `.sps/`; enhancers optional. |
-| Other skills-compatible agents | Varies | Use the portable workflow and fall back cleanly. |
-
-For the detailed host model, see [`skills/sps/CAPABILITY-MATRIX.md`](skills/sps/CAPABILITY-MATRIX.md).
-
-## Install
-
-### One command (recommended)
-
-Clones or updates the repo under `~/.sps/src/Shahid-Personal-SkillSet`, then
-runs the installer with a clean progress UI.
-
-Mac / Linux:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash
-```
-
-Noninteractive core install:
+### Mac / Linux
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --profile core --yes
 ```
 
-Windows PowerShell:
-
-```powershell
-irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1 | iex
-```
-
-Or:
+### Windows (PowerShell)
 
 ```powershell
 & ([scriptblock]::Create((irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1))) -Profile core -Yes
 ```
 
-### Profiles
-
-| Profile | What you get |
-|---|---|
-| `core` | **Recommended.** `/sps` + curated portable skills |
-| `full` | Core + Claude plugins / MCP / extras |
-
-Alias: `balanced` → `core`. Optional: `minimal` → `/sps` only.
-
-### Update later
-
-```bash
-bash ~/.sps/src/Shahid-Personal-SkillSet/scripts/sps-update.sh --profile core --yes
-# or
-curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --yes
-```
-
-### Health check
+### Check install
 
 ```bash
 bash ~/.sps/src/Shahid-Personal-SkillSet/scripts/sps-doctor.sh
 ```
 
-### Local install (already cloned)
+### Update later
 
 ```bash
-bash install.sh --profile core --yes
-bash install.sh --profile full --yes
+curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --yes
 ```
 
-Windows:
+---
 
-```powershell
-powershell -ExecutionPolicy Bypass -File install.ps1 -Profile core -Yes
+## Which profile should I use?
+
+| Profile | Use when | Includes |
+|---|---|---|
+| **`core`** (recommended) | Everyday work | `/sps` + design/React/testing skills + **Karpathy guidelines** |
+| **`full`** | Claude-heavy / security extras | Everything in core + Claude plugins + **Trail of Bits** security + MCP extras |
+| **`minimal`** | Only the orchestrator | `/sps` only |
+
+```bash
+# full (Claude + Trail of Bits security plugins)
+bash ~/.sps/src/Shahid-Personal-SkillSet/install.sh --profile full --yes
 ```
 
-See [`skills/sps/INSTALL-PROFILES.md`](skills/sps/INSTALL-PROFILES.md).
+---
 
-The installer writes an install manifest to `~/.sps/install-manifest.env` so the
-uninstaller can remove what the installer managed.
+## How to use (in any project)
 
-When you pass `--agents '*'`, the installer targets this curated mainstream set:
-`claude-code`, `cursor`, `codex`, `antigravity`, `antigravity-cli`, and `universal`.
+Open the project in your agent, then type:
 
-The core `/sps` skill is also mirrored into the major global skill roots
-directly, so local-repo installs do not depend on uneven host detection in the
-Skills CLI.
+| Command | Meaning |
+|---|---|
+| `/sps` | Start / continue the normal build workflow |
+| `/sps audit` | Score the project against SPS rules (old projects start here) |
+| `/sps sync` | Fix **CMS debt** (site built first, admin controls missing) |
+| `/sps doctor` | Check install / host / skill health |
 
-The install scripts exit nonzero if any requested step fails, which makes them
-safe to use from automation and CI.
+### Examples
+
+```text
+/sps build a marketing site. CMS for every section. Mobile-first.
+/sps audit
+/sps sync
+/sps fix the navbar and keep CMS control working
+```
+
+---
+
+## What happens when you run `/sps`
+
+Simple flow:
+
+1. **Ask questions** until the plan is clear (including team + deploy)
+2. **Write project memory** into `./.sps/` (and short locks in `AGENTS.md` / `GEMINI.md` / `CLAUDE.md`)
+3. Confirm: “anything missing?”
+4. If CMS: build a small **CMS foundation** once
+5. Build **one section at a time**
+6. For each section (when CMS is on): **UI + CMS + proof they connect**
+7. Stop for **your approval** → next section
+8. Verify honestly before calling it done
+
+### The CMS rule (important)
+
+If the project has a CMS:
+
+- every content piece (text, image, video, menu, demo data) should be editable in admin
+- a section is **not done** with storefront UI alone
+- pending projects that already have UI: use **`/sps sync`**
+
+---
+
+## What the agent must follow
+
+- **Memory:** write `./.sps/` every session (not chat-only)
+- **Sections:** small todos → approval → next section
+- **Design gate:** no eyebrows, seamless section flow, planned palette, research before design
+- **Cleanup:** quality check before submit
+- **Hygiene:** organize dropped files; no duplicate assets
+- **Skills:** pick the best skill per job; if missing, try install or give you install steps
+- **Tokens:** surgical edits; don’t read whole repos by default (Karpathy + context rules)
+- **Antigravity:** must respect `/sps` locks in `GEMINI.md` / `AGENTS.md` (boot refusal if missing)
+
+---
+
+## Compatibility (honest)
+
+| Host | Level | Notes |
+|---|---|---|
+| Claude Code | Best | Full profile enhancers work here |
+| Cursor | High | Strong core workflow |
+| Codex | High | Portable core |
+| Antigravity / Gemini | Medium | Needs root mirrors + `/sps` |
+| Windsurf / Copilot / OpenCode family | Medium | Portable laws; extras vary |
+| Other skills-compatible agents | Varies | Falls back cleanly |
+| Generic chatbots | No | Out of scope |
+
+Details: [`skills/sps/CAPABILITY-MATRIX.md`](skills/sps/CAPABILITY-MATRIX.md)
+
+---
+
+## Core skills included
+
+**Always with `core`:**
+- `/sps` (orchestrator)
+- `hallmark`, `impeccable`, `taste-skill` (design taste — don’t stack all at once)
+- `web-design-guidelines`, `vercel-react-best-practices`, `vercel-composition-patterns`
+- `webapp-testing`
+- **`karpathy-guidelines`** (surgical, simple changes)
+
+**Extra with `full` (mainly Claude):**
+- UI/engineering/marketing/a11y plugins
+- **Trail of Bits** security plugins (`differential-review`, `static-analysis`, and related)
+- optional MCP helpers
+
+Skill picking rules: [`skills/sps/SKILL-ROUTER.md`](skills/sps/SKILL-ROUTER.md)
+
+---
+
+## Project memory (`./.sps/`)
+
+When `/sps` bootstraps a project, it creates files like:
+
+| File | Purpose |
+|---|---|
+| `profile.md` | Project rules, CMS/CRM flags, deploy notes |
+| `handoff.md` | Current status + next chunk |
+| `content-model.md` | What each section can edit in CMS |
+| `cms-debt.md` | Missing CMS controls (for `/sps sync`) |
+| `design-system.md` | Palette, type, motion, refs |
+| `section-registry.md` | Section list + status |
+| `section-todos/` | Tiny task lists per section |
+
+Also short locks in project root: `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`.
+
+---
 
 ## Uninstall
 
-By default, uninstall removes `/sps`, the curated installed skills, host
-integrations, and `~/.sps/` personal data.
-
-Mac / Linux:
-
 ```bash
-bash uninstall.sh
-bash uninstall.sh --yes
+bash ~/.sps/src/Shahid-Personal-SkillSet/uninstall.sh --yes
+# keep personal memory:
+bash ~/.sps/src/Shahid-Personal-SkillSet/uninstall.sh --keep-personal --yes
 ```
 
-Windows:
+Windows: `uninstall.ps1` / `uninstall.ps1 -KeepPersonal -Yes`
 
-```powershell
-powershell -ExecutionPolicy Bypass -File uninstall.ps1
-powershell -ExecutionPolicy Bypass -File uninstall.ps1 -Yes
-```
-
-If you want to keep `~/.sps/` personal data:
-
-```bash
-bash uninstall.sh --keep-personal
-bash uninstall.sh --keep-personal --yes
-```
-
-```powershell
-powershell -ExecutionPolicy Bypass -File uninstall.ps1 -KeepPersonal
-powershell -ExecutionPolicy Bypass -File uninstall.ps1 -KeepPersonal -Yes
-```
-
-## Use
-
-In any supported host:
-
-```text
-/sps [your request]
-/sps audit
-```
-
-Examples:
-- `/sps design a premium landing page for a fintech startup`
-- `/sps build a dashboard section by section with approval checkpoints`
-- `/sps fix this production bug and verify the deploy path`
-- `/sps compare CMS options for this project and recommend one`
-- `/sps audit`
-- `/sps improve this existing website` (forces audit first if `.sps/` was missing)
-
-## Key design rules
-
-- once `./.sps/` exists, `/sps` stays required for that project’s build work
-- project rules do not leak into other projects
-- memory files are written at boot and after every approved section
-- active agent identity + SPS version are stored in `./.sps/agent.md`
-- discovery happens before implementation
-- section-by-section approval is required, with abort conditions
-- capability detection happens before extra tooling
-- no invented files, APIs, packages, or “tests passed” claims
-- verification is required before handoff
-- UI work defaults to minimal mobile: responsive, low-end safe, budgeted assets, no fancy/laggy phone effects unless explicitly approved
-- repeated mistakes can be promoted into project or personal rules only with approval
+---
 
 ## Maintainer checks
 
@@ -190,56 +186,26 @@ bash scripts/smoke-sps.sh
 bash scripts/bootstrap-sps.sh /path/to/project
 ```
 
-CI runs the same lint + smoke checks on every push and pull request via
-`.github/workflows/sps-ci.yml`.
+CI runs lint + smoke on push/PR.
 
-Windows PowerShell syntax (when `pwsh` is installed):
+---
 
-```powershell
-pwsh -NoProfile -File scripts/check-powershell.ps1
-```
+## Learn more
 
-## Better defaults adopted
+| Doc | Topic |
+|---|---|
+| [`skills/sps/METHOD-CARD.md`](skills/sps/METHOD-CARD.md) | 1-page laws |
+| [`skills/sps/CMS-COUPLING.md`](skills/sps/CMS-COUPLING.md) | CMS + UI together |
+| [`skills/sps/SYNC.md`](skills/sps/SYNC.md) | `/sps sync` for pending projects |
+| [`skills/sps/DESIGN-GATE.md`](skills/sps/DESIGN-GATE.md) | Design rules |
+| [`skills/sps/SECTION-DOD.md`](skills/sps/SECTION-DOD.md) | When a section is “done” |
+| [`CATALOG.md`](CATALOG.md) | Skill catalog |
+| [`CHANGELOG.md`](CHANGELOG.md) | Version history |
 
-This repo now treats a smaller set of cross-agent skills as stronger defaults:
-- `web-design-guidelines`
-- `vercel-react-best-practices`
-- `vercel-composition-patterns`
-- `webapp-testing`
-- `hallmark`
-- `impeccable`
-- `taste-skill`
+---
 
-The repo also standardizes brand/logo sourcing around [`theSVG`](https://thesvg.org/).
+## Safety
 
-## Repo structure
-
-```text
-Shahid-Personal-SkillSet/
-├── skills/sps/SKILL.md
-├── skills/sps/*.md                 # reference docs
-├── skills/sps/templates/           # project .sps bootstrap templates
-├── skills/sps/hosts/               # thin host adapters
-├── scripts/bootstrap-sps.sh
-├── scripts/lint-sps.sh
-├── scripts/smoke-sps.sh
-├── get-sps.sh
-├── get-sps.ps1
-├── scripts/sps-doctor.sh
-├── scripts/sps-update.sh
-├── scripts/check-powershell.ps1
-├── .github/workflows/sps-ci.yml
-├── plugins/universal-build-orchestrator/
-├── install.sh
-├── install.ps1
-├── uninstall.sh
-├── uninstall.ps1
-├── CATALOG.md
-└── README.md
-```
-
-## Safety note
-
-This repo intentionally avoids claiming that every agent or IDE supports the
-same workflow. Review third-party skills before trusting them, and prefer the
-`core` profile unless you specifically need host-specific extras.
+- Prefer **`core`** unless you need Claude/security extras
+- Review third-party skills before trusting them
+- Never claim “works identically on every agent on the internet”
