@@ -85,16 +85,28 @@ Read `./.sps/profile.md`, `./.sps/handoff.md`, and the SPS Method Card before
 building. Do not replace `/sps` with a host-default scaffolding workflow.
 CMS-enabled sections must ship storefront + CMS controls together.'
 
+GEMINI_LOCK_BLOCK='## /sps lock (required)
+
+This project is under `/sps` orchestration. Antigravity must NOT use a host-default
+scaffold workflow instead of `/sps`.
+
+Before any code:
+1. Read `./.sps/profile.md` and `./.sps/handoff.md`
+2. Read the SPS Method Card from the installed `sps` skill (`METHOD-CARD.md`)
+3. Follow CMS-coupled section delivery when CMS is enabled
+4. Stop for approval after each section Definition of Done
+
+Commands: `/sps` · `/sps audit` · `/sps sync` · `/sps doctor`'
+
 for root_file in AGENTS.md GEMINI.md CLAUDE.md; do
   target="$TARGET/$root_file"
+  block="$LOCK_BLOCK"
+  [[ "$root_file" == "GEMINI.md" ]] && block="$GEMINI_LOCK_BLOCK"
   if [[ ! -f "$target" ]]; then
-    printf "%s
-" "$LOCK_BLOCK" > "$target"
+    printf '%s\n' "$block" > "$target"
     echo "write $target"
   elif ! grep -q "/sps lock" "$target"; then
-    printf "
-%s
-" "$LOCK_BLOCK" >> "$target"
+    printf '\n%s\n' "$block" >> "$target"
     echo "append $target"
   else
     echo "keep  $target"

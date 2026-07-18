@@ -52,7 +52,7 @@ Current skill version: read `VERSION` and stamp it into `./.sps/agent.md`.
     else instruct user ([SKILL-ROUTER.md](SKILL-ROUTER.md)). `/sps` is the only
     orchestrator (no Superpowers-as-boss by default).
 14. **Context efficiency.** Surgical edits; grep/offset reads; no whole-file
-    default ([CONTEXT-EFFICIENCY.md](CONTEXT-EFFICIENCY.md)).
+    default. Prefer installed `karpathy-guidelines` + [CONTEXT-EFFICIENCY.md](CONTEXT-EFFICIENCY.md).
 15. **Low-end mobile hard gate.** ([MOBILE-LOW-END.md](MOBILE-LOW-END.md),
     [ASSET-BUDGET.md](ASSET-BUDGET.md)).
 16. **Cleanup before submit.** Quality, flow, dead code, consistency — then ask
@@ -91,6 +91,8 @@ write `audit-report.md` → stop for user choice → then remediate / discover /
 5. Legacy? → audit first.
 6. Read host adapter (`hosts/*`).
 7. Reaffirm `/sps` lock in memory + root mirrors.
+   On Antigravity/Gemini: enforce boot refusal if mirrors missing
+   ([hosts/antigravity.md](hosts/antigravity.md)).
 8. Continue from handoff, discovery, sync, doctor, or audit.
 
 ## Step 0: Load scoped memory

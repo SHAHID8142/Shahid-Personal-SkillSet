@@ -23,8 +23,8 @@ as a second orchestrator by default.
 | UI review / a11y | `web-design-guidelines` | host a11y skill | DESIGN-GATE + manual a11y list |
 | React quality | `vercel-react-best-practices` | `vercel-composition-patterns` | stack best practices in repo |
 | Testing | `webapp-testing` | Playwright skill | VERIFICATION-RECIPES.md |
-| Surgical behavior | Karpathy guidelines skill | — | CONTEXT-EFFICIENCY.md |
-| Security | Trail of Bits differential-review (when available) | host security review | security checks in SECTION-DOD |
+| Surgical behavior | `karpathy-guidelines` (core install) | — | CONTEXT-EFFICIENCY.md |
+| Security | Trail of Bits `differential-review` + `static-analysis` (full profile / Claude) | host security review | security checks in SECTION-DOD |
 | CMS coupling | SPS CMS-COUPLING | — | (required; not optional) |
 | Logos | `theSVG` | official brand source | LOGO-SOURCES.md |
 | Docs / library APIs | Context7 MCP when available | — | official docs fetch |
@@ -42,3 +42,20 @@ Do not auto-combine:
 Claude-only or heavy tools (ui-ux-pro-max, engineering-skills, Trail of Bits full
 suite, Firecrawl, Caveman, Handoff) stay optional. Prefer them only when the host
 supports them and the chunk needs them.
+
+
+## Install commands (ensure protocol)
+
+Karpathy (core):
+```bash
+npx skills add https://github.com/forrestchang/andrej-karpathy-skills --skill karpathy-guidelines -g -y
+```
+
+Trail of Bits (full / Claude):
+```bash
+claude plugin marketplace add trailofbits/skills
+claude plugin install differential-review@trailofbits --scope user
+claude plugin install static-analysis@trailofbits --scope user
+claude plugin install ask-questions-if-underspecified@trailofbits --scope user
+claude plugin install insecure-defaults@trailofbits --scope user
+```

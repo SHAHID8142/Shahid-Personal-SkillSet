@@ -29,8 +29,8 @@ Portable across skills-compatible coding agents. Not identical everywhere.
 | UI review | `web-design-guidelines` | a11y host skill |
 | React | `vercel-react-best-practices` | `vercel-composition-patterns` |
 | Testing | `webapp-testing` | Playwright |
-| Surgical/token | Karpathy guidelines | SPS CONTEXT-EFFICIENCY |
-| Security | Trail of Bits (full/optional) | host security review |
+| Surgical/token | `karpathy-guidelines` (core) | SPS CONTEXT-EFFICIENCY |
+| Security | Trail of Bits (full profile) | host security review |
 | CMS | SPS CMS-COUPLING + `/sps sync` | — |
 | Logos | `theSVG` | official assets |
 

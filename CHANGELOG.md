@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.1
+
+- core install now includes **Karpathy guidelines** (`karpathy-guidelines`)
+- full profile adds **Trail of Bits** marketplace + security plugins (Claude)
+- Antigravity harden: stronger host adapter, boot refusal if mirrors missing,
+  richer `GEMINI.md` lock template in bootstrap
+
 ## 3.0.0
 
 Breaking workflow release focused on CMS-coupled delivery and multi-agent reliability.

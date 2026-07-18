@@ -158,10 +158,10 @@ progress_bar() {
 compute_total_steps() {
   case "$PROFILE" in
     minimal) TOTAL_STEPS=1 ;;
-    core) TOTAL_STEPS=8 ;;
+    core) TOTAL_STEPS=9 ;;
     full)
-      TOTAL_STEPS=10
-      if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 11)); fi
+      TOTAL_STEPS=11
+      if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 16)); fi
       if have uv || have pip; then TOTAL_STEPS=$((TOTAL_STEPS + 1)); fi
       ;;
   esac
@@ -367,7 +367,7 @@ section "Installing"
 step "/sps core skill" npx skills add "$REPO" -g --copy -y "${AGENT_ARGS[@]}"
 
 if [[ "$PROFILE" != "minimal" ]]; then
-  MANAGED_SKILLS+=(hallmark impeccable taste-skill webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns)
+  MANAGED_SKILLS+=(hallmark impeccable taste-skill webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns karpathy-guidelines)
   step "hallmark" npx skills add nutlope/hallmark -g -y "${AGENT_ARGS[@]}"
   step "impeccable" npx skills add pbakaus/impeccable -g -y "${AGENT_ARGS[@]}"
   step "taste-skill" npx skills add Leonxlnx/taste-skill -g -y "${AGENT_ARGS[@]}"
@@ -375,6 +375,7 @@ if [[ "$PROFILE" != "minimal" ]]; then
   step "web-design-guidelines" npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y "${AGENT_ARGS[@]}"
   step "vercel-react-best-practices" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y "${AGENT_ARGS[@]}"
   step "vercel-composition-patterns" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -y "${AGENT_ARGS[@]}"
+  step "karpathy-guidelines" npx skills add https://github.com/forrestchang/andrej-karpathy-skills --skill karpathy-guidelines -g -y "${AGENT_ARGS[@]}"
 fi
 
 if [[ "$PROFILE" == "full" ]]; then
@@ -395,6 +396,13 @@ if [[ "$PROFILE" == "full" ]]; then
     step "marketing-skills" claude plugin install marketing-skills@claude-code-skills --scope project
     step "a11y-audit" claude plugin install a11y-audit@claude-code-skills --scope project
     step "docker-development" claude plugin install docker-development@claude-code-skills --scope project
+    CLAUDE_MARKETPLACES+=(trailofbits)
+    CLAUDE_PLUGINS+=(differential-review@trailofbits static-analysis@trailofbits ask-questions-if-underspecified@trailofbits insecure-defaults@trailofbits)
+    step "Trail of Bits marketplace" claude plugin marketplace add trailofbits/skills
+    step "ToB differential-review" claude plugin install differential-review@trailofbits --scope user
+    step "ToB static-analysis" claude plugin install static-analysis@trailofbits --scope user
+    step "ToB ask-questions" claude plugin install ask-questions-if-underspecified@trailofbits --scope user
+    step "ToB insecure-defaults" claude plugin install insecure-defaults@trailofbits --scope user
     USE_CONTEXT7=1
     step "Context7 MCP" add_context7
   else

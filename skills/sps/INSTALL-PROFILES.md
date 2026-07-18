@@ -11,7 +11,7 @@ Installs:
 - `web-design-guidelines`
 - `vercel-react-best-practices`
 - `vercel-composition-patterns`
-- Karpathy guidelines when the installer/skills CLI can resolve it
+- `karpathy-guidelines` (Forrest Chang / Andrej Karpathy guidelines)
 - `theSVG` when available via skills CLI
 
 ```bash

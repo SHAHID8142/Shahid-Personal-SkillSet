@@ -254,7 +254,7 @@ Step "/sps core skill" ([scriptblock]::Create("npx skills add `"$repoDir`" -g --
 
 if ($Profile -ne "minimal") {
     section "Balanced portable stack"
-    $script:ManagedSkills += @("hallmark","impeccable","taste-skill","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns")
+    $script:ManagedSkills += @("hallmark","impeccable","taste-skill","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","karpathy-guidelines")
     Step "hallmark" ([scriptblock]::Create("npx skills add nutlope/hallmark -g -y $agentArgsString"))
     Step "impeccable" ([scriptblock]::Create("npx skills add pbakaus/impeccable -g -y $agentArgsString"))
     Step "taste-skill" ([scriptblock]::Create("npx skills add Leonxlnx/taste-skill -g -y $agentArgsString"))
@@ -262,6 +262,7 @@ if ($Profile -ne "minimal") {
     Step "web-design-guidelines" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y $agentArgsString"))
     Step "vercel-react-best-practices" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y $agentArgsString"))
     Step "vercel-composition-patterns" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -y $agentArgsString"))
+    Step "karpathy-guidelines" ([scriptblock]::Create("npx skills add https://github.com/forrestchang/andrej-karpathy-skills --skill karpathy-guidelines -g -y $agentArgsString"))
 }
 
 if ($Profile -eq "full") {
@@ -282,6 +283,13 @@ if ($Profile -eq "full") {
             "marketing-skills@claude-code-skills",
             "a11y-audit@claude-code-skills",
             "docker-development@claude-code-skills"
+        $script:ClaudeMarketplaces += @("trailofbits")
+        $script:ClaudePlugins += @("differential-review@trailofbits","static-analysis@trailofbits","ask-questions-if-underspecified@trailofbits","insecure-defaults@trailofbits")
+        Step "Trail of Bits marketplace" { claude plugin marketplace add trailofbits/skills }
+        Step "ToB differential-review" { claude plugin install differential-review@trailofbits --scope user }
+        Step "ToB static-analysis" { claude plugin install static-analysis@trailofbits --scope user }
+        Step "ToB ask-questions" { claude plugin install ask-questions-if-underspecified@trailofbits --scope user }
+        Step "ToB insecure-defaults" { claude plugin install insecure-defaults@trailofbits --scope user }
         )
         Step "/sps Claude marketplace" ([scriptblock]::Create("claude plugin marketplace add `"$rd`""))
         Step "/sps Claude plugin" { claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope project }

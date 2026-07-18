@@ -19,6 +19,11 @@ Not identical behavior everywhere. Not for generic chatbots.
 7. Surgical context: grep/offset reads; no whole-file by default
 8. Honest host capabilities; never invent tools/results
 
+## Antigravity / Gemini
+
+If Host is Antigravity/Gemini and `GEMINI.md`/`AGENTS.md` locks are missing:
+**boot refusal** — fix mirrors before coding.
+
 ## Never
 
 1. Storefront-only "done" when CMS is enabled

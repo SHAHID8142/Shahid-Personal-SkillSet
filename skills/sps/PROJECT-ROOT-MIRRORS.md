@@ -26,3 +26,23 @@ CMS-enabled sections must ship storefront + CMS controls together.
 
 - Keep detailed rules in `./.sps/` (source of truth)
 - Host root files stay short and point inward
+
+
+## Antigravity-specific `GEMINI.md` (preferred full block)
+
+When creating `GEMINI.md` on Antigravity hosts, prefer this fuller block:
+
+```markdown
+## /sps lock (required)
+
+This project is under `/sps` orchestration. Antigravity must NOT use a host-default
+scaffold workflow instead of `/sps`.
+
+Before any code:
+1. Read `./.sps/profile.md` and `./.sps/handoff.md`
+2. Read the SPS Method Card from the installed `sps` skill (`METHOD-CARD.md`)
+3. Follow CMS-coupled section delivery when CMS is enabled
+4. Stop for approval after each section Definition of Done
+
+Commands: `/sps` · `/sps audit` · `/sps sync` · `/sps doctor`
+```
