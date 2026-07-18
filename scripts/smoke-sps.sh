@@ -30,7 +30,7 @@ bash -n "$REPO/scripts/sps-update.sh" && pass "bash -n sps-update.sh" || fail "b
 rm -rf "$TMP"
 mkdir -p "$TMP/project"
 bash "$REPO/scripts/bootstrap-sps.sh" "$TMP/project"
-for f in profile.md handoff.md mistakes.md agent.md audit-report.md; do
+for f in profile.md handoff.md mistakes.md agent.md audit-report.md content-model.md cms-debt.md section-registry.md; do
   if [[ -f "$TMP/project/.sps/$f" ]]; then pass "bootstrap wrote $f"
   else fail "bootstrap missing $f"
   fi
@@ -45,6 +45,13 @@ fi
 # Force rewrite works
 bash "$REPO/scripts/bootstrap-sps.sh" --force "$TMP/project" >/dev/null
 pass "bootstrap --force rerun"
+
+if grep -q "/sps lock" "$TMP/project/AGENTS.md"; then pass "bootstrap wrote AGENTS.md lock"
+else fail "bootstrap missing AGENTS.md lock"
+fi
+if [[ -f "$REPO/skills/sps/METHOD-CARD.md" && -f "$REPO/skills/sps/CMS-COUPLING.md" ]]; then pass "v3 law files present"
+else fail "v3 law files missing"
+fi
 
 # PowerShell checker (optional)
 if command -v pwsh >/dev/null 2>&1; then

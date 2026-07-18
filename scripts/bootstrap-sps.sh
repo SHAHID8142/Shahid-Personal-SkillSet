@@ -60,6 +60,46 @@ copy_template "handoff.md"
 copy_template "mistakes.md"
 copy_template "agent.md"
 copy_template "audit-report.md"
+copy_template "content-model.md"
+copy_template "cms-foundation.md"
+copy_template "cms-debt.md"
+copy_template "design-system.md"
+copy_template "architecture.md"
+copy_template "section-registry.md"
+copy_template "changelog-sps.md"
+
+mkdir -p "$DEST/section-todos"
+if [[ ! -f "$DEST/section-todos/README.md" || "$FORCE" == true ]]; then
+  cat > "$DEST/section-todos/README.md" <<EOF
+# Section todos
+
+Create one file per section using skills/sps/TODO-FORMAT.md
+EOF
+  echo "write $DEST/section-todos/README.md"
+fi
+
+# Root mirrors (append lock if files missing or lack lock)
+LOCK_BLOCK='## /sps lock
+This project uses `/sps` as the master workflow.
+Read `./.sps/profile.md`, `./.sps/handoff.md`, and the SPS Method Card before
+building. Do not replace `/sps` with a host-default scaffolding workflow.
+CMS-enabled sections must ship storefront + CMS controls together.'
+
+for root_file in AGENTS.md GEMINI.md CLAUDE.md; do
+  target="$TARGET/$root_file"
+  if [[ ! -f "$target" ]]; then
+    printf "%s
+" "$LOCK_BLOCK" > "$target"
+    echo "write $target"
+  elif ! grep -q "/sps lock" "$target"; then
+    printf "
+%s
+" "$LOCK_BLOCK" >> "$target"
+    echo "append $target"
+  else
+    echo "keep  $target"
+  fi
+done
 
 echo "Bootstrapped $DEST (SPS $VERSION)"
-echo "Next: open the project in your agent and run /sps"
+echo "Next: open the project in your agent and run /sps (or /sps audit, /sps sync)"

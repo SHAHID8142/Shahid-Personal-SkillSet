@@ -30,6 +30,9 @@ Check:
 - preview / rendering path
 - missing content fallback
 - SEO field coverage if applicable
+- **round-trip**: edit in admin → content layer/API → storefront visible change
+- seed/demo media replace/hide/delete path
+- no untracked hardcoded bypass for claimed-controllable fields
 
 ## Storefront / checkout change
 
@@ -94,3 +97,12 @@ Always state:
 - active agent host
 - SPS version
 - that `/sps` remains required for this project
+
+## Cleanup / ship gate
+
+Check:
+- dead code and unused imports from the slice
+- consistent naming and file split
+- markers for next agent
+- secrets not introduced
+- workspace hygiene (no duplicate assets)

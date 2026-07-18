@@ -13,6 +13,11 @@ Inspect the current project, compare it to SPS rules, score alignment out of
 report to the user. Do not implement fixes until the user approves a
 remediation path.
 
+## CMS debt
+
+If CMS is enabled or suspected, also write/update `./.sps/cms-debt.md` and
+recommend `/sps sync` for remediation.
+
 ## When audit is mandatory
 
 Treat the project as **legacy / first SPS contact** when any of these are true:
@@ -58,30 +63,36 @@ Score every item as:
 
 | ID | Category | Check | Points |
 |---|---|---|---|
-| A1 | Memory | `.sps/` bootstrapped | 4 |
-| A2 | Memory | `/sps` lock present | 4 |
-| A3 | Memory | `agent.md` has host + version stamp | 4 |
-| A4 | Memory | profile / handoff usable for ongoing work | 3 |
-| B1 | Understanding | project type inferred with evidence | 5 |
-| B2 | Understanding | stack detected with evidence | 5 |
-| B3 | Understanding | CMS / storefront / ERP / admin checked | 5 |
-| B4 | Understanding | deployment clues checked | 3 |
-| C1 | Honesty | no fake certainty in the report | 4 |
-| C2 | Honesty | Known / Assumed / Unverified filled | 4 |
-| D1 | Mobile | responsive approach present or clearly planned | 8 |
-| D2 | Mobile | no hover-only critical action risk (or mitigated) | 6 |
-| D3 | Mobile | no heavy / laggy mobile motion risk (or mitigated) | 8 |
-| D4 | Mobile | dual path decision recorded when needed | 4 |
-| E1 | Assets | image/video/Lottie/3D risks reviewed | 6 |
-| E2 | Assets | autoplay media policy reviewed | 4 |
-| E3 | Assets | font / animation library weight reviewed | 4 |
-| F1 | Quality | lint/test/build scripts exist or absence noted | 5 |
-| F2 | Quality | no obvious deployability blockers unstated | 5 |
-| F3 | Quality | accessibility basics reviewed | 4 |
-| G1 | Workflow | remediation can continue section-by-section | 3 |
-| G2 | Workflow | top remediation chunks ordered by risk | 2 |
+| A1 | Memory | `.sps/` bootstrapped | 3 |
+| A2 | Memory | `/sps` lock present | 3 |
+| A3 | Memory | `agent.md` has host + version stamp | 3 |
+| A4 | Memory | profile / handoff usable | 2 |
+| A5 | Memory | root mirrors (`AGENTS.md`/`GEMINI.md`/`CLAUDE.md`) point to `/sps` | 3 |
+| B1 | Understanding | project type inferred with evidence | 4 |
+| B2 | Understanding | stack detected with evidence | 4 |
+| B3 | Understanding | CMS / storefront / ERP / admin checked | 4 |
+| B4 | Understanding | deploy target/method + team/multi-agent notes | 4 |
+| C1 | Honesty | no fake certainty in the report | 3 |
+| C2 | Honesty | Known / Assumed / Unverified filled | 3 |
+| D1 | Mobile | responsive approach present or planned | 6 |
+| D2 | Mobile | no hover-only critical action risk (or mitigated) | 4 |
+| D3 | Mobile | no heavy / laggy mobile motion risk (or mitigated) | 6 |
+| D4 | Mobile | dual path decision recorded when needed | 3 |
+| E1 | Assets | media risks + workspace hygiene reviewed | 5 |
+| E2 | Assets | autoplay / weight policy reviewed | 3 |
+| F1 | Quality | lint/test/build scripts exist or absence noted | 4 |
+| F2 | Quality | deployability blockers stated | 3 |
+| F3 | Quality | accessibility basics reviewed | 3 |
+| H1 | CMS | if CMS enabled: foundation present or debt listed | 8 |
+| H2 | CMS | if CMS enabled: no silent storefront-only “done” sections (debt tracked) | 8 |
+| H3 | Design | design-gate risks noted (eyebrows/separators/palette/slop) | 4 |
+| G1 | Workflow | remediation can continue section-by-section / `/sps sync` | 4 |
+| G2 | Workflow | top remediation chunks ordered by risk | 3 |
 
 **Total = 100**
+
+If CMS is not part of the project, award H1/H2 full points only when the audit
+explicitly proves CMS is out of scope (not when CMS was simply ignored).
 
 ### Score bands
 

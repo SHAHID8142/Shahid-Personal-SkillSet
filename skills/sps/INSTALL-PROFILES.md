@@ -1,74 +1,42 @@
 # Install Profiles
 
-`/sps` uses two install profiles so the skillset stays simple and portable.
-
 ## Core (recommended default)
 
-Use for day-to-day work across Claude, Cursor, Codex, Antigravity, and similar
-agents.
-
 Installs:
-- `/sps`
+- `/sps` (orchestrator + CMS/design/sync/router laws)
 - `hallmark`
 - `impeccable`
-- `taste-skill`
+- `taste-skill` (secondary; do not stack with hallmark on the same chunk)
 - `webapp-testing`
 - `web-design-guidelines`
 - `vercel-react-best-practices`
 - `vercel-composition-patterns`
+- Karpathy guidelines when the installer/skills CLI can resolve it
+- `theSVG` when available via skills CLI
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --profile core --yes
 ```
 
-Alias: `balanced` still maps to `core`.
-
 ## Full
 
-Use when you want host-specific extras on top of `core`.
+Everything in `core`, plus optional enhancers when the host supports them:
+- Claude plugins (`ui-ux-pro-max`, engineering/marketing/a11y/docker sets)
+- Trail of Bits security skills (Claude marketplace) when available
+- `Context7`, `graphify`, Firecrawl, Handoff, Caveman (optional)
+- Anthropic `frontend-design` only if not conflicting with active taste skill
 
-Includes everything in `core`, plus optional enhancers such as:
-- Claude plugin entrypoint
-- `ui-ux-pro-max`
-- `engineering-skills`
-- `engineering-advanced-skills`
-- `marketing-skills`
-- `a11y-audit`
-- `docker-development`
-- `graphify`
-- `Context7`
-- optional specialists like `astro-framework`
+## Minimal
 
-The full profile is capability-aware:
-- if `claude` is not present, Claude plugin steps are skipped
-- if `uv` or `pip` is missing, `graphify` is skipped
-- if MCP is unavailable, MCP setup is skipped
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --profile full --yes
-```
-
-## Optional alias: minimal
-
-`minimal` still works and installs **only `/sps`** (fastest / most portable).
-It is kept as an alias for power users, not a primary menu choice.
-
-```bash
-bash install.sh --profile minimal --yes
-```
+`/sps` only.
 
 ## Agent expansion
 
-In the SPS installers, `--agents '*'` expands to:
-- `claude-code`
-- `cursor`
-- `codex`
-- `antigravity`
-- `antigravity-cli`
-- `universal`
+`--agents '*'` expands to skills-compatible coding agents the installer knows:
 
-## Recommendation
+- `claude-code`, `cursor`, `codex`
+- `antigravity`, `antigravity-cli`
+- `windsurf`, `github-copilot`, `opencode`, `cline`, `roo`, `kiro-cli`, `amp`
+- `universal` (shared `~/.agents/skills` style paths)
 
-- `core`: default for almost everyone
-- `full`: only when you want Claude/MCP extras
-- `minimal`: only when you want `/sps` alone
+Unsupported hosts still get project-local `.sps/` portability via METHOD-CARD.

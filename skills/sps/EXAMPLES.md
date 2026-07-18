@@ -57,3 +57,26 @@ User: `/sps improve this website` on a repo with no `.sps/`
 5. Stop and ask: remediate Fail items, continue original request, audit-only,
    or ask discovery questions first
 6. Only after the user chooses, continue section-by-section
+
+
+## Example 6: CMS-coupled navbar section
+
+User: `/sps build the navbar`
+
+1. Confirm CMS enabled in profile
+2. Roles: Visitor, Admin, Mobile, Next agent
+3. Content inventory: logo, links, CTA, mobile menu
+4. Todos for UI + CMS + wire + round-trip
+5. Approval packet with CMS evidence plan
+6. Build storefront navbar + admin fields together
+7. Prove admin edit updates storefront
+8. Cleanup + DoD → stop for approval
+
+## Example 7: `/sps sync` on a pending project
+
+User: `/sps sync`
+
+1. Audit CMS coupling; write `cms-debt.md`
+2. Ensure CMS Foundation
+3. Sync one indebted section at a time with approvals
+4. Do not redesign the whole site unless asked

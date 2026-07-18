@@ -1,6 +1,22 @@
 # Changelog
 
-## 2.6.0
+## 3.0.0
+
+Breaking workflow release focused on CMS-coupled delivery and multi-agent reliability.
+
+- hard **CMS-coupled section delivery** (storefront + CMS together); `/sps sync` for debt
+- foundation-first build order + discovery grill for team/multi-agent + deploy method
+- portable **DESIGN-GATE** (no eyebrows, seamless gaps, palette, research-before-design)
+- **SECTION-DOD**, role matrix, todo format, workspace hygiene, context efficiency
+- **Skill Router** with install-or-instruct protocol; `/sps` remains sole orchestrator
+- **METHOD-CARD** + project root mirrors for Antigravity/Claude/Cursor lock-in
+- expanded host adapters (Windsurf, Copilot, OpenCode family, generic)
+- installer sync paths / agent expansion for more skills-compatible agents
+- enhanced `.sps` templates: content-model, cms-foundation, cms-debt, design-system, registry
+- audit checklist updated for CMS debt, mirrors, design-gate, deploy/team
+- honest portability claim: skills-compatible coding agents, not every internet agent
+
+2.6.0
 
 - simplified install profiles to two primaries: `core` (recommended default) and
   `full`

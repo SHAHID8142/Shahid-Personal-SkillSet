@@ -1,17 +1,11 @@
 # Claude Code host adapter for `/sps`
 
-This is a thin host note for Claude Code. The canonical workflow is still
-`skills/sps/SKILL.md`. The Claude plugin entrypoint is
-`universal-build-orchestrator`.
+Canonical workflow: `../SKILL.md` + `../METHOD-CARD.md`.
 
 ## Claude notes
 
-- Plugins and MCP can enhance `/sps`, but must not replace the portable core.
-- Write `./.sps/agent.md` with Host: Claude Code and the current SPS version.
-- Use Claude enhancers only when they do not conflict with project rules.
-
-## Required behavior
-
-1. Follow canonical `/sps` steps.
-2. Keep project memory authoritative over global Claude preferences.
-3. Fall back to the portable workflow if a plugin/MCP is missing.
+- Best host for full profile enhancers (plugins/MCP)
+- Still: `/sps` orchestrates; do not let other workflows replace it
+- `CLAUDE.md` must contain the `/sps` lock block
+- Full-profile skills OK when needed; respect conflict ban in SKILL-ROUTER.md
+- Write `./.sps/agent.md` with Host: Claude Code and VERSION

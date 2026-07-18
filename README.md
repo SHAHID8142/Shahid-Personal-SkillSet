@@ -11,17 +11,19 @@ capabilities.
 
 When you invoke `/sps`, the agent should:
 
-1. detect the active host and write `./.sps/agent.md` with the SPS version stamp
-2. bootstrap `./.sps/` from templates if missing
-3. if the project never used `/sps` before, run a mandatory scored alignment
-   audit, write `./.sps/audit-report.md`, and give the report before building
-4. load project-scoped memory before global defaults
-5. reaffirm that `/sps` is required for this project
-6. ask mandatory discovery questions (or continue after the audit choice)
-7. research options and recommend one path with Known / Assumed / Unverified labels
-8. choose the best role and specialist stack for the phase
-9. build section by section with approvals, memory updates, low-end mobile gates, and asset budgets
-10. verify the work before handoff without inventing results
+1. read the Method Card; detect host; write `./.sps/agent.md` + VERSION
+2. bootstrap enhanced `.sps/` docs + root mirrors (`AGENTS.md` / `GEMINI.md` / `CLAUDE.md`)
+3. legacy projects: scored audit (+ CMS debt) before building
+4. discovery grill including team/multi-agent and deploy target/method
+5. docs pack + pre-build “anything missing?” confirm
+6. CMS Foundation (when CMS enabled), then section-by-section **UI + CMS together**
+7. skill router (install-or-instruct), roles, todos, design gate, hygiene, cleanup
+8. stop for approval after Section DoD (including CMS round-trip proof)
+9. use `/sps sync` for storefront/CMS debt on pending projects
+10. verify honestly before handoff (Known / Assumed / Unverified)
+
+Portability: skills-compatible coding agents. Not identical everywhere. Not for
+generic chatbots.
 
 ## Compatibility
 
@@ -30,7 +32,8 @@ When you invoke `/sps`, the agent should:
 | Claude Code | Full | Best host for `/sps`, including plugin and MCP enhancers. |
 | Cursor | High | Core workflow is strong; use Cursor-native tools instead of Claude plugin assumptions. |
 | Codex | High | Core workflow is portable; advanced integrations vary by runtime. |
-| Antigravity / Gemini CLI | Medium | Core workflow works; keep the stack simple and capability-aware. |
+| Antigravity / Gemini CLI | Medium | Requires root mirrors; keep stack simple and capability-aware. |
+| Windsurf / Copilot / OpenCode family | Medium–Varies | Portable laws via SKILL.md + `.sps/`; enhancers optional. |
 | Other skills-compatible agents | Varies | Use the portable workflow and fall back cleanly. |
 
 For the detailed host model, see [`skills/sps/CAPABILITY-MATRIX.md`](skills/sps/CAPABILITY-MATRIX.md).

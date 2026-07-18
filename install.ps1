@@ -43,7 +43,9 @@ $syncRoots = @(
     "$env:USERPROFILE\.gemini\config\skills",
     "$env:USERPROFILE\.gemini\skills",
     "$env:USERPROFILE\.gemini\antigravity\skills",
-    "$env:USERPROFILE\.gemini\antigravity-cli\skills"
+    "$env:USERPROFILE\.gemini\antigravity-cli\skills",
+        "$env:USERPROFILE\.codeium\windsurf\skills",
+        "$env:USERPROFILE\.config\opencode\skills"
 )
 
 function note($msg)    { Write-Host "  $msg" -ForegroundColor DarkGray }
@@ -52,7 +54,7 @@ function warn($msg)    { Write-Host "  [!]  $msg" -ForegroundColor Yellow }
 function section($msg) { Write-Host ""; Write-Host "-- $msg --" -ForegroundColor Cyan }
 function have($cmd)    { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
 function Get-AgentArgs {
-    if ($Agents -eq "*") { return @("--agent","claude-code","--agent","cursor","--agent","codex","--agent","antigravity","--agent","antigravity-cli","--agent","universal") }
+    if ($Agents -eq "*") { return @("--agent","claude-code","--agent","cursor","--agent","codex","--agent","antigravity","--agent","antigravity-cli","--agent","windsurf","--agent","github-copilot","--agent","opencode","--agent","cline","--agent","roo","--agent","kiro-cli","--agent","amp","--agent","universal") }
     $args = @()
     foreach ($agent in ($Agents -split ",")) {
         if ($agent.Trim()) {

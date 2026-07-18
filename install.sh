@@ -39,6 +39,14 @@ SYNC_PATHS=(
   "$HOME/.gemini/skills"
   "$HOME/.gemini/antigravity/skills"
   "$HOME/.gemini/antigravity-cli/skills"
+  "$HOME/.codeium/windsurf/skills"
+  "$HOME/.windsurf/skills"
+  "$HOME/.config/opencode/skills"
+  "$HOME/.cline/skills"
+  "$HOME/.roo/skills"
+  "$HOME/.kiro/skills"
+  "$HOME/.amp/skills"
+  "$HOME/.github/skills"
 )
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
@@ -162,7 +170,13 @@ compute_total_steps() {
 build_agent_args() {
   AGENT_ARGS=()
   if [[ "$AGENTS" == "*" ]]; then
-    AGENT_ARGS=(--agent "claude-code" --agent "cursor" --agent "codex" --agent "antigravity" --agent "antigravity-cli" --agent "universal")
+    AGENT_ARGS=(
+      --agent "claude-code" --agent "cursor" --agent "codex"
+      --agent "antigravity" --agent "antigravity-cli"
+      --agent "windsurf" --agent "github-copilot" --agent "opencode"
+      --agent "cline" --agent "roo" --agent "kiro-cli" --agent "amp"
+      --agent "universal"
+    )
     return
   fi
   IFS=',' read -r -a _agents <<< "$AGENTS"
@@ -206,26 +220,18 @@ step() {
 }
 
 seed_global_memory() {
-  [ -f "$HOME/.sps/personal-defaults.md" ] || cat > "$HOME/.sps/personal-defaults.md" <<'EOF'
+  if [ ! -f "$HOME/.sps/personal-defaults.md" ]; then
+    if [ -f "$REPO/templates/personal-defaults.md" ]; then
+      cp "$REPO/templates/personal-defaults.md" "$HOME/.sps/personal-defaults.md"
+    else
+      cat > "$HOME/.sps/personal-defaults.md" <<'EOF'
 # SPS Personal Defaults
 
 Only put rules here when the user explicitly says they should apply across
 future projects.
-
-## Preferred tools
-- Package manager:
-- Preferred deploy:
-
-## Preferred workflow
-- Review style:
-- Commit style:
-
-## Explicit global approvals
--
-
-## Explicit global rejections
--
 EOF
+    fi
+  fi
 
   [ -f "$HOME/.sps/global-mistakes.md" ] || cat > "$HOME/.sps/global-mistakes.md" <<'EOF'
 # SPS Global Mistakes
@@ -309,7 +315,8 @@ print_success_card() {
   echo -e "${GREEN}${BOLD}║${NC}  1. Open any project in your agent                       ${GREEN}${BOLD}║${NC}"
   echo -e "${GREEN}${BOLD}║${NC}  2. Run:  /sps                                           ${GREEN}${BOLD}║${NC}"
   echo -e "${GREEN}${BOLD}║${NC}  3. Old project?  /sps audit                             ${GREEN}${BOLD}║${NC}"
-  echo -e "${GREEN}${BOLD}║${NC}  4. Health check: bash scripts/sps-doctor.sh             ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  4. CMS debt?     /sps sync                              ${GREEN}${BOLD}║${NC}"
+  echo -e "${GREEN}${BOLD}║${NC}  5. Health check: bash scripts/sps-doctor.sh             ${GREEN}${BOLD}║${NC}"
   echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
   echo ""
   note "Log: $LOG"
@@ -419,6 +426,15 @@ section "Host verification"
 [ -d "$HOME/.gemini/config/skills/sps" ] && ok "/sps on Gemini/Antigravity" || bad "/sps missing on Gemini/Antigravity"
 
 print_success_card
+
+# Portable core is the sync of /sps. Optional npx skill adds may fail on network
+# or agent-id drift; do not fail the whole install if mirrors are healthy.
+if [[ -f "$HOME/.claude/skills/sps/SKILL.md" && -f "$HOME/.cursor/skills/sps/SKILL.md" ]]; then
+  if ((FAILED > 0)); then
+    warn "Some optional skill installs failed ($FAILED). /sps mirrors are OK — see $LOG"
+  fi
+  exit 0
+fi
 
 if ((FAILED > 0)); then
   exit 1

@@ -1,17 +1,26 @@
 # Antigravity / Gemini CLI host adapter for `/sps`
 
-This is a thin host note for Antigravity and Gemini CLI. The canonical workflow
-is still `skills/sps/SKILL.md`.
+Canonical workflow: `skills/sps/SKILL.md` + [METHOD-CARD.md](../METHOD-CARD.md).
 
-## Antigravity notes
+## Why this host fails often
 
-- Keep the flow simple and conversational when structured UI is missing.
-- Do not rely on Claude plugin ecosystems.
-- Rely on mirrored skill paths under `~/.gemini/.../skills/sps` when present.
-- Write `./.sps/agent.md` with Host: Antigravity / Gemini CLI and the version.
+Antigravity may prefer its own scaffolding and skip skills unless project root
+mirrors and explicit `/sps` invocation are present.
 
 ## Required behavior
 
-1. Follow canonical `/sps` steps with plain-markdown discovery and approvals.
-2. Use shell verification when available; otherwise document manual checks.
-3. Avoid host-specific extras that reduce portability.
+1. On session boot, read METHOD-CARD + `./.sps/*` before any code.
+2. Ensure `GEMINI.md` and `AGENTS.md` contain the `/sps` lock block
+   ([PROJECT-ROOT-MIRRORS.md](../PROJECT-ROOT-MIRRORS.md)).
+3. Do **not** invent a parallel "Antigravity-native" build process.
+4. Use plain-markdown discovery and approval packets.
+5. CMS coupling, design gate, hygiene, and context-efficiency laws still apply.
+6. If skills are missing from `~/.gemini/**/skills/sps`, tell the user to run
+   `get-sps.sh` / `install.sh` and give exact commands.
+7. Write `./.sps/agent.md` with Host: Antigravity / Gemini CLI and VERSION.
+
+## Forbidden
+
+- Skipping discovery because the host chat UI feels faster
+- Storefront-only sections on CMS projects
+- Claiming verification that was not run

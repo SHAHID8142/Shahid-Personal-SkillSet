@@ -5,54 +5,37 @@ Use this file to decide what `/sps` can safely assume on each host.
 ## Rule
 
 If a capability is missing, fall back instead of pretending it exists.
+Never claim "works on every agent on the internet."
 
 ## Support model
 
-| Host | Skills | MCP | Shell / installs | Structured questions | Browser / runtime verification | Notes |
+| Host | Skills | MCP | Shell / installs | Structured questions | Browser / runtime | Notes |
 |---|---|---|---|---|---|---|
-| Claude Code | Strong | Strong | Strong | Usually available | Strong | Best host for full `/sps` behavior, including plugin-specific enhancers. |
-| Cursor | Strong | Strong | Strong | Usually available | Strong | Use host-native tools first; do not assume Claude plugin commands exist. |
-| Codex | Strong | Varies | Strong | Varies | Varies | Favor portable skills and shell-based verification. |
-| Antigravity / Gemini CLI | Medium | Varies | Medium | Usually conversational only | Varies | Keep the flow simple and explicit; do not rely on plugin ecosystems. |
-| Other skills-compatible agents | Varies | Varies | Varies | Varies | Varies | Use the generic fallback workflow. |
+| Claude Code | Strong | Strong | Strong | Usually | Strong | Best for full-profile enhancers |
+| Cursor | Strong | Strong | Strong | Usually | Strong | Host-native tools; no Claude plugin assumptions |
+| Codex | Strong | Varies | Strong | Varies | Varies | Portable skills + shell verification |
+| Antigravity / Gemini CLI | Medium | Varies | Medium | Conversational | Varies | Requires root mirrors; easy to skip SPS |
+| Windsurf | Medium | Varies | Varies | Varies | Varies | Prefer short pointers to `./.sps/` |
+| GitHub Copilot | Medium | Varies | Varies | Varies | Varies | `AGENTS.md` + skills when supported |
+| OpenCode / Cline / Roo / Kiro / Amp | Varies | Varies | Varies | Varies | Varies | Use generic adapter |
+| Other skills-compatible agents | Varies | Varies | Varies | Varies | Varies | METHOD-CARD + `.sps/` memory |
+| Generic chatbots / non-coding agents | No | No | No | No | No | Out of scope |
 
 ## Fallback order
 
-1. Use explicit skill invocation if the host supports it.
-2. Use host-native shell, file, and planning tools if available.
-3. Use MCP only when the host actually supports MCP.
-4. Use plain conversational questioning if structured forms are unavailable.
-5. Use manual verification notes if browser/runtime tooling is unavailable.
+1. Explicit skill invocation
+2. Host-native shell/file/planning tools
+3. MCP only if configured
+4. Plain conversational questioning
+5. Manual verification notes
 
 ## Hard restrictions
 
-- Never assume Claude plugins exist on Cursor, Codex, Antigravity, or other hosts.
-- Never assume MCP is configured just because the host can theoretically support it.
-- Never assume browser automation exists.
-- Never assume the same skill directories exist on every runtime.
-- Never claim "works identically everywhere."
+- Never assume Claude plugins on non-Claude hosts
+- Never assume MCP/browser automation
+- Never assume identical skill directories
+- Never claim identical behavior everywhere
 
 ## Write host identity every session
 
-After detecting the host, always update `./.sps/agent.md` with:
-
-- active host name
-- `/sps` required: yes
-- detected capabilities
-- fallback notes for missing capabilities
-
-Do this even on limited hosts. Memory writing is portable; advanced tooling is not.
-
-## Generic fallback workflow
-
-When the host is unknown or limited:
-
-1. Write or refresh `./.sps/agent.md`.
-2. Run discovery in plain chat.
-3. Present options and recommendation in plain markdown with Known / Assumed /
-   Unverified labels.
-4. Use the best available local shell/filesystem workflow.
-5. Use project-local `.sps/` memory only, and update it after each approval.
-6. Apply the mobile / low-end gate even if browser tooling is missing; mark what
-   remains manually unverified.
-7. Handoff with a clear "verified vs not verified" summary.
+Update `./.sps/agent.md` with host, `/sps` required, capabilities, fallbacks, VERSION.
