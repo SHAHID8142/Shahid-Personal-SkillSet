@@ -1,8 +1,6 @@
 # `/sps sync` — CMS / storefront debt mode
 
-Easy to remember: **sync** the storefront with CMS reality.
-
-Aliases mentioned in docs only: `cms-sync`, `couple`. Primary command: `/sps sync`.
+Primary command: `/sps sync` (Aliases: `/sps cms-sync`, `/sps couple`).
 
 ## When to use
 

@@ -78,6 +78,9 @@ Steps 0–9 below after legacy onboarding when required.
 in-session checks: host, VERSION, mirrors, required skills from router, CMS debt
 pointers.
 
+### Read-Only Q&A Carve-Out (Context-Efficiency)
+If the user's request is purely investigatory or asking a simple code question ("explain this function", "what does X do?", "where is Y defined?"), SKIP full session boot / heavy memory load and answer directly. Only activate full memory, audit, or discovery for actual build, refactor, audit, or code-modifying tasks.
+
 ### Legacy / first-contact (mandatory)
 If no usable `./.sps/` memory on an existing codebase: bootstrap → scored audit →
 write `audit-report.md` → stop for user choice → then remediate / discover / build.

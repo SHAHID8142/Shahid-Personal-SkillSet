@@ -281,6 +281,10 @@ sync_core_skill() {
     if mkdir -p "$dest_root" 2>/dev/null; then
       rm -rf "$dest_root/sps"
       cp -R "$src" "$dest_root/"
+      if [ -d "$REPO/scripts" ]; then
+        mkdir -p "$dest_root/sps/scripts"
+        cp -R "$REPO/scripts/"* "$dest_root/sps/scripts/"
+      fi
       ok "synced /sps → ${dest_root/#$HOME/\~}/sps"
     else
       warn "could not sync → ${dest_root/#$HOME/\~}"

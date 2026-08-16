@@ -128,7 +128,7 @@ SPS version:
 ### Scored checklist
 | ID | Result | Points awarded | Notes |
 |---|---|---|---|
-| A1 | Pass | 4 | ... |
+| A1 | Pass | 3 | ... |
 | D3 | Fail | 0 | ... |
 
 ### Project snapshot

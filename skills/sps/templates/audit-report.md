@@ -4,7 +4,7 @@ Date:
 Project status: legacy first contact | existing SPS project
 Scope: full alignment | focused
 Active agent:
-SPS version:
+SPS version: 3.0.1
 
 ## Score
 - Total: /100
@@ -20,6 +20,7 @@ SPS version:
 | A2 |  |  |  |
 | A3 |  |  |  |
 | A4 |  |  |  |
+| A5 |  |  |  |
 | B1 |  |  |  |
 | B2 |  |  |  |
 | B3 |  |  |  |
@@ -32,10 +33,12 @@ SPS version:
 | D4 |  |  |  |
 | E1 |  |  |  |
 | E2 |  |  |  |
-| E3 |  |  |  |
 | F1 |  |  |  |
 | F2 |  |  |  |
 | F3 |  |  |  |
+| H1 |  |  |  |
+| H2 |  |  |  |
+| H3 |  |  |  |
 | G1 |  |  |  |
 | G2 |  |  |  |
 
