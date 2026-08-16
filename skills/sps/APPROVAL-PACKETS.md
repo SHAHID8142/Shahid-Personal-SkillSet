@@ -1,12 +1,31 @@
-# Approval Packets
+# Approval Packets & Batch Modes
 
-Before building each major section or chunk, send a compact approval packet.
-Do not continue until the user approves.
+Before building each section, component, or chunk, send an appropriate tier approval packet.
+Do not proceed until the user approves (or batch mode is enabled).
 
-## Template
+---
+
+## 1. Two-Tier Packet System
+
+### Tier 1: Compact Quick-Fix Packet (Small Edits, Bug Fixes, Tweaks)
+Use for small bug fixes, styling adjustments, copy edits, or single-file changes:
 
 ```markdown
-## Approval Packet
+### Quick-Fix Approval Packet
+- **Target / Section:** (e.g. Header phone number alignment)
+- **Proposed Change:** (1-2 sentences)
+- **Affected Files:** (list of files)
+- **Risk / Side Effects:** None / minimal
+- **Proceed?** (Reply 'yes' / 'go ahead')
+```
+
+---
+
+### Tier 2: Full Architecture Packet (Major Sections, Pages, Schema)
+Use for major sections, new collections, database migrations, or redesigns:
+
+```markdown
+## Approval Packet (Tier 2)
 
 Section:
 Purpose:
@@ -25,7 +44,6 @@ Role stack:
 Skills selected (router):
 - Primary per domain:
 - Secondary (optional):
-- Missing / install plan:
 
 This chunk covers:
 - frontend / UI:
@@ -34,27 +52,11 @@ This chunk covers:
 - CMS round-trip proof plan:
 - storefront / ERP / admin:
 - accessibility:
-- performance:
-- responsive breakpoints:
-- mobile behavior: minimal / dual / user-approved richer
-- motion:
-- low-end lag risks and mitigations:
-- workspace hygiene notes:
-- cleanup gate plan:
-
-Design Research Packet:
-- attached / summary:
+- performance & mobile behavior: minimal / dual / richer (user-approved)
+- workspace hygiene & cleanup gate plan:
 
 Evidence:
-- Known:
-- Assumed:
-- Unverified:
-
-Intentionally not included:
-- ...
-
-Trade-offs:
-- ...
+- Known / Assumed / Unverified:
 
 Memory updates after approval:
 - profile / handoff / content-model / section-todos / registry:
@@ -63,29 +65,36 @@ Next action after approval:
 - ...
 ```
 
-## Abort conditions
+---
+
+## 2. Batch Approval Mode (B3)
+
+If the user explicitly states `batch approve`, `approve all remaining sections`, or runs `/sps approve --batch`:
+1. The agent may execute multiple low-risk sections consecutively without stopping after every single sub-step.
+2. The agent MUST still respect Section DoD, CMS round-trips, and memory file updates for each section.
+3. Stop immediately if an error, breaking change, or ambiguity occurs.
+
+---
+
+## 3. Release `/sps` Lock Procedure (B3)
+
+If the user wishes to exit `/sps` orchestrator mode or handover the repository cleanly:
+- Command: `/sps release-lock` or `/sps unlock`
+- Action:
+  1. Remove `./.sps/lock.json`
+  2. Comment out the hard-lock block in `GEMINI.md`, `AGENTS.md`, `CLAUDE.md` with timestamp.
+  3. Write final summary to `./.sps/handoff.md`.
+
+---
+
+## 4. Abort Conditions
 
 Do **not** start coding the chunk if any of these are true:
-
 1. `./.sps/agent.md` is missing or has no active host
 2. `/sps` lock is missing from project memory or root mirrors when required
-3. Required discovery answers are still unknown for this chunk (CMS, auth,
-   storefront, team/deploy when the chunk depends on them)
+3. Required discovery answers are still unknown for this chunk
 4. CMS-enabled project and this UI chunk has no CMS inventory + admin plan
-5. UI chunk lacks Design Research Packet (or redesign research)
-6. UI chunk lacks responsive + mobile behavior notes
-7. UI chunk would ship fancy/laggy mobile motion without explicit approval
-8. Asset budget would be exceeded without explicit approval
-9. Todo list for the chunk is missing
-10. ROLE-MATRIX roles are undeclared
-11. The packet claims verification that has not happened
-12. Known / Assumed / Unverified labels are missing on risky claims
-
-When aborting, tell the user which condition blocked progress and what is needed.
-
-## Rules
-
-- Keep it short but complete on CMS + mobile + roles.
-- After approval, update `./.sps/handoff.md` immediately.
-- After implementation, do not ask for section approval until SECTION-DOD passes
-  including cleanup gate and CMS round-trip when applicable.
+5. UI chunk lacks responsive + mobile behavior notes
+6. Asset budget would be exceeded without explicit approval
+7. Todo list for the chunk is missing
+8. The packet claims verification that has not happened

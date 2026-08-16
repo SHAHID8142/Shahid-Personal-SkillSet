@@ -1,29 +1,28 @@
-# Workspace Hygiene
+# Workspace Hygiene & Multi-Agent Concurrency
 
-## Law
+## 1. General Hygiene Laws
 
 Keep the working directory clean, intentional, and free of duplicate assets.
 
-## When the user drops a file / folder / link into the project
+1. **Categorize Drops:** Docs, images, videos, fonts, data, or notes.
+2. **Move to Canonical Paths:**
+   - `docs/` — briefs and project documents
+   - `public/uploads/` — public media assets
+   - `src/assets/` — bundled component assets
+   - `.sps/` — SPS memory markdown files only (no binary dumps)
+3. **No Duplicate Copies:** Use canonical paths; never create copy duplicates "just in case".
+4. **Never Commit Secrets:** Keep `.env`, credentials, and private keys strictly untracked.
 
-1. Identify type: doc, image, video, font, data, note, secret (never commit secrets)
-2. Move it to the dedicated folder for that type (project convention; if unclear,
-   propose a folder map and get a quick approval)
-3. Use the **canonical path** — do not copy the file into a second location for
-   "usage" while leaving clutter at the drop site
-4. Update imports/references to the canonical path
-5. If the asset becomes CMS/media content, register it in CMS/media memory
-6. Remove empty leftover clutter from the drop location when safe
+---
 
-## Folder defaults (propose if project lacks them)
+## 2. Multi-Agent Write Serialization (B9)
 
-- `docs/` or `director/` — briefs and documents
-- `public/` or project media roots — images/videos for the site
-- `src/assets/` — bundled assets when the stack requires it
-- `.sps/` — SPS memory only (not binary dumps)
+When multiple coding agents (e.g. Claude Code + Cursor + OpenCode + Antigravity) collaborate on the same repository:
 
-## Forbidden
-
-- Duplicate copies "just in case"
-- Leaving large binaries in repo root
-- Committing `.env` or credential files
+1. **Single-Writer Memory Rule:**
+   - Only the active agent writing a chunk may update `./.sps/handoff.md` and `./.sps/agent.md`.
+   - The active agent stamps its identifier and timestamp into `./.sps/agent.md`.
+2. **Memory Conflict Prevention:**
+   - Before executing, the incoming agent MUST read `./.sps/agent.md` and `./.sps/handoff.md` to acquire the latest context state.
+   - If `./.sps/agent.md` indicates an ongoing session from another host within the last 5 minutes, verify previous work before overwriting memory.
+3. **Atomic File Writes:** Always write memory files completely with deterministic formatting to prevent merge corruptions.
