@@ -24,7 +24,7 @@ AGENTS="*"
 ASSUME_YES=false
 INTERACTIVE=false
 MANIFEST="$HOME/.sps/install-manifest.env"
-MANAGED_SKILLS=("sps")
+MANAGED_SKILLS=("sps" "sps-cms")
 CLAUDE_PLUGINS=()
 CLAUDE_MARKETPLACES=()
 USE_CONTEXT7=0
@@ -273,6 +273,7 @@ EOF
 
 sync_core_skill() {
   local src="$REPO/skills/sps"
+  local cms_src="$REPO/skills/sps-cms"
   if [ ! -d "$src" ]; then
     warn "skills/sps not found - run from repo root"
     return
@@ -285,7 +286,11 @@ sync_core_skill() {
         mkdir -p "$dest_root/sps/scripts"
         cp -R "$REPO/scripts/"* "$dest_root/sps/scripts/"
       fi
-      ok "synced /sps → ${dest_root/#$HOME/\~}/sps"
+      if [ -d "$cms_src" ]; then
+        rm -rf "$dest_root/sps-cms"
+        cp -R "$cms_src" "$dest_root/"
+      fi
+      ok "synced /sps & /sps-cms → ${dest_root/#$HOME/\~}"
     else
       warn "could not sync → ${dest_root/#$HOME/\~}"
     fi

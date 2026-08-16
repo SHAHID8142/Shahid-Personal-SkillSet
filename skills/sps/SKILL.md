@@ -2,12 +2,13 @@
 name: sps
 description: >
   Project-scoped master build orchestrator for skills-compatible coding agents.
-  Use for build, design, implement, fix, refactor, test, deploy, audit, sync, or
-  improve work with mandatory discovery, CMS-coupled section delivery, design
-  gates, skill routing, workspace hygiene, role matrix, todos, approvals,
-  anti-hallucination, always-written .sps memory, low-end mobile gates, legacy
-  audits, and deployable handoff across Claude, Cursor, Codex, Antigravity,
-  Windsurf, Copilot, OpenCode, and other skills-compatible agents.
+  Triggered when the user invokes /sps, /sps sync, /sps cms-sync, /sps audit,
+  /sps doctor, /sps couple, /sps release-lock, or asks to build, design, implement,
+  fix, refactor, test, deploy, audit, sync CMS with storefront, or improve any codebase.
+  Enforces mandatory discovery, CMS-coupled section delivery, design gates, skill
+  routing, workspace hygiene, 2-tier approval packets, anti-hallucination, always-written
+  .sps memory, low-end mobile gates, and deployable handoffs across Claude, Cursor,
+  Codex, Antigravity, OpenCode, Windsurf, and other agents.
 ---
 
 # /sps (v3.0.2 Master Orchestrator)
@@ -46,8 +47,8 @@ Standard section-by-section construction following the inlined hard-law core.
 ### Audit
 `/sps audit` → [AUDIT.md](AUDIT.md). Read-only 100-point scored evaluation.
 
-### Sync
-`/sps sync` (Aliases: `/sps cms-sync`, `/sps couple`) → [SYNC.md](SYNC.md). Remediate CMS and storefront debt.
+### Sync & CMS-Sync
+`/sps sync` / `/sps cms-sync` / `/sps couple` → [SYNC.md](SYNC.md) & [CMS-COUPLING.md](CMS-COUPLING.md). Pay CMS and storefront debt on existing or pending codebases.
 
 ### Doctor
 `/sps doctor` → run `scripts/sps-doctor.sh` or in-session host and mirror validation.
