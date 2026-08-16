@@ -169,6 +169,9 @@ for dest_root in "${SYNC_PATHS[@]}" "${DEFAULT_SYNC_PATHS[@]}"; do
   if [ -e "$dest_root/sps" ]; then
     rm -rf "$dest_root/sps" && removed "${dest_root/#$HOME/\~}/sps"
   fi
+  if [ -e "$dest_root/sps-cms" ]; then
+    rm -rf "$dest_root/sps-cms" && removed "${dest_root/#$HOME/\~}/sps-cms"
+  fi
 done
 
 # ── Remove Claude plugin system skills ───────────────────────────────────────

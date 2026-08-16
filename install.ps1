@@ -164,6 +164,7 @@ SYNC_PATHS=$($syncRoots -join ",")
 
 function Sync-CoreSkill {
     $src = Join-Path $repoDir "skills\sps"
+    $cmsSrc = Join-Path $repoDir "skills\sps-cms"
     if (-not (Test-Path $src)) {
         note "skills\sps not found - run from repo root"
         return
@@ -175,6 +176,12 @@ function Sync-CoreSkill {
             if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
             Copy-Item -Path $src -Destination $destRoot -Recurse -Force -ErrorAction Stop
             note "+ synced /sps to $dest"
+            if (Test-Path $cmsSrc) {
+                $cmsDest = Join-Path $destRoot "sps-cms"
+                if (Test-Path $cmsDest) { Remove-Item -Recurse -Force $cmsDest }
+                Copy-Item -Path $cmsSrc -Destination $destRoot -Recurse -Force -ErrorAction Stop
+                note "+ synced /sps-cms to $cmsDest"
+            }
         } catch {
             note "- could not sync /sps to $destRoot"
         }
@@ -215,8 +222,8 @@ if (have pip) { ok "pip found" } else { warn "pip not found" }
 $agentArgs = Get-AgentArgs
 $agentArgsString = Get-AgentArgString
 
-$script:TotalSteps = 29
-if (have claude) { $script:TotalSteps += 15 }
+$script:TotalSteps = 28
+if (have claude) { $script:TotalSteps += 16 }
 if ((have uv) -or (have pip)) { $script:TotalSteps += 1 }
 note "Planned steps: $($script:TotalSteps)"
 
@@ -224,11 +231,10 @@ section "Installing"
 Step "/sps core skill" ([scriptblock]::Create("npx skills add `"$repoDir`" -g --copy -y $agentArgsString"))
 
 section "Complete skill stack"
-$script:ManagedSkills += @("hallmark","impeccable","design-taste-frontend","sps-cms","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","karpathy-guidelines","agent-browser","ai-seo","copywriting","deploy-to-vercel","verification-before-completion")
+$script:ManagedSkills += @("hallmark","impeccable","design-taste-frontend","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","karpathy-guidelines","agent-browser","ai-seo","copywriting","deploy-to-vercel","verification-before-completion")
 Step "hallmark" ([scriptblock]::Create("npx skills add nutlope/hallmark -g -y $agentArgsString"))
 Step "impeccable" ([scriptblock]::Create("npx skills add pbakaus/impeccable -g -y $agentArgsString"))
 Step "design-taste-frontend (taste-skill v2)" ([scriptblock]::Create("npx skills add Leonxlnx/taste-skill --skill design-taste-frontend -g -y $agentArgsString"))
-Step "sps-cms (mandatory CMS engine)" ([scriptblock]::Create("npx skills add SHAHID8142/sps-cms -g -y $agentArgsString"))
 Step "webapp-testing" ([scriptblock]::Create("npx skills add https://github.com/anthropics/skills --skill webapp-testing -g -y $agentArgsString"))
 Step "web-design-guidelines" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y $agentArgsString"))
 Step "vercel-react-best-practices" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y $agentArgsString"))

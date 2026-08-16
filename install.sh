@@ -114,8 +114,8 @@ detect_hosts() {
 }
 
 compute_total_steps() {
-  TOTAL_STEPS=29
-  if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 15)); fi
+  TOTAL_STEPS=28
+  if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 16)); fi
   if have uv || have pip; then TOTAL_STEPS=$((TOTAL_STEPS + 1)); fi
 }
 
@@ -134,8 +134,8 @@ progress_bar() {
 }
 
 compute_total_steps() {
-  TOTAL_STEPS=29
-  if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 15)); fi
+  TOTAL_STEPS=28
+  if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 16)); fi
   if have uv || have pip; then TOTAL_STEPS=$((TOTAL_STEPS + 1)); fi
 }
 
@@ -337,11 +337,10 @@ note "Planned steps: $TOTAL_STEPS"
 section "Installing"
 step "/sps core skill" npx skills add "$REPO" -g --copy -y "${AGENT_ARGS[@]}"
 
-MANAGED_SKILLS+=(hallmark impeccable design-taste-frontend sps-cms webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns karpathy-guidelines agent-browser ai-seo copywriting deploy-to-vercel verification-before-completion)
+MANAGED_SKILLS+=(hallmark impeccable design-taste-frontend webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns karpathy-guidelines agent-browser ai-seo copywriting deploy-to-vercel verification-before-completion)
 step "hallmark" npx skills add nutlope/hallmark -g -y "${AGENT_ARGS[@]}"
 step "impeccable" npx skills add pbakaus/impeccable -g -y "${AGENT_ARGS[@]}"
 step "design-taste-frontend (taste-skill v2)" npx skills add Leonxlnx/taste-skill --skill design-taste-frontend -g -y "${AGENT_ARGS[@]}"
-step "sps-cms (mandatory CMS engine)" npx skills add SHAHID8142/sps-cms -g -y "${AGENT_ARGS[@]}"
 step "webapp-testing" npx skills add https://github.com/anthropics/skills --skill webapp-testing -g -y "${AGENT_ARGS[@]}"
 step "web-design-guidelines" npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y "${AGENT_ARGS[@]}"
 step "vercel-react-best-practices" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y "${AGENT_ARGS[@]}"

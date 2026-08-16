@@ -139,6 +139,11 @@ foreach ($destRoot in ($syncPaths + $defaultSyncPaths | Select-Object -Unique)) 
         Remove-Item -Recurse -Force $spsPath
         removed "$spsPath"
     }
+    $spsCmsPath = Join-Path $destRoot "sps-cms"
+    if (Test-Path $spsCmsPath) {
+        Remove-Item -Recurse -Force $spsCmsPath
+        removed "$spsCmsPath"
+    }
 }
 
 # -- Remove Claude plugins -----------------------------------------------------

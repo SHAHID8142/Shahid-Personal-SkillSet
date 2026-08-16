@@ -34,7 +34,7 @@ as a second orchestrator by default.
 | Hallucination gate | `verification-before-completion` | `fact-check` | ANTI-HALLUCINATION.md |
 | Token efficiency | `caveman` (opt-in lite) | `context-mode` (Claude Code only) | CONTEXT-EFFICIENCY.md |
 | Security | Trail of Bits `differential-review` + `static-analysis` (Claude) | host security review | security checks in SECTION-DOD |
-| CMS engine | **`sps-cms` (SHAHID8142/sps-cms) — mandatory** | — | (required; not optional) |
+| CMS engine | **`sps-cms` (bundled, synced by installer) — mandatory** | — | (required; not optional) |
 | Logos | `theSVG` | official brand source | LOGO-SOURCES.md |
 | Docs / library APIs | Context7 MCP when available | — | official docs fetch |
 
@@ -66,9 +66,9 @@ Taste-skill v2 — install ONLY the taste skill, not the other 11 repo variants:
 npx skills add Leonxlnx/taste-skill --skill design-taste-frontend -g -y
 ```
 
-sps-cms (mandatory CMS engine):
+sps-cms (mandatory CMS engine — bundled in this repo, synced by installer):
 ```bash
-npx skills add SHAHID8142/sps-cms -g -y
+npx skills add SHAHID8142/Shahid-Personal-SkillSet --skill sps-cms -g -y
 ```
 
 Karpathy:

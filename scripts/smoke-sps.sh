@@ -80,11 +80,21 @@ if command -v npx >/dev/null 2>&1; then
     else
       fail "install missing mirrored sps paths"
     fi
+    if [[ -d "$SMOKE_HOME/.claude/skills/sps-cms" && -d "$SMOKE_HOME/.cursor/skills/sps-cms" ]]; then
+      pass "install mirrored sps-cms to Claude + Cursor"
+    else
+      fail "install missing mirrored sps-cms paths"
+    fi
     if HOME="$SMOKE_HOME" USERPROFILE="$SMOKE_HOME" bash "$REPO/uninstall.sh" --yes; then
       if [[ ! -d "$SMOKE_HOME/.claude/skills/sps" && ! -d "$SMOKE_HOME/.cursor/skills/sps" ]]; then
         pass "uninstall removed mirrored sps paths"
       else
         fail "uninstall left mirrored sps paths"
+      fi
+      if [[ ! -d "$SMOKE_HOME/.claude/skills/sps-cms" && ! -d "$SMOKE_HOME/.cursor/skills/sps-cms" ]]; then
+        pass "uninstall removed mirrored sps-cms paths"
+      else
+        fail "uninstall left mirrored sps-cms paths"
       fi
     else
       fail "uninstall.sh failed"
