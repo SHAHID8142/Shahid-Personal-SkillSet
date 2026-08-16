@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 # SPS doctor — check whether /sps is installed across agents.
 # Usage: bash scripts/sps-doctor.sh [optional-project-dir]
+#        bash scripts/sps-doctor.sh --fix   # auto-repair broken mirrors via reinstall
 
 set -euo pipefail
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 PROJECT="${1:-}"
+FIX=false
+for arg in "$@"; do
+  [[ "$arg" == "--fix" || "$arg" == "-f" ]] && FIX=true && PROJECT=""
+done
 
 echo ""
 echo -e "${CYAN}${BOLD}SPS Doctor${NC}"
@@ -16,6 +21,8 @@ echo ""
 ok()   { echo -e "  ${GREEN}✓${NC} $*"; }
 bad()  { echo -e "  ${RED}✗${NC} $*"; }
 info() { echo -e "  ${DIM}- $*${NC}"; }
+
+MISSING=0
 
 REPO_REF="$HOME/.sps/src/Shahid-Personal-SkillSet"
 SCRIPT_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -42,6 +49,7 @@ check_skill() {
     ok "$label ($ver)  ${path/#$HOME/\~}"
   else
     bad "$label missing  ${path/#$HOME/\~}"
+    MISSING=$((MISSING + 1))
   fi
 }
 
@@ -60,7 +68,7 @@ check_skill "OpenCode" "$HOME/.config/opencode/skills/sps"
 echo ""
 if [[ -f "$HOME/.sps/install-manifest.env" ]]; then
   ok "Install manifest present"
-  info "$(grep '^PROFILE=' "$HOME/.sps/install-manifest.env" || true)"
+  info "$(grep '^PROFILE=' "$HOME/.sps/install-manifest.env" || true) (complete unified install)"
   info "$(grep '^SPS_VERSION=' "$HOME/.sps/install-manifest.env" || true)"
 else
   bad "Install manifest missing (run get-sps.sh / install.sh)"
@@ -70,6 +78,25 @@ if [[ -d "$HOME/.sps/src/Shahid-Personal-SkillSet/.git" ]]; then
   ok "Source clone at ~/.sps/src/Shahid-Personal-SkillSet"
 else
   info "No source clone yet — use: curl .../get-sps.sh | bash"
+fi
+
+echo ""
+echo -e "${BOLD}Managed skills${NC}"
+check_skill "sps-cms (mandatory CMS engine)" "$HOME/.claude/skills/sps-cms"
+check_skill "taste-skill v2 (design-taste-frontend)" "$HOME/.claude/skills/design-taste-frontend"
+check_skill "agent-browser" "$HOME/.claude/skills/agent-browser"
+check_skill "ai-seo" "$HOME/.claude/skills/ai-seo"
+check_skill "copywriting" "$HOME/.claude/skills/copywriting"
+check_skill "verification-before-completion" "$HOME/.claude/skills/verification-before-completion"
+
+echo ""
+echo -e "${BOLD}Update status${NC}"
+if [[ -x "$SCRIPT_REPO/scripts/check-update.sh" ]]; then
+  bash "$SCRIPT_REPO/scripts/check-update.sh" || true
+elif [[ -x "$REPO_REF/scripts/check-update.sh" ]]; then
+  bash "$REPO_REF/scripts/check-update.sh" || true
+else
+  info "check-update.sh not found (older install) — update with get-sps.sh"
 fi
 
 if [[ -n "$PROJECT" && -d "$PROJECT" ]]; then
@@ -92,7 +119,25 @@ fi
 
 echo ""
 echo -e "${BOLD}Next commands${NC}"
+info "Update SPS:       bash scripts/sps-update.sh --yes   (or --check)"
 info "Install/update:  curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash"
 info "Doctor again:     bash scripts/sps-doctor.sh [project-dir]"
 info "In a project:     /sps  |  /sps audit  |  /sps sync  |  /sps doctor"
+
+if [[ "$FIX" == true ]]; then
+  echo ""
+  if [[ $MISSING -gt 0 ]]; then
+    echo -e "${YELLOW}${BOLD}--fix: $MISSING broken/missing installs found — repairing via forced reinstall…${NC}"
+    if [[ -x "$SCRIPT_REPO/scripts/sps-update.sh" ]]; then
+      bash "$SCRIPT_REPO/scripts/sps-update.sh" --force
+    elif [[ -x "$REPO_REF/scripts/sps-update.sh" ]]; then
+      bash "$REPO_REF/scripts/sps-update.sh" --force
+    else
+      echo -e "${RED}✗ sps-update.sh not found — reinstall manually with get-sps.sh${NC}"
+    fi
+    echo -e "${YELLOW}Re-run doctor to confirm everything is green.${NC}"
+  else
+    ok "--fix: nothing to repair."
+  fi
+fi
 echo ""

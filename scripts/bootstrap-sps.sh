@@ -60,6 +60,7 @@ copy_template "handoff.md"
 copy_template "mistakes.md"
 copy_template "agent.md"
 copy_template "audit-report.md"
+copy_template "plan.md"
 copy_template "content-model.md"
 copy_template "cms-foundation.md"
 copy_template "cms-debt.md"
@@ -79,12 +80,6 @@ EOF
 fi
 
 # Root mirrors (append lock if files missing or lack lock)
-LOCK_BLOCK='## /sps lock
-This project uses `/sps` as the master workflow.
-Read `./.sps/profile.md`, `./.sps/handoff.md`, and the SPS Method Card before
-building. Do not replace `/sps` with a host-default scaffolding workflow.
-CMS-enabled sections must ship storefront + CMS controls together.'
-
 GEMINI_LOCK_BLOCK='## /sps lock (required)
 
 This project is under `/sps` orchestration. Antigravity must NOT use a host-default
@@ -93,10 +88,27 @@ scaffold workflow instead of `/sps`.
 Before any code:
 1. Read `./.sps/profile.md` and `./.sps/handoff.md`
 2. Read the SPS Method Card from the installed `sps` skill (`METHOD-CARD.md`)
-3. Follow CMS-coupled section delivery when CMS is enabled
-4. Stop for approval after each section Definition of Done
+3. Build work requires an approved `./.sps/plan.md` — zero code before plan approval
+4. Follow CMS-coupled section delivery when CMS is enabled (engine skill: sps-cms)
+5. Stop for approval after each section Definition of Done; user manually checks each section
 
-Commands: `/sps` · `/sps audit` · `/sps sync` · `/sps doctor`'
+Commands: `/sps` · `/sps audit` · `/sps sync` · `/sps doctor`
+
+## SPS behavioral rules (required, Karpathy)
+
+1. Think before coding: state assumptions, enumerate interpretations, ask if ambiguous.
+2. Simplicity first: deliver the minimum code the task requires; no speculative features.
+3. Surgical changes: edit only what the request requires; never refactor unrelated code.
+4. Goal-driven execution: define visible success criteria and verify them before claiming done.
+5. Never claim verification that was not actually run (no "should pass").'
+
+LOCK_BLOCK='## /sps lock
+This project uses `/sps` as the master workflow.
+Read `./.sps/profile.md`, `./.sps/handoff.md`, and the SPS Method Card before
+building. Do not replace `/sps` with a host-default scaffolding workflow.
+Build work requires an approved `./.sps/plan.md` (zero code before plan approval).
+CMS-enabled sections must ship storefront + CMS controls together (engine: sps-cms).
+Each section ends with a user manual check before the next section starts.'
 
 for root_file in AGENTS.md GEMINI.md CLAUDE.md; do
   target="$TARGET/$root_file"
@@ -115,3 +127,18 @@ done
 
 echo "Bootstrapped $DEST (SPS $VERSION)"
 echo "Next: open the project in your agent and run /sps (or /sps audit, /sps sync)"
+
+# Session-start update check (non-blocking, 24h cached). Auto-applies when the
+# host is an agent session and an update is available.
+UPDATE_CHECK="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/check-update.sh"
+if [[ -f "$UPDATE_CHECK" ]]; then
+  bash "$UPDATE_CHECK" >/dev/null 2>&1
+  rc=$?
+  if [[ $rc -eq 1 ]]; then
+    UPDATE_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sps-update.sh"
+    if [[ -f "$UPDATE_SCRIPT" ]]; then
+      echo "SPS update available — auto-applying…"
+      bash "$UPDATE_SCRIPT" --yes
+    fi
+  fi
+fi

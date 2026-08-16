@@ -1,6 +1,6 @@
 # Shahid Personal SkillSet (`/sps`)
 
-**Version:** 3.0.1
+**Version:** 4.0.0
 
 `/sps` tells your coding agent **how to build a project step by step** — with
 memory, approvals, and (when you use a CMS) **storefront + admin controls
@@ -13,18 +13,18 @@ chatbots.
 
 ---
 
-## Quick start (install)
+## Quick start (one-command install)
 
 ### Mac / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --profile core --yes
+curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --yes
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1))) -Profile core -Yes
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1))) -Yes
 ```
 
 ### Check install
@@ -33,28 +33,45 @@ curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet
 bash ~/.sps/src/Shahid-Personal-SkillSet/scripts/sps-doctor.sh
 ```
 
-### Update later
+### Update
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash -s -- --yes
+# or, after a session-start auto-check:
+bash ~/.sps/src/Shahid-Personal-SkillSet/scripts/sps-update.sh --yes
 ```
 
----
-
-## Which profile should I use?
-
-| Profile | Use when | Includes |
-|---|---|---|
-| **`core`** (recommended) | Everyday work | `/sps` + design/React/testing skills + **Karpathy guidelines** |
-| **`full`** | Claude-heavy / security extras | Everything in core + Claude plugins + **Trail of Bits** security + MCP extras |
-| **`minimal`** | Only the orchestrator | `/sps` only |
+### Uninstall
 
 ```bash
-# full (Claude + Trail of Bits security plugins)
-bash ~/.sps/src/Shahid-Personal-SkillSet/install.sh --profile full --yes
+bash ~/.sps/src/Shahid-Personal-SkillSet/uninstall.sh --yes
+# keep personal memory:
+bash ~/.sps/src/Shahid-Personal-SkillSet/uninstall.sh --keep-personal --yes
 ```
 
+Windows: `uninstall.ps1` / `uninstall.ps1 -KeepPersonal -Yes`
+
 ---
+
+## One installer — everything included
+
+There is a **single unified install**: `/sps` + the complete curated skill stack.
+No profiles, no minimal/full choice — one command installs everything:
+
+- `/sps` orchestrator + plan gate + auto-update system
+- Design taste (`design-taste-frontend` v2 + `hallmark` + `impeccable`)
+- **`sps-cms`** (mandatory CMS engine)
+- React/performance (`vercel-react-best-practices`, `vercel-composition-patterns`)
+- Testing (`webapp-testing`), live verify + Lighthouse (`agent-browser`)
+- SEO + copy (`ai-seo`, `copywriting`, `fact-check`)
+- Deploy (`deploy-to-vercel`)
+- **`karpathy-guidelines`** + **`verification-before-completion`** + `grill-me` + `caveman`
+- Backend (`supabase`, `supabase-postgres-best-practices`, `prisma-*`)
+- Mobile (`vercel-react-native-skills`, `sleek-design-mobile-apps`)
+- Research (`firecrawl`, `astro-framework`, `webgpu-claude-skill`)
+- Claude-only extras when `claude` CLI is present: UI/engineering/marketing plugins,
+  **Trail of Bits** security plugins, Context7 MCP
+- `graphify` when `uv`/`pip` is available
 
 ## How to use (in any project)
 
@@ -118,9 +135,9 @@ If the project has a CMS:
 
 | Host | Level | Notes |
 |---|---|---|
-| Claude Code | Best | Full profile enhancers work here |
-| Cursor | High | Strong core workflow |
-| Codex | High | Portable core |
+| Claude Code | Best | Full stack + plugins/MCP extras |
+| Cursor | High | Full stack |
+| Codex | High | Full stack |
 | Antigravity / Gemini | Medium | Needs root mirrors + `/sps` |
 | Windsurf / Copilot / OpenCode family | Medium | Portable laws; extras vary |
 | Other skills-compatible agents | Varies | Falls back cleanly |
@@ -132,17 +149,22 @@ Details: [`skills/sps/CAPABILITY-MATRIX.md`](skills/sps/CAPABILITY-MATRIX.md)
 
 ## Core skills included
 
-**Always with `core`:**
-- `/sps` (orchestrator)
-- `hallmark`, `impeccable`, `taste-skill` (design taste — don’t stack all at once)
+**Every install (single unified stack):**
+- `/sps` (orchestrator) + `PLAN-GATE.md` plan-first workflow
+- `design-taste-frontend` (taste-skill v2) + `hallmark`, `impeccable` (taste — don't stack all at once)
 - `web-design-guidelines`, `vercel-react-best-practices`, `vercel-composition-patterns`
-- `webapp-testing`
-- **`karpathy-guidelines`** (surgical, simple changes)
+- `webapp-testing`, `agent-browser` (live verify + Lighthouse)
+- **`sps-cms`** (mandatory CMS engine)
+- `ai-seo`, `copywriting`, `deploy-to-vercel`
+- **`karpathy-guidelines`**, **`verification-before-completion`**, `grill-me`, `caveman`
+- Backend: `supabase`, `supabase-postgres-best-practices`, `prisma-database-setup`, `prisma-client-api`, `prisma-cli`
+- Mobile: `vercel-react-native-skills`, `sleek-design-mobile-apps`
+- Research: `firecrawl`, `fact-check`, `astro-framework`, `webgpu-claude-skill`
 
-**Extra with `full` (mainly Claude):**
+**Claude-only (auto when `claude` CLI present):**
 - UI/engineering/marketing/a11y plugins
 - **Trail of Bits** security plugins (`differential-review`, `static-analysis`, and related)
-- optional MCP helpers
+- Context7 MCP
 
 Skill picking rules: [`skills/sps/SKILL-ROUTER.md`](skills/sps/SKILL-ROUTER.md)
 
@@ -206,6 +228,5 @@ CI runs lint + smoke on push/PR.
 
 ## Safety
 
-- Prefer **`core`** unless you need Claude/security extras
 - Review third-party skills before trusting them
-- Never claim “works identically on every agent on the internet”
+- Never claim "works identically on every agent on the internet"

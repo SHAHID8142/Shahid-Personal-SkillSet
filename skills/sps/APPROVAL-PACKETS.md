@@ -2,13 +2,15 @@
 
 Before building each section, component, or chunk, send an appropriate tier approval packet.
 Do not proceed until the user approves (or batch mode is enabled).
+Build work additionally requires the plan gate first ([PLAN-GATE.md](PLAN-GATE.md)).
 
 ---
 
 ## 1. Two-Tier Packet System
 
 ### Tier 1: Compact Quick-Fix Packet (Small Edits, Bug Fixes, Tweaks)
-Use for small bug fixes, styling adjustments, copy edits, or single-file changes:
+Use for small bug fixes, styling adjustments, copy edits, or single-file changes
+(the only category allowed to skip the full plan gate):
 
 ```markdown
 ### Quick-Fix Approval Packet
@@ -76,7 +78,22 @@ If the user explicitly states `batch approve`, `approve all remaining sections`,
 
 ---
 
-## 3. Release `/sps` Lock Procedure (B3)
+## 3. Manual Check Loop (per section)
+
+After a section ships and its approval packet is accepted:
+
+1. The user checks the section live: storefront + CMS admin + mobile viewport.
+2. The user gives feedback (change requests or OK).
+3. On change requests: agent fixes, re-runs verification (tests + Lighthouse),
+   resubmits the updated packet.
+4. Only after the user confirms OK does the next section start.
+
+The section is not "done" until the manual check passes. See
+[SECTION-DOD.md](SECTION-DOD.md) item 29.
+
+---
+
+## 4. Release `/sps` Lock Procedure (B3)
 
 If the user wishes to exit `/sps` orchestrator mode or handover the repository cleanly:
 - Command: `/sps release-lock` or `/sps unlock`
@@ -87,14 +104,15 @@ If the user wishes to exit `/sps` orchestrator mode or handover the repository c
 
 ---
 
-## 4. Abort Conditions
+## 5. Abort Conditions
 
 Do **not** start coding the chunk if any of these are true:
 1. `./.sps/agent.md` is missing or has no active host
 2. `/sps` lock is missing from project memory or root mirrors when required
 3. Required discovery answers are still unknown for this chunk
-4. CMS-enabled project and this UI chunk has no CMS inventory + admin plan
-5. UI chunk lacks responsive + mobile behavior notes
-6. Asset budget would be exceeded without explicit approval
-7. Todo list for the chunk is missing
-8. The packet claims verification that has not happened
+4. Build request without an approved `./.sps/plan.md` (PLAN-GATE)
+5. CMS-enabled project and this UI chunk has no CMS inventory + admin plan
+6. UI chunk lacks responsive + mobile behavior notes
+7. Asset budget would be exceeded without explicit approval
+8. Todo list for the chunk is missing
+9. The packet claims verification that has not happened

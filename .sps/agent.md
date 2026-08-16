@@ -2,7 +2,7 @@
 Last updated:
 
 ## SPS version
-- Skill version: 2.6.0
+- Skill version: 4.0.0
 
 ## Active agent
 - Host: Cursor | Claude Code | Codex | Antigravity / Gemini CLI | Other

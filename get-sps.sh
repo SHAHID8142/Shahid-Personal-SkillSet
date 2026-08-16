@@ -5,11 +5,11 @@
 #   curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash
 #
 # With options:
-#   curl -fsSL .../get-sps.sh | bash -s -- --profile core --yes
-#   curl -fsSL .../get-sps.sh | bash -s -- --profile full --agents '*'
+#   curl -fsSL .../get-sps.sh | bash -s -- --yes
+#   curl -fsSL .../get-sps.sh | bash -s -- --agents claude-code,cursor --yes
 #
 # Local:
-#   bash get-sps.sh --profile core --yes
+#   bash get-sps.sh --yes
 
 set -euo pipefail
 

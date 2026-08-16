@@ -4,14 +4,12 @@
 #   irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1 | iex
 #
 # With options:
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1))) -Profile balanced -Yes
+#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.ps1))) -Yes
 #
 # Local:
-#   powershell -ExecutionPolicy Bypass -File get-sps.ps1 -Profile balanced -Yes
+#   powershell -ExecutionPolicy Bypass -File get-sps.ps1 -Yes
 
 param(
-    [ValidateSet("minimal","balanced","core","full")]
-    [string]$Profile = "",
     [string]$Agents = "*",
     [switch]$Yes,
     [switch]$Interactive
@@ -63,7 +61,6 @@ Write-Host ""
 
 $install = Join-Path $repoDir "install.ps1"
 $argsList = @()
-if ($Profile) { $argsList += @("-Profile", $Profile) }
 if ($Agents) { $argsList += @("-Agents", $Agents) }
 if ($Yes) { $argsList += "-Yes" }
 if ($Interactive) { $argsList += "-Interactive" }

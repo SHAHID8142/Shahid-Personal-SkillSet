@@ -11,7 +11,7 @@ description: >
   Codex, Antigravity, OpenCode, Windsurf, and other agents.
 ---
 
-# /sps (v3.0.2 Master Orchestrator)
+# /sps (v4.0.0 Master Orchestrator)
 
 `/sps` is a capability-aware master workflow for **skills-compatible coding agents** (Claude, Cursor, Codex, Antigravity/Gemini, Windsurf, OpenCode).
 
@@ -27,15 +27,19 @@ Current skill version: read `VERSION` and stamp it into `./.sps/agent.md`.
 2. **Always Write Memory.** Update `./.sps/` (`handoff.md`, `agent.md`, `content-model.md`) every run and after every approved chunk.
 3. **No Hallucinations & Evidence Labels.** Never invent facts; mark risky claims as `Known`, `Assumed`, or `Unverified`.
 4. **Mandatory Discovery.** Grill until complete on goals, stack, CMS, auth, mobile policies, multi-agent roles, and deploy targets.
-5. **CMS-Coupled Section Delivery.** If CMS is enabled, storefront + CMS for the same section ship together. Storefront-only done is strictly forbidden ([CMS-COUPLING.md](CMS-COUPLING.md)).
-6. **Design Gate & Zero Clichés.** No fake dummy buttons, no purple-on-dark clichés, no uncurated stock slop. Research before design.
-7. **Two-Tier Approval Packets ([APPROVAL-PACKETS.md](APPROVAL-PACKETS.md)):**
+5. **Plan-First Zero-Code Gate ([PLAN-GATE.md](PLAN-GATE.md)).** Write `./.sps/plan.md`, present it, and **stop — zero code before user approval**. Then build one section at a time.
+6. **CMS-Coupled Section Delivery.** If CMS is enabled, storefront + CMS for the same section ship together. Storefront-only done is strictly forbidden ([CMS-COUPLING.md](CMS-COUPLING.md)).
+7. **Design Gate & Zero Clichés.** No fake dummy buttons, no purple-on-dark clichés, no uncurated stock slop. Research before design ([DESIGN-GATE.md](DESIGN-GATE.md)).
+8. **Two-Tier Approval Packets ([APPROVAL-PACKETS.md](APPROVAL-PACKETS.md)):**
    - *Tier 1 (Compact Quick-Fix):* 5-6 lines for bug fixes, CSS tweaks, and text updates.
    - *Tier 2 (Full Architecture):* Comprehensive packet for major sections, new pages, and database schemas.
    - *Batch Mode:* User can specify `batch approve` to run consecutive low-risk sections.
-8. **Low-End Mobile Gate & Asset Budgets.** Max 1.5MB initial payload, dual-path motion, zero mobile jank ([MOBILE-LOW-END.md](MOBILE-LOW-END.md), [ASSET-BUDGET.md](ASSET-BUDGET.md)).
-9. **Context Efficiency & Surgical Edits.** Use targeted line-range edits and grep searches. Never dump whole files by default.
-10. **Cleanup & Verification DoD.** Run tests, typecheck, lint, and verify live round-trips before submitting for approval.
+   - *Abort conditions:* Never start a chunk when plan/lock/memory/todo/verification is missing (see APPROVAL-PACKETS).
+9. **Low-End Mobile Gate & Asset Budgets.** Max 1.5MB initial payload, dual-path motion, zero mobile jank ([MOBILE-LOW-END.md](MOBILE-LOW-END.md), [ASSET-BUDGET.md](ASSET-BUDGET.md)).
+10. **Context Efficiency & Surgical Edits.** Use targeted line-range edits and grep searches. Never dump whole files by default ([CONTEXT-EFFICIENCY.md](CONTEXT-EFFICIENCY.md)).
+11. **Skill Router & Mistake Promotion.** Route every chunk through [SKILL-ROUTER.md](SKILL-ROUTER.md) (one primary skill per domain, `sps-cms` mandatory for CMS). Promote repeated mistakes to [MISTAKE-PROMOTION.md](MISTAKE-PROMOTION.md).
+12. **Cleanup & Verification DoD.** Run tests, typecheck, lint, and verify live round-trips before submitting for approval.
+13. **Auto-Update Awareness.** On session start, run `scripts/check-update.sh` (24h-cached); if an update is available, auto-apply it via `scripts/sps-update.sh --yes` and report what changed.
 
 ---
 
@@ -43,6 +47,9 @@ Current skill version: read `VERSION` and stamp it into `./.sps/agent.md`.
 
 ### Build (default)
 Standard section-by-section construction following the inlined hard-law core.
+Per-section parallel lanes (CMS / UI / content / test) follow
+[SUBAGENT-PLAYBOOK.md](SUBAGENT-PLAYBOOK.md); the orchestrator serializes
+`.sps/` writes and converges at the Section DoD.
 
 ### Audit
 `/sps audit` → [AUDIT.md](AUDIT.md). Read-only 100-point scored evaluation.
@@ -67,10 +74,12 @@ If no usable `./.sps/` memory on an existing codebase: bootstrap → scored audi
 ## Session Boot Checklist
 
 1. Read METHOD-CARD.
-2. Detect host; refresh `./.sps/agent.md` + VERSION stamp.
-3. Bootstrap `./.sps/` if missing; ensure enhanced docs pack templates exist.
-4. Read profile, handoff, mistakes, agent; create root mirrors if needed.
-5. Legacy? → audit first.
-6. Read host adapter (`hosts/*`).
-7. Reaffirm `/sps` lock in memory + root mirrors.
-8. Continue from handoff, discovery, sync, doctor, or audit.
+2. Check for SPS updates: run `scripts/check-update.sh`; if update available, run `scripts/sps-update.sh --yes` and report what changed.
+3. Detect host; refresh `./.sps/agent.md` + VERSION stamp.
+4. Bootstrap `./.sps/` if missing; ensure enhanced docs pack templates exist.
+5. Read profile, handoff, mistakes, agent, plan; create root mirrors if needed.
+6. Legacy? → audit first.
+7. Read host adapter (`hosts/*`).
+8. Reaffirm `/sps` lock in memory + root mirrors.
+9. Continue from handoff, discovery, sync, doctor, or audit.
+10. Build work: plan gate first — `./.sps/plan.md` written and approved before any code.

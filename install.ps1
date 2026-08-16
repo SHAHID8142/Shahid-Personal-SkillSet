@@ -1,6 +1,4 @@
 param(
-    [ValidateSet("minimal","balanced","core","full","")]
-    [string]$Profile = "",
     [string]$Agents = "*",
     [switch]$Yes,
     [switch]$Interactive
@@ -153,7 +151,7 @@ Shared research notes saved here.
 
 function Write-Manifest {
 @"
-PROFILE=$Profile
+PROFILE=all
 AGENTS=$Agents
 MANAGED_SKILLS=$($script:ManagedSkills -join ",")
 CLAUDE_PLUGINS=$($script:ClaudePlugins -join ",")
@@ -197,25 +195,8 @@ if (Test-Path "$env:USERPROFILE\.codex") { ok "Codex" } else { warn "Codex not d
 if (Test-Path "$env:USERPROFILE\.gemini") { ok "Gemini / Antigravity" } else { warn "Gemini / Antigravity not detected" }
 Write-Host ""
 
-if (-not $Profile) {
-    if ($Interactive -or (-not $Yes)) {
-        Write-Host "Choose install profile" -ForegroundColor White
-        Write-Host "  1) core  - recommended (/sps + portable skills)"
-        Write-Host "  2) full  - core + Claude extras"
-        $choice = if ($Yes) { "1" } else { Read-Host "Enter 1/2 [1]" }
-        switch ($choice) {
-            "2" { $Profile = "full" }
-            default { $Profile = "core" }
-        }
-    } else {
-        $Profile = "core"
-    }
-}
-
-if ($Profile -eq "balanced") { $Profile = "core" }
-
 Write-Host "Plan" -ForegroundColor White
-ok "profile = $Profile"
+ok "install  = complete stack (sps + all curated skills)"
 ok "agents  = $Agents"
 ok "version = $($script:Version)"
 Write-Host ""
@@ -234,45 +215,48 @@ if (have pip) { ok "pip found" } else { warn "pip not found" }
 $agentArgs = Get-AgentArgs
 $agentArgsString = Get-AgentArgString
 
-switch ($Profile) {
-    "minimal" { $script:TotalSteps = 1 }
-    "core" { $script:TotalSteps = 8 }
-    "full" {
-        $script:TotalSteps = 10
-        if (have claude) { $script:TotalSteps += 11 }
-        if ((have uv) -or (have pip)) { $script:TotalSteps += 1 }
-    }
-    default {
-        Write-Host "Invalid profile: $Profile" -ForegroundColor Red
-        exit 1
-    }
-}
+$script:TotalSteps = 29
+if (have claude) { $script:TotalSteps += 15 }
+if ((have uv) -or (have pip)) { $script:TotalSteps += 1 }
 note "Planned steps: $($script:TotalSteps)"
 
 section "Installing"
 Step "/sps core skill" ([scriptblock]::Create("npx skills add `"$repoDir`" -g --copy -y $agentArgsString"))
 
-if ($Profile -ne "minimal") {
-    section "Balanced portable stack"
-    $script:ManagedSkills += @("hallmark","impeccable","taste-skill","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","karpathy-guidelines")
-    Step "hallmark" ([scriptblock]::Create("npx skills add nutlope/hallmark -g -y $agentArgsString"))
-    Step "impeccable" ([scriptblock]::Create("npx skills add pbakaus/impeccable -g -y $agentArgsString"))
-    Step "taste-skill" ([scriptblock]::Create("npx skills add Leonxlnx/taste-skill -g -y $agentArgsString"))
-    Step "webapp-testing" ([scriptblock]::Create("npx skills add https://github.com/anthropics/skills --skill webapp-testing -g -y $agentArgsString"))
-    Step "web-design-guidelines" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y $agentArgsString"))
-    Step "vercel-react-best-practices" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y $agentArgsString"))
-    Step "vercel-composition-patterns" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -y $agentArgsString"))
-    Step "karpathy-guidelines" ([scriptblock]::Create("npx skills add https://github.com/forrestchang/andrej-karpathy-skills --skill karpathy-guidelines -g -y $agentArgsString"))
-}
+section "Complete skill stack"
+$script:ManagedSkills += @("hallmark","impeccable","design-taste-frontend","sps-cms","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","karpathy-guidelines","agent-browser","ai-seo","copywriting","deploy-to-vercel","verification-before-completion")
+Step "hallmark" ([scriptblock]::Create("npx skills add nutlope/hallmark -g -y $agentArgsString"))
+Step "impeccable" ([scriptblock]::Create("npx skills add pbakaus/impeccable -g -y $agentArgsString"))
+Step "design-taste-frontend (taste-skill v2)" ([scriptblock]::Create("npx skills add Leonxlnx/taste-skill --skill design-taste-frontend -g -y $agentArgsString"))
+Step "sps-cms (mandatory CMS engine)" ([scriptblock]::Create("npx skills add SHAHID8142/sps-cms -g -y $agentArgsString"))
+Step "webapp-testing" ([scriptblock]::Create("npx skills add https://github.com/anthropics/skills --skill webapp-testing -g -y $agentArgsString"))
+Step "web-design-guidelines" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y $agentArgsString"))
+Step "vercel-react-best-practices" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y $agentArgsString"))
+Step "vercel-composition-patterns" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -y $agentArgsString"))
+Step "karpathy-guidelines" ([scriptblock]::Create("npx skills add https://github.com/forrestchang/andrej-karpathy-skills --skill karpathy-guidelines -g -y $agentArgsString"))
+Step "agent-browser" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-browser -g -y $agentArgsString"))
+Step "ai-seo" ([scriptblock]::Create("npx skills add https://github.com/coreyhaines31/marketingskills --skill ai-seo -g -y $agentArgsString"))
+Step "copywriting" ([scriptblock]::Create("npx skills add https://github.com/coreyhaines31/marketingskills --skill copywriting -g -y $agentArgsString"))
+Step "deploy-to-vercel" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill deploy-to-vercel -g -y $agentArgsString"))
+Step "verification-before-completion" ([scriptblock]::Create("npx skills add https://github.com/obra/superpowers --skill verification-before-completion -g -y $agentArgsString"))
 
-if ($Profile -eq "full") {
-    section "Optional specialists"
-    $script:ManagedSkills += @("astro-framework","webgpu-claude-skill")
-    Step "astro-framework" ([scriptblock]::Create("npx skills add withastro/astro -g -y $agentArgsString"))
-    Step "webgpu-claude-skill" ([scriptblock]::Create("npx skills add dgreenheck/webgpu-claude-skill -g -y $agentArgsString"))
+$script:ManagedSkills += @("astro-framework","webgpu-claude-skill","firecrawl","supabase","supabase-postgres-best-practices","prisma-database-setup","prisma-client-api","prisma-cli","vercel-react-native-skills","sleek-design-mobile-apps","fact-check","grill-me","caveman")
+Step "astro-framework" ([scriptblock]::Create("npx skills add withastro/astro -g -y $agentArgsString"))
+Step "webgpu-claude-skill" ([scriptblock]::Create("npx skills add dgreenheck/webgpu-claude-skill -g -y $agentArgsString"))
+Step "firecrawl" ([scriptblock]::Create("npx skills add firecrawl/firecrawl -g -y $agentArgsString"))
+Step "supabase" ([scriptblock]::Create("npx skills add https://github.com/supabase/agent-skills --skill supabase -g -y $agentArgsString"))
+Step "supabase-postgres-best-practices" ([scriptblock]::Create("npx skills add https://github.com/supabase/agent-skills --skill supabase-postgres-best-practices -g -y $agentArgsString"))
+Step "prisma-database-setup" ([scriptblock]::Create("npx skills add https://github.com/prisma/skills --skill prisma-database-setup -g -y $agentArgsString"))
+Step "prisma-client-api" ([scriptblock]::Create("npx skills add https://github.com/prisma/skills --skill prisma-client-api -g -y $agentArgsString"))
+Step "prisma-cli" ([scriptblock]::Create("npx skills add https://github.com/prisma/skills --skill prisma-cli -g -y $agentArgsString"))
+Step "vercel-react-native-skills" ([scriptblock]::Create("npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-native-skills -g -y $agentArgsString"))
+Step "sleek-design-mobile-apps" ([scriptblock]::Create("npx skills add https://github.com/sleekdotdesign/agent-skills --skill sleek-design-mobile-apps -g -y $agentArgsString"))
+Step "fact-check" ([scriptblock]::Create("npx skills add https://github.com/jwynia/agent-skills --skill fact-check -g -y $agentArgsString"))
+Step "grill-me" ([scriptblock]::Create("npx skills add https://github.com/mattpocock/skills --skill grill-me -g -y $agentArgsString"))
+Step "caveman" ([scriptblock]::Create("npx skills add https://github.com/mattpocock/skills --skill caveman -g -y $agentArgsString"))
 
-    if (have claude) {
-        section "Claude extras"
+if (have claude) {
+    section "Claude extras"
         $rd = $repoDir
         $script:ClaudeMarketplaces += @("shahid-personal-skillset","ui-ux-pro-max-skill","claude-code-skills")
         $script:ClaudePlugins += @(
@@ -283,6 +267,7 @@ if ($Profile -eq "full") {
             "marketing-skills@claude-code-skills",
             "a11y-audit@claude-code-skills",
             "docker-development@claude-code-skills"
+        )
         $script:ClaudeMarketplaces += @("trailofbits")
         $script:ClaudePlugins += @("differential-review@trailofbits","static-analysis@trailofbits","ask-questions-if-underspecified@trailofbits","insecure-defaults@trailofbits")
         Step "Trail of Bits marketplace" { claude plugin marketplace add trailofbits/skills }
@@ -290,7 +275,6 @@ if ($Profile -eq "full") {
         Step "ToB static-analysis" { claude plugin install static-analysis@trailofbits --scope user }
         Step "ToB ask-questions" { claude plugin install ask-questions-if-underspecified@trailofbits --scope user }
         Step "ToB insecure-defaults" { claude plugin install insecure-defaults@trailofbits --scope user }
-        )
         Step "/sps Claude marketplace" ([scriptblock]::Create("claude plugin marketplace add `"$rd`""))
         Step "/sps Claude plugin" { claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope project }
         Step "ui-ux-pro-max marketplace" { claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill }
@@ -311,20 +295,19 @@ if ($Profile -eq "full") {
                 Write-Output $out
             }
         }
-    } else {
-        note "Claude extras skipped because claude CLI was not found"
-    }
+} else {
+    note "Claude extras skipped because claude CLI was not found"
+}
 
-    section "Optional research tools"
-    if (have uv) {
-        $script:UseGraphify = 1
-        Step "graphify" { uv tool install graphifyy; graphify install }
-    } elseif (have pip) {
-        $script:UseGraphify = 1
-        Step "graphify (pip)" { pip install graphifyy; graphify install }
-    } else {
-        note "graphify skipped because neither uv nor pip is available"
-    }
+section "Optional research tools"
+if (have uv) {
+    $script:UseGraphify = 1
+    Step "graphify" { uv tool install graphifyy; graphify install }
+} elseif (have pip) {
+    $script:UseGraphify = 1
+    Step "graphify (pip)" { pip install graphifyy; graphify install }
+} else {
+    note "graphify skipped because neither uv nor pip is available"
 }
 
 section "Shared setup"
@@ -344,7 +327,7 @@ $elapsed = [math]::Round((Get-Date).Subtract($script:Start).TotalSeconds)
 Write-Host ""
 Write-Host "+============================================================+" -ForegroundColor Green
 Write-Host "|  Install complete                                          |" -ForegroundColor Green
-Write-Host ("|  Profile: {0,-47}|" -f $Profile) -ForegroundColor Green
+Write-Host ("|  Install: {0,-46}|" -f "complete stack (all)") -ForegroundColor Green
 Write-Host ("|  Version: {0,-47}|" -f $script:Version) -ForegroundColor Green
 Write-Host ("|  Time:    {0,-47}|" -f "${elapsed}s") -ForegroundColor Green
 Write-Host "|  Next: open a project and run  /sps                        |" -ForegroundColor Green

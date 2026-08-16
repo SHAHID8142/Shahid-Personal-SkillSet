@@ -1,5 +1,32 @@
 # Changelog
 
+## 4.0.0
+
+- **Single unified installer**: one command installs the complete stack — no
+  `minimal`/`core`/`full` profiles (`install.sh`, `install.ps1`, `get-sps.*`
+  simplified; updaters reinstall everything; manifest writes `PROFILE=all`)
+- **Plan-First Zero-Code Gate**: new `PLAN-GATE.md` + `templates/plan.md` — write `./.sps/plan.md`, present it, zero code until user approval (hard law #5)
+- **One-Section-One-Go delivery**: `SECTION-DOD.md` rewritten (29 checks) — UI + CMS + content + SEO + Lighthouse (Perf ≥90, SEO/A11y/BP 100) + deploy-readiness + manual check loop per section
+- **`sps-cms` mandatory CMS engine** (no fallback); CMS-COUPLING law updated
+- **Skill Router v2**: `design-taste-frontend` (taste-skill v2) as primary taste skill; old taste family (`gpt-taste`, `high-end-visual-design`, `minimalist-ui`, `industrial-brutalist-ui`, `image-to-code`, `redesign-existing-projects`, `stitch-design-taste`, `full-output-enforcement`) de-routed; `verification-before-completion` single-skill only
+- **Core profile +5 skills**: `agent-browser`, `ai-seo`, `copywriting`, `deploy-to-vercel`, `verification-before-completion`
+- **Full profile +8 skills**: `firecrawl`, `supabase`, `supabase-postgres-best-practices`, `prisma-database-setup`, `prisma-client-api`, `prisma-cli`, `vercel-react-native-skills`, `sleek-design-mobile-apps`, `fact-check`
+- **Parallel subagent playbook**: `SUBAGENT-PLAYBOOK.md` — CMS/UI/content/test lanes, write serialization, evidence-before-claims, review agent
+- **Auto-update system**: `scripts/check-update.sh` (24h-cached, offline-safe, semver compare) + rewritten `scripts/sps-update.sh` (preserves install profile/agents from manifest, `--check/--yes/--force`) + PowerShell mirrors `check-update.ps1` / `update-sps.ps1`; session-start auto-apply; CI version-sanity job (VERSION stamp, mirror sync, PS1 array balance)
+- **Doctor v2**: `sps-doctor.sh` checks managed skills + update status; new `--fix` auto-repair via forced reinstall
+- **Antigravity hardening**: boot refusal now 7 checks incl. plan gate; Karpathy behavioral block injected into `GEMINI.md`
+- fix: `install.ps1` unbalanced array literal; version drift between README/templates/`.sps`
+
+## 3.0.2
+
+- inlined hard-law core in `SKILL.md` (mandatory on all hosts)
+- two-tier approval packets (Tier 1 quick-fix vs Tier 2 architecture)
+- batch approval mode + `/sps release-lock` / `/sps unlock` procedure
+- standardized `SPS:SECTION` / `SPS:CMS_FIELDS` / `SPS:READS_FROM` markers
+- multi-agent write serialization
+- fix: scripts missing in skill install; audit template synced with AUDIT.md
+  scoring; dynamic VERSION stamping in templates; read-only Q&A carve-out
+
 ## 3.0.1
 
 - core install now includes **Karpathy guidelines** (`karpathy-guidelines`)
@@ -23,7 +50,7 @@ Breaking workflow release focused on CMS-coupled delivery and multi-agent reliab
 - audit checklist updated for CMS debt, mirrors, design-gate, deploy/team
 - honest portability claim: skills-compatible coding agents, not every internet agent
 
-2.6.0
+## 2.6.0
 
 - simplified install profiles to two primaries: `core` (recommended default) and
   `full`

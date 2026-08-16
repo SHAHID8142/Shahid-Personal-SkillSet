@@ -11,6 +11,15 @@ When a project is CMS-enabled (discovery or profile says CMS = yes):
 3. Storefront-only delivery is forbidden.
 4. Hardcoded content may exist only as temporary scaffold and must be tracked as
    CMS debt in `./.sps/cms-debt.md` until removed.
+5. **The CMS engine skill is `sps-cms` (SHAHID8142/sps-cms) — mandatory, no
+   fallback.** When CMS is enabled, load the `sps-cms` skill and follow its
+   backend + admin patterns for foundation and per-section work. If `sps-cms`
+   is not installed, install it first:
+   ```bash
+   npx skills add SHAHID8142/sps-cms -g -y
+   ```
+   If the install fails, stop and give the user the exact install command above
+   (mirror of the SKILL-ROUTER install-or-instruct protocol).
 
 ## Foundation before first section
 

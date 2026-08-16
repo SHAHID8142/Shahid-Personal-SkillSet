@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Shahid Personal SkillSet install (Mac / Linux)
+# Shahid Personal SkillSet install (Mac / Linux) — single unified installer.
+# Installs /sps + the complete curated skill stack on every detected host.
 # Usage:
-#   bash install.sh                          # interactive menu when TTY
-#   bash install.sh --profile core --yes
-#   bash install.sh --profile full --agents '*'
+#   bash install.sh                 # interactive confirm when TTY
+#   bash install.sh --yes           # non-interactive
+#   bash install.sh --agents claude-code,cursor --yes
 #
 # Prefer one-command bootstrap:
 #   curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash
@@ -19,7 +20,6 @@ export npm_config_cache="${HOME}/.sps/npm-cache"
 export NPX_NO_UPDATE_NOTIFIER=1
 
 NETWORK_TIMEOUT=90
-PROFILE=""
 AGENTS="*"
 ASSUME_YES=false
 INTERACTIVE=false
@@ -61,24 +61,25 @@ START_TS=$SECONDS
 
 usage() {
   cat <<'EOF'
-Usage: bash install.sh [--profile core|full] [--agents '*'|list] [--yes] [--interactive]
+Usage: bash install.sh [--agents '*'|list] [--yes] [--interactive]
 
-Profiles:
-  core   Recommended default: /sps + curated portable skills
-  full   Core + Claude plugins / MCP / graphify extras
-
-Aliases (still accepted):
-  balanced -> core
-  minimal  -> /sps only (fastest, no specialist skills)
+Single unified install: /sps orchestrator + complete curated skill stack
+(design taste, CMS engine, testing, SEO/copy, deploy, backend, mobile, security,
+token efficiency) for every detected agent host.
 
 One-command (clone/pull + install):
   curl -fsSL https://raw.githubusercontent.com/SHAHID8142/Shahid-Personal-SkillSet/main/get-sps.sh | bash
+
+Update:
+  bash scripts/sps-update.sh --yes     (or: get-sps.sh, which pulls + reinstalls)
+
+Uninstall:
+  bash uninstall.sh
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --profile|-p) PROFILE="${2:-}"; shift 2 ;;
     --agents|-a)  AGENTS="${2:-}"; shift 2 ;;
     --yes|-y)     ASSUME_YES=true; shift ;;
     --interactive|-i) INTERACTIVE=true; shift ;;
@@ -112,33 +113,10 @@ detect_hosts() {
   echo ""
 }
 
-choose_profile_interactive() {
-  echo -e "${BOLD}Choose install profile${NC}"
-  echo -e "  ${BOLD}1)${NC} core  — recommended (/sps + portable skills)  ${DIM}~1–3m${NC}"
-  echo -e "  ${BOLD}2)${NC} full  — core + Claude plugins / MCP extras   ${DIM}~3–6m${NC}"
-  echo ""
-  local choice=""
-  if [[ -t 0 ]]; then
-    read -r -p "Enter 1/2 [1]: " choice
-  else
-    choice="1"
-  fi
-  case "${choice:-1}" in
-    2|full) PROFILE="full" ;;
-    *) PROFILE="core" ;;
-  esac
-}
-
-normalize_profile() {
-  case "$PROFILE" in
-    balanced) PROFILE="core" ;;
-    minimal|core|full) ;;
-    *)
-      echo "Invalid profile: $PROFILE"
-      usage
-      exit 1
-      ;;
-  esac
+compute_total_steps() {
+  TOTAL_STEPS=29
+  if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 15)); fi
+  if have uv || have pip; then TOTAL_STEPS=$((TOTAL_STEPS + 1)); fi
 }
 
 progress_bar() {
@@ -156,15 +134,9 @@ progress_bar() {
 }
 
 compute_total_steps() {
-  case "$PROFILE" in
-    minimal) TOTAL_STEPS=1 ;;
-    core) TOTAL_STEPS=9 ;;
-    full)
-      TOTAL_STEPS=11
-      if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 16)); fi
-      if have uv || have pip; then TOTAL_STEPS=$((TOTAL_STEPS + 1)); fi
-      ;;
-  esac
+  TOTAL_STEPS=29
+  if have claude; then TOTAL_STEPS=$((TOTAL_STEPS + 15)); fi
+  if have uv || have pip; then TOTAL_STEPS=$((TOTAL_STEPS + 1)); fi
 }
 
 build_agent_args() {
@@ -259,7 +231,7 @@ write_manifest() {
   fi
   mkdir -p "$HOME/.sps"
   cat > "$MANIFEST" <<EOF
-PROFILE=$PROFILE
+PROFILE=all
 AGENTS=$AGENTS
 MANAGED_SKILLS=$managed
 CLAUDE_PLUGINS=$claude_plugins
@@ -315,7 +287,7 @@ print_success_card() {
   echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
   echo -e "${GREEN}${BOLD}║${NC}  ${BOLD}Install complete${NC}                                         ${GREEN}${BOLD}║${NC}"
   echo -e "${GREEN}${BOLD}╠════════════════════════════════════════════════════════════╣${NC}"
-  printf "${GREEN}${BOLD}║${NC}  Profile: %-47s ${GREEN}${BOLD}║${NC}\n" "$PROFILE"
+  printf "${GREEN}${BOLD}║${NC}  Install: %-46s ${GREEN}${BOLD}║${NC}\n" "complete stack (all)"
   printf "${GREEN}${BOLD}║${NC}  Version: %-47s ${GREEN}${BOLD}║${NC}\n" "$VERSION"
   printf "${GREEN}${BOLD}║${NC}  Time:    %-47s ${GREEN}${BOLD}║${NC}\n" "${elapsed}s"
   printf "${GREEN}${BOLD}║${NC}  Steps:   %-47s ${GREEN}${BOLD}║${NC}\n" "$INSTALLED ok / $FAILED failed"
@@ -339,18 +311,8 @@ mkdir -p "$LOG_DIR/learned"
 banner
 detect_hosts
 
-if [[ -z "$PROFILE" ]]; then
-  if $INTERACTIVE || { [[ -t 0 ]] && ! $ASSUME_YES; }; then
-    choose_profile_interactive
-  else
-    PROFILE="core"
-  fi
-fi
-
-normalize_profile
-
 echo -e "${BOLD}Plan${NC}"
-ok "profile = $PROFILE"
+ok "install  = complete stack (sps + all curated skills)"
 ok "agents  = $AGENTS"
 ok "version = $VERSION"
 echo ""
@@ -375,58 +337,71 @@ note "Planned steps: $TOTAL_STEPS"
 section "Installing"
 step "/sps core skill" npx skills add "$REPO" -g --copy -y "${AGENT_ARGS[@]}"
 
-if [[ "$PROFILE" != "minimal" ]]; then
-  MANAGED_SKILLS+=(hallmark impeccable taste-skill webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns karpathy-guidelines)
-  step "hallmark" npx skills add nutlope/hallmark -g -y "${AGENT_ARGS[@]}"
-  step "impeccable" npx skills add pbakaus/impeccable -g -y "${AGENT_ARGS[@]}"
-  step "taste-skill" npx skills add Leonxlnx/taste-skill -g -y "${AGENT_ARGS[@]}"
-  step "webapp-testing" npx skills add https://github.com/anthropics/skills --skill webapp-testing -g -y "${AGENT_ARGS[@]}"
-  step "web-design-guidelines" npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y "${AGENT_ARGS[@]}"
-  step "vercel-react-best-practices" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y "${AGENT_ARGS[@]}"
-  step "vercel-composition-patterns" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -y "${AGENT_ARGS[@]}"
-  step "karpathy-guidelines" npx skills add https://github.com/forrestchang/andrej-karpathy-skills --skill karpathy-guidelines -g -y "${AGENT_ARGS[@]}"
+MANAGED_SKILLS+=(hallmark impeccable design-taste-frontend sps-cms webapp-testing web-design-guidelines vercel-react-best-practices vercel-composition-patterns karpathy-guidelines agent-browser ai-seo copywriting deploy-to-vercel verification-before-completion)
+step "hallmark" npx skills add nutlope/hallmark -g -y "${AGENT_ARGS[@]}"
+step "impeccable" npx skills add pbakaus/impeccable -g -y "${AGENT_ARGS[@]}"
+step "design-taste-frontend (taste-skill v2)" npx skills add Leonxlnx/taste-skill --skill design-taste-frontend -g -y "${AGENT_ARGS[@]}"
+step "sps-cms (mandatory CMS engine)" npx skills add SHAHID8142/sps-cms -g -y "${AGENT_ARGS[@]}"
+step "webapp-testing" npx skills add https://github.com/anthropics/skills --skill webapp-testing -g -y "${AGENT_ARGS[@]}"
+step "web-design-guidelines" npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g -y "${AGENT_ARGS[@]}"
+step "vercel-react-best-practices" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -g -y "${AGENT_ARGS[@]}"
+step "vercel-composition-patterns" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-composition-patterns -g -y "${AGENT_ARGS[@]}"
+step "karpathy-guidelines" npx skills add https://github.com/forrestchang/andrej-karpathy-skills --skill karpathy-guidelines -g -y "${AGENT_ARGS[@]}"
+step "agent-browser" npx skills add https://github.com/vercel-labs/agent-browser -g -y "${AGENT_ARGS[@]}"
+step "ai-seo" npx skills add https://github.com/coreyhaines31/marketingskills --skill ai-seo -g -y "${AGENT_ARGS[@]}"
+step "copywriting" npx skills add https://github.com/coreyhaines31/marketingskills --skill copywriting -g -y "${AGENT_ARGS[@]}"
+step "deploy-to-vercel" npx skills add https://github.com/vercel-labs/agent-skills --skill deploy-to-vercel -g -y "${AGENT_ARGS[@]}"
+step "verification-before-completion" npx skills add https://github.com/obra/superpowers --skill verification-before-completion -g -y "${AGENT_ARGS[@]}"
+
+MANAGED_SKILLS+=(astro-framework webgpu-claude-skill firecrawl supabase supabase-postgres-best-practices prisma-database-setup prisma-client-api prisma-cli vercel-react-native-skills sleek-design-mobile-apps fact-check grill-me caveman)
+step "astro-framework" npx skills add withastro/astro -g -y "${AGENT_ARGS[@]}"
+step "webgpu-claude-skill" npx skills add dgreenheck/webgpu-claude-skill -g -y "${AGENT_ARGS[@]}"
+step "firecrawl" npx skills add firecrawl/firecrawl -g -y "${AGENT_ARGS[@]}"
+step "supabase" npx skills add https://github.com/supabase/agent-skills --skill supabase -g -y "${AGENT_ARGS[@]}"
+step "supabase-postgres-best-practices" npx skills add https://github.com/supabase/agent-skills --skill supabase-postgres-best-practices -g -y "${AGENT_ARGS[@]}"
+step "prisma-database-setup" npx skills add https://github.com/prisma/skills --skill prisma-database-setup -g -y "${AGENT_ARGS[@]}"
+step "prisma-client-api" npx skills add https://github.com/prisma/skills --skill prisma-client-api -g -y "${AGENT_ARGS[@]}"
+step "prisma-cli" npx skills add https://github.com/prisma/skills --skill prisma-cli -g -y "${AGENT_ARGS[@]}"
+step "vercel-react-native-skills" npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-native-skills -g -y "${AGENT_ARGS[@]}"
+step "sleek-design-mobile-apps" npx skills add https://github.com/sleekdotdesign/agent-skills --skill sleek-design-mobile-apps -g -y "${AGENT_ARGS[@]}"
+step "fact-check" npx skills add https://github.com/jwynia/agent-skills --skill fact-check -g -y "${AGENT_ARGS[@]}"
+step "grill-me" npx skills add https://github.com/mattpocock/skills --skill grill-me -g -y "${AGENT_ARGS[@]}"
+step "caveman" npx skills add https://github.com/mattpocock/skills --skill caveman -g -y "${AGENT_ARGS[@]}"
+
+if have claude; then
+  CLAUDE_MARKETPLACES+=(shahid-personal-skillset ui-ux-pro-max-skill claude-code-skills)
+  CLAUDE_PLUGINS+=(universal-build-orchestrator@shahid-personal-skillset ui-ux-pro-max@ui-ux-pro-max-skill engineering-skills@claude-code-skills engineering-advanced-skills@claude-code-skills marketing-skills@claude-code-skills a11y-audit@claude-code-skills docker-development@claude-code-skills)
+  step "/sps Claude marketplace" claude plugin marketplace add "$REPO"
+  step "/sps Claude plugin" claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope project
+  step "ui-ux-pro-max marketplace" claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
+  step "ui-ux-pro-max" claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope project
+  step "claude-code-skills marketplace" claude plugin marketplace add alirezarezvani/claude-skills
+  step "engineering-skills" claude plugin install engineering-skills@claude-code-skills --scope project
+  step "engineering-advanced-skills" claude plugin install engineering-advanced-skills@claude-code-skills --scope project
+  step "marketing-skills" claude plugin install marketing-skills@claude-code-skills --scope project
+  step "a11y-audit" claude plugin install a11y-audit@claude-code-skills --scope project
+  step "docker-development" claude plugin install docker-development@claude-code-skills --scope project
+  CLAUDE_MARKETPLACES+=(trailofbits)
+  CLAUDE_PLUGINS+=(differential-review@trailofbits static-analysis@trailofbits ask-questions-if-underspecified@trailofbits insecure-defaults@trailofbits)
+  step "Trail of Bits marketplace" claude plugin marketplace add trailofbits/skills
+  step "ToB differential-review" claude plugin install differential-review@trailofbits --scope user
+  step "ToB static-analysis" claude plugin install static-analysis@trailofbits --scope user
+  step "ToB ask-questions" claude plugin install ask-questions-if-underspecified@trailofbits --scope user
+  step "ToB insecure-defaults" claude plugin install insecure-defaults@trailofbits --scope user
+  USE_CONTEXT7=1
+  step "Context7 MCP" add_context7
+else
+  warn "Claude extras skipped because claude CLI was not found"
 fi
 
-if [[ "$PROFILE" == "full" ]]; then
-  MANAGED_SKILLS+=(astro-framework webgpu-claude-skill)
-  step "astro-framework" npx skills add withastro/astro -g -y "${AGENT_ARGS[@]}"
-  step "webgpu-claude-skill" npx skills add dgreenheck/webgpu-claude-skill -g -y "${AGENT_ARGS[@]}"
-
-  if have claude; then
-    CLAUDE_MARKETPLACES+=(shahid-personal-skillset ui-ux-pro-max-skill claude-code-skills)
-    CLAUDE_PLUGINS+=(universal-build-orchestrator@shahid-personal-skillset ui-ux-pro-max@ui-ux-pro-max-skill engineering-skills@claude-code-skills engineering-advanced-skills@claude-code-skills marketing-skills@claude-code-skills a11y-audit@claude-code-skills docker-development@claude-code-skills)
-    step "/sps Claude marketplace" claude plugin marketplace add "$REPO"
-    step "/sps Claude plugin" claude plugin install universal-build-orchestrator@shahid-personal-skillset --scope project
-    step "ui-ux-pro-max marketplace" claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
-    step "ui-ux-pro-max" claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill --scope project
-    step "claude-code-skills marketplace" claude plugin marketplace add alirezarezvani/claude-skills
-    step "engineering-skills" claude plugin install engineering-skills@claude-code-skills --scope project
-    step "engineering-advanced-skills" claude plugin install engineering-advanced-skills@claude-code-skills --scope project
-    step "marketing-skills" claude plugin install marketing-skills@claude-code-skills --scope project
-    step "a11y-audit" claude plugin install a11y-audit@claude-code-skills --scope project
-    step "docker-development" claude plugin install docker-development@claude-code-skills --scope project
-    CLAUDE_MARKETPLACES+=(trailofbits)
-    CLAUDE_PLUGINS+=(differential-review@trailofbits static-analysis@trailofbits ask-questions-if-underspecified@trailofbits insecure-defaults@trailofbits)
-    step "Trail of Bits marketplace" claude plugin marketplace add trailofbits/skills
-    step "ToB differential-review" claude plugin install differential-review@trailofbits --scope user
-    step "ToB static-analysis" claude plugin install static-analysis@trailofbits --scope user
-    step "ToB ask-questions" claude plugin install ask-questions-if-underspecified@trailofbits --scope user
-    step "ToB insecure-defaults" claude plugin install insecure-defaults@trailofbits --scope user
-    USE_CONTEXT7=1
-    step "Context7 MCP" add_context7
-  else
-    warn "Claude extras skipped because claude CLI was not found"
-  fi
-
-  if have uv; then
-    USE_GRAPHIFY=1
-    step "graphify" bash -c 'uv tool install graphifyy && graphify install'
-  elif have pip; then
-    USE_GRAPHIFY=1
-    step "graphify (pip)" bash -c 'pip install graphifyy && graphify install'
-  else
-    warn "graphify skipped because neither uv nor pip is available"
-  fi
+if have uv; then
+  USE_GRAPHIFY=1
+  step "graphify" bash -c 'uv tool install graphifyy && graphify install'
+elif have pip; then
+  USE_GRAPHIFY=1
+  step "graphify (pip)" bash -c 'pip install graphifyy && graphify install'
+else
+  warn "graphify skipped because neither uv nor pip is available"
 fi
 
 section "Shared setup"

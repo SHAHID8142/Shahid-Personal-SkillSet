@@ -11,7 +11,7 @@ Never claim "works on every agent on the internet."
 
 | Host | Skills | MCP | Shell / installs | Structured questions | Browser / runtime | Notes |
 |---|---|---|---|---|---|---|
-| Claude Code | Strong | Strong | Strong | Usually | Strong | Best for full-profile enhancers |
+| Claude Code | Strong | Strong | Strong | Usually | Strong | Full stack + plugins/MCP extras |
 | Cursor | Strong | Strong | Strong | Usually | Strong | Host-native tools; no Claude plugin assumptions |
 | Codex | Strong | Varies | Strong | Varies | Varies | Portable skills + shell verification |
 | Antigravity / Gemini CLI | Medium | Varies | Medium | Conversational | Varies | Requires root mirrors; easy to skip SPS |
@@ -20,6 +20,15 @@ Never claim "works on every agent on the internet."
 | OpenCode / Cline / Roo / Kiro / Amp | Varies | Varies | Varies | Varies | Varies | Use generic adapter |
 | Other skills-compatible agents | Varies | Varies | Varies | Varies | Varies | METHOD-CARD + `.sps/` memory |
 | Generic chatbots / non-coding agents | No | No | No | No | No | Out of scope |
+
+## v4.0 features on each host
+
+| Host | Plan gate (`plan.md`) | Auto-update (`check-update.sh`) | Parallel subagents | Manual check loop |
+|---|---|---|---|---|
+| Claude Code | Yes | Yes (session-start) | Yes (SUBAGENT-PLAYBOOK) | Yes |
+| Antigravity | Yes (boot refusal #7) | Yes (session-start) | Yes | Yes |
+| Codex / Cursor | Yes | Yes (session-start) | Yes | Yes |
+| Windsurf / Copilot / others | Yes | Yes (session-start) | Varies | Yes |
 
 ## Fallback order
 

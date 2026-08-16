@@ -85,7 +85,7 @@ function Get-AgentArgs {
 }
 
 $manifestPath = "$env:USERPROFILE\.sps\install-manifest.env"
-$managedSkills = @("sps","hallmark","impeccable","taste-skill","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","astro-framework","webgpu-claude-skill")
+$managedSkills = @("sps","hallmark","impeccable","design-taste-frontend","sps-cms","webapp-testing","web-design-guidelines","vercel-react-best-practices","vercel-composition-patterns","karpathy-guidelines","agent-browser","ai-seo","copywriting","deploy-to-vercel","verification-before-completion","astro-framework","webgpu-claude-skill","firecrawl","supabase","supabase-postgres-best-practices","prisma-database-setup","prisma-client-api","prisma-cli","vercel-react-native-skills","sleek-design-mobile-apps","fact-check","grill-me","caveman","taste-skill")
 $claudePlugins = @("universal-build-orchestrator@shahid-personal-skillset","ui-ux-pro-max@ui-ux-pro-max-skill","engineering-skills@claude-code-skills","engineering-advanced-skills@claude-code-skills","marketing-skills@claude-code-skills","a11y-audit@claude-code-skills","docker-development@claude-code-skills")
 $claudeMarketplaces = @("shahid-personal-skillset","ui-ux-pro-max-skill","claude-code-skills")
 $useContext7 = 0

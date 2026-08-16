@@ -25,6 +25,16 @@ bash -n "$REPO/scripts/bootstrap-sps.sh" && pass "bash -n bootstrap-sps.sh" || f
 bash -n "$REPO/scripts/lint-sps.sh" && pass "bash -n lint-sps.sh" || fail "bash -n lint-sps.sh"
 bash -n "$REPO/scripts/sps-doctor.sh" && pass "bash -n sps-doctor.sh" || fail "bash -n sps-doctor.sh"
 bash -n "$REPO/scripts/sps-update.sh" && pass "bash -n sps-update.sh" || fail "bash -n sps-update.sh"
+bash -n "$REPO/scripts/check-update.sh" && pass "bash -n check-update.sh" || fail "bash -n check-update.sh"
+
+# check-update.sh must terminate with a valid exit code even offline
+HOME="$TMP/home-nonet" bash "$REPO/scripts/check-update.sh" --force >/dev/null 2>&1
+rc=$?
+if [[ $rc -eq 0 || $rc -eq 1 || $rc -eq 2 ]]; then
+  pass "check-update.sh exited with valid code ($rc)"
+else
+  fail "check-update.sh unexpected exit ($rc)"
+fi
 
 # Bootstrap into a temp project
 rm -rf "$TMP"
@@ -64,11 +74,11 @@ fi
 if command -v npx >/dev/null 2>&1; then
   SMOKE_HOME="$TMP/home"
   mkdir -p "$SMOKE_HOME"
-  if HOME="$SMOKE_HOME" USERPROFILE="$SMOKE_HOME" bash "$REPO/install.sh" --profile core --agents '*' --yes; then
+  if HOME="$SMOKE_HOME" USERPROFILE="$SMOKE_HOME" bash "$REPO/install.sh" --agents '*' --yes; then
     if [[ -d "$SMOKE_HOME/.claude/skills/sps" && -d "$SMOKE_HOME/.cursor/skills/sps" ]]; then
-      pass "core install mirrored sps to Claude + Cursor"
+      pass "install mirrored sps to Claude + Cursor"
     else
-      fail "core install missing mirrored sps paths"
+      fail "install missing mirrored sps paths"
     fi
     if HOME="$SMOKE_HOME" USERPROFILE="$SMOKE_HOME" bash "$REPO/uninstall.sh" --yes; then
       if [[ ! -d "$SMOKE_HOME/.claude/skills/sps" && ! -d "$SMOKE_HOME/.cursor/skills/sps" ]]; then
@@ -80,8 +90,8 @@ if command -v npx >/dev/null 2>&1; then
       fail "uninstall.sh failed"
     fi
   else
-    fail "core install.sh failed"
-  fi
+      fail "install.sh failed"
+    fi
 else
   echo "SKIP  npx missing; install/uninstall smoke not run"
 fi

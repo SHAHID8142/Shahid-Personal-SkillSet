@@ -9,7 +9,10 @@ $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $files = @(
     (Join-Path $repo "install.ps1"),
-    (Join-Path $repo "uninstall.ps1")
+    (Join-Path $repo "uninstall.ps1"),
+    (Join-Path $repo "get-sps.ps1"),
+    (Join-Path $repo "scripts\check-update.ps1"),
+    (Join-Path $repo "scripts\update-sps.ps1")
 )
 
 foreach ($file in $files) {

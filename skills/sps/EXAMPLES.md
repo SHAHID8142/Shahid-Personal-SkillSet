@@ -80,3 +80,22 @@ User: `/sps sync`
 2. Ensure CMS Foundation
 3. Sync one indebted section at a time with approvals
 4. Do not redesign the whole site unless asked
+
+## Example 8: Plan gate (zero code before approval)
+
+User: `/sps build a landing page with CMS`
+
+1. Discovery questions complete → write `./.sps/plan.md` (scope, stack, CMS,
+   sections, deploy, risks)
+2. Present plan; **zero code written**
+3. User approves (or edits) the plan
+4. Only then: CMS foundation + first section, one section at a time
+
+## Example 9: Auto-update on session start
+
+User: opens project in agent, session starts
+
+1. Run `scripts/check-update.sh` (24h-cached)
+2. Update available → `scripts/sps-update.sh --yes` auto-applies
+3. Report what changed (CHANGELOG) to the user
+4. Continue with `/sps` as normal
